@@ -49,6 +49,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
+    'appartments.apps.AppartmentsConfig',
+    'masters_services.apps.MastersServicesConfig',
+    'general_statistics.apps.GeneralStatisticsConfig',
+    'statements.apps.StatementsConfig',
+    'receipts.apps.ReceiptsConfig',
+    'utility_services.apps.UtilityServicesConfig',
+    'website.apps.WebsiteConfig',
+
+
 ]
 
 MIDDLEWARE = [
