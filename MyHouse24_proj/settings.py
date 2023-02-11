@@ -56,8 +56,6 @@ INSTALLED_APPS = [
     'receipts.apps.ReceiptsConfig',
     'utility_services.apps.UtilityServicesConfig',
     'website.apps.WebsiteConfig',
-
-
 ]
 
 MIDDLEWARE = [
@@ -123,6 +121,13 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# Authentification and authorization settings
+
+
+AUTH_USER_MODEL = 'users.User'
+LOGIN_URL = '/users/sign_in/'
+LOGOUT_REDIRECT_URL = '/users/sign_in/'
 
 
 # Internationalization
