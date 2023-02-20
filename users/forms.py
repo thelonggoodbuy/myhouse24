@@ -93,7 +93,7 @@ class LoginAdminUserForm(AuthenticationForm):
             return email
 
 
-class RegisterUserForm(forms.ModelForm):
+class SignUpSimpleUserForm(forms.ModelForm):
     email = forms.EmailField(required=True,
                             label="email",
                             widget=forms.EmailInput(attrs={'class': 'form-control',
@@ -104,6 +104,9 @@ class RegisterUserForm(forms.ModelForm):
     confirm_password = forms.CharField(label='Пароль(повторно)',
                             widget=forms.PasswordInput(attrs={'class': 'form-control',
                                                             'placeholder':'confirm password'}))
+    
+    i_agree = forms.BooleanField(required=False,
+                                        label='запомнить меня')
 
 
 
@@ -111,22 +114,31 @@ class RegisterUserForm(forms.ModelForm):
         new_email = self.cleaned_data['email']
         taken_email = User.objects.filter(email=new_email)
         if taken_email.exists():
-            self.add_error('email', 'Пользователь с таким именем уже зарегистрирован')
+            print('117 строка формы. КОНФЛИКТ')
+            self.add_error('email', 'Пользователь с таким адресом электронной почты уже зарегистрирован')
+            # messages.error(self.request,'Пользователь с таким адресом электронной почты уже зарегистрирован')
         return new_email
 
     def clean_password(self):
         password = self.cleaned_data['password']
-        validate_password(password)
+        # validate_password(password)
         return password
 
     def clean(self):
-        cleaned_data = super(RegisterUserForm, self).clean()
+        cleaned_data = super(SignUpSimpleUserForm, self).clean()
         password = cleaned_data.get('password')
+        i_agree = cleaned_data.get('i_agree')
         confirm_password = cleaned_data.get('confirm_password')
         if password != confirm_password:
+            # messages.error(self.request,'Пароль и подтверждения пароля должны совпадать')
             raise forms.ValidationError({
                 "password":["Пароль и подтверждения пароля должны совпадать"]
                 })
+        if i_agree == False:
+            # messages.error(self.request,'Вы должны согласиться с политикой конфиденциальности, чтобы зарегистрироваться как жилец')
+            raise forms.ValidationError({
+                "i_agree":["Вы должны согласиться с политикой конфиденциальности, чтобы зарегистрироваться как жилец"]
+            })
 
     class Meta:
         model = User

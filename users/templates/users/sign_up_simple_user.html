@@ -6,7 +6,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title> вход </title>
+        <title> регистрация пользователя </title>
 
         <link rel="stylesheet" type="text/css" href="{% static 'users/components/bootstrap/dist/css/bootstrap.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/components/bootstrap/dist/css/bootstrap.min.css.map' %}">
@@ -61,28 +61,17 @@
 
                             <div id="preloader"></div>
                             
-                            <p class="login-box-msg">Вход в личный кабинет</p>
+                            <p class="login-box-msg">регистрация нового жильца</p>
                                 <form method="post" class="form-signin" id="login-form">
                                         {% csrf_token %}
-                                        <p><div>{{ form.username }}</p>
-                                            {% if form.email.errors %}
-                                                <small>{{ form.email.errors|striptags }}</small> 
-                                            {% endif %}
+                                        <p><div>{{ form.email }}</p>
                                         <p>{{ form.password }}</p>
-                                            {% if form.password.errors %}
-                                                <small>{{ form.password.errors|striptags }}</small> 
-                                            {% endif %}
-                                
-                                        {% for field in form %}
-                                                {% if field.errors %}
-                                                    <small>{{field.label_tag}} {{ field.errors|striptags }}</small> 
-                                                {% endif %}
-                                        {% endfor %}
-
+                                        <p>{{ form.confirm_password }}</p>
                                     <div class="row">
                                         <div class="col-xs-12">
                                             <div class="checkbox icheck">
-                                                {{ form.remember_me }} запомнить меня!
+                                            
+                                            <span>{{ form.i_agree }} Я согласен с <a href="#">политикой конфиденциальности</a></span>
                                             </div>
                                         </div>
                                         <div class="col-xs-12">
