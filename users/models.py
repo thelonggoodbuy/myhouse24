@@ -1,6 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
-from django.contrib.auth.models import AbstractBaseUser, AbstractUser, PermissionsMixin
+from .managers import CustomUserManager
 
 
 
@@ -19,28 +20,33 @@ class User(AbstractBaseUser, PermissionsMixin):
     ('locksmith', 'слесарь'),
     )
     username = None
-    status = models.CharField(max_length=200, choices=USERS_STATUS)
+    status = models.CharField(max_length=200, choices=USERS_STATUS, null=True)
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
-    surname = models.CharField(max_length=200)
-    name = models.CharField(max_length=200)
-    patronymic = models.CharField(max_length=200)
-    burn = models.DateField()
-    note = models.TextField()
-    phone = models.CharField(max_length=200)
-    viber = models.CharField(max_length=200)
-    telegam = models.CharField(max_length=200)
+    surname = models.CharField(max_length=200, null=True)
+    name = models.CharField(max_length=200, null=True)
+    patronymic = models.CharField(max_length=200, null=True)
+    burn = models.DateField(null=True)
+    note = models.TextField(null=True)
+    phone = models.CharField(max_length=200, null=True)
+    viber = models.CharField(max_length=200, null=True)
+    telegam = models.CharField(max_length=200, null=True)
     email = models.EmailField(max_length=200, unique=True)
     password = models.CharField(max_length=200, blank=True)
-    image = models.ImageField(blank=True, verbose_name='Аватар', upload_to='galery/')
+    image = models.ImageField(blank=True, null=True, verbose_name='Аватар', upload_to='galery/')
     role = models.CharField(max_length=200, choices=USERS_ROLE, blank=True, null=True)
 
+    # username = None
     USERNAME_FIELD = 'email'
-    EMAIL_FIELD = 'email'
+    
+    # EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    # objects = CustomUserManager()
+    objects = CustomUserManager()
+
+    def get_full_name(self):
+        return f"{self.surname} {self.name} {self.patronymic}"
 
 
 class MessageToUser(models.Model):

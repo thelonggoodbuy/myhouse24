@@ -1,3 +1,8 @@
 from django.shortcuts import render
 
-# Create your views here.
+from django.views.generic.base import TemplateView
+
+
+class CRMReportView(TemplateView):
+    
+    template_name = "receipts/crm_report.html"

@@ -48,6 +48,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'debug_toolbar',
+
     'users.apps.UsersConfig',
     'appartments.apps.AppartmentsConfig',
     'masters_services.apps.MastersServicesConfig',
@@ -59,6 +62,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -126,8 +130,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 AUTH_USER_MODEL = 'users.User'
-LOGIN_URL = '/users/sign_in/'
-LOGOUT_REDIRECT_URL = '/users/sign_in/'
+LOGIN_URL = '/users/login_user/'
+LOGOUT_REDIRECT_URL = '/users/login_user/'
 
 
 # Internationalization
@@ -153,3 +157,12 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
+
+# SESSION_COOKIE_AGE = 1209600
+# SESSION_EXPIRE_AT_BROWSER_CLOSE = True
