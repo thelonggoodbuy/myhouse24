@@ -12,8 +12,10 @@
         {% endblock title %}
         <link rel="stylesheet" type="text/css" href="{% static 'users/components/bootstrap/dist/css/bootstrap.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/components/bootstrap/dist/css/bootstrap.min.css.map' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/plugins/DataTables/datatables.min.css'%}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/css/AdminLTE.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/css/style.css' %}">
+        
         <link rel="stylesheet" type="text/css" href="{% static 'users/plugins/toastr/build/toastr.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/components/Ionicons/css/ionicons.min.css' %}">
@@ -30,6 +32,7 @@
         <script type="text/javascript" src="{% static 'users/components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/components/fastclick/lib/fastclick.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/js/adminlte.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/plugins/DataTables/datatables.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/plugins/toastr/build/toastr.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/plugins/iCheck/icheck.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.js' %}"></script>
@@ -264,7 +267,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{% url 'users:admin_settings_users_list' %}">
                                 <i class="fa fa-user-plus"></i>  
                                 <span>Пользователи</span>
                             </a>

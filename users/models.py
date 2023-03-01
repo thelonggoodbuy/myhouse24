@@ -20,7 +20,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     ('director', 'директор'),
     ('manager', 'управляющий'),
     ('accounter', 'бухгалтер'),
-    ('electrician', 'электри'),
+    ('electrician', 'электрик'),
     ('plumber', 'сантехник'),
     ('locksmith', 'слесарь'),
     )
@@ -32,8 +32,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     surname = models.CharField(max_length=200, null=True)
     name = models.CharField(max_length=200, null=True)
     patronymic = models.CharField(max_length=200, null=True)
-    burn = models.DateField(null=True)
-    note = models.TextField(null=True)
+    full_name = models.CharField(max_length=600, blank=True, null=True)
+    burn = models.DateField(null=True, blank=True)
+    note = models.TextField(null=True, blank=True)
     phone = models.CharField(max_length=200, null=True)
     viber = models.CharField(max_length=200, null=True)
     telegam = models.CharField(max_length=200, null=True)
@@ -60,8 +61,29 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_absolute_url(self):
          return reverse('users:login_user')
-    
 
+    def __str__(self):
+        return self.email
+    
+    def get_verbose_role(self):
+        return dict(User.USERS_ROLE)[self.role]
+    
+    def get_verbose_status(self):
+        return dict(User.USERS_STATUS)[self.status]
+    
+    @classmethod
+    def get_verbose_status_dict(cls):
+        status_verbose_dict = dict((status, verbose_status) for status, verbose_status in cls.USERS_STATUS)
+        return status_verbose_dict
+
+    @classmethod
+    def get_verbose_roles_dict(cls):
+        role_verbose_dict = dict((role, verbose_role) for role, verbose_role in cls.USERS_ROLE)
+        return role_verbose_dict
+
+    def save(self, *args, **kwargs):
+        self.full_name = (f"{self.surname} {self.name} {self.patronymic}").strip()
+        super(User, self).save(*args, **kwargs)
 
 
 class Profile(models.Model):

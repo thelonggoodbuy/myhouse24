@@ -1,0 +1,252 @@
+{% extends "layout/base_crm.html" %}
+
+{% block title %}
+    <title> список пользователей </title>
+{% endblock title %}
+
+{% block content %}
+    {% comment %} <h1>admin settings user list</h1>
+    <ul>
+        {% for user in simple_users %}
+            <li>{{user.email}}</li>
+        {% endfor %}
+    </ul> {% endcomment %}
+
+
+
+        {% comment %} !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {% endcomment %}
+
+        <section class="content">
+                
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="pull-right margin-bottom">
+                        <a class="btn btn-success" href="#">Создать пользователя</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title"></h3>
+                            <div class="box-tools">
+                                <a href="#" class="btn btn-default btn-sm">
+                                    <span class="hidden-xs">Очистить</span><i class="fa fa-eraser visible-xs" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div id="w0" class="grid-view">
+                            
+                            <div class="box-body table-responsive no-padding">
+                                <table class="table table-bordered table-hover table-striped linkedRow" id="settings_user_list_table">
+                                    <thead>
+                                        <tr>
+                                            <th>id</th>
+                                            <th>email</th>
+                                            <th>name</th>
+                                            <th>surname</th>
+                                            <th>phone</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                                <table class="table table-bordered table-hover table-striped linkedRow" id="settings_user_list_table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Пользователь</th>
+                                            <th>Роль</th>
+                                            <th>Телефон</th>
+                                            <th>Email (логин)</th>
+                                            <th>Статус</th>
+                                            <th style="width: 114px; min-width: 114px">&nbsp;</th>
+                                        </tr>
+                                        <tr id="w0-filters" class="filters">
+                                            <td>&nbsp;</td>
+                                            <td><input type="text" class="form-control" name="UserAdminSearch[searchFullname]"></td>
+                                            <td>
+                                                <select id="useradminsearch-role" class="form-control select2-hidden-accessible" name="UserAdminSearch[role]">
+                                                    <option value=""></option>
+                                                    <option value="admin">Директор</option>
+                                                    <option value="manager">Управляющий</option>
+                                                    <option value="accountant">Бухгалтер</option>
+                                                    <option value="electrician">Электрик</option>
+                                                    <option value="plumber">Сантехник</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" name="UserAdminSearch[phone]">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" name="UserAdminSearch[email]">
+                                            </td>
+                                            <td><select id="useradminsearch-status" class="form-control select2-hidden-accessible" name="UserAdminSearch[status]">
+                                                    <option value=""></option>
+                                                    <option value="10">Активен</option>
+                                                    <option value="5">Новый</option>
+                                                    <option value="0">Отключен</option>
+                                                </select>
+                                            </td>
+                                            <td>&nbsp;</td>
+                                        </tr>
+                                    </thead>
+                                    {% comment %} <tbody>
+                                        {% for user in users_list %}
+                                            <tr>
+                                                <td>{{ user.id }}</td>
+                                                <td>{{ user.name }} {{ user.surname }} {{ user.patronymic}}</td>
+                                                <td>
+                                                    {% if user.role %} {{ user.get_verbose_role }} {% endif %}
+                                                </td>
+                                                <td>{{ user.phone }}</td>
+                                                <td>{{ user.email }}</td>
+                                                <td>
+                                                    {% if user.status == 'active' %}
+                                                        <small class="label label-success">{{ user.get_verbose_status }}</small>
+                                                    {% elif user.status == 'new' %}
+                                                        <small class="label label-warning">{{ user.get_verbose_status }}</small>
+                                                    {% elif user.status == 'disable' %}
+                                                        <small class="label label-danger">{{ user.get_verbose_status }}</small>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group pull-right"> 
+                                                        <a class="btn btn-default btn-sm" href="#" title="Отправить приглашение" data-toggle="tooltip">
+                                                            <i class="fa fa-repeat"></i>
+                                                        </a> 
+                                                        <a class="btn btn-default btn-sm" href="#" title="Редактировать" data-toggle="tooltip">
+                                                            <i class="fa fa-pencil"></i>
+                                                        </a>
+                                                        {% if user.is_superuser == True %}
+                                                            <a class="btn btn-default btn-sm" href="#" title="Редактировать" data-toggle="tooltip">
+                                                                <i class="fa fa-trash"></i>
+                                                            </a>
+                                                        {% else %}
+                                                        <a> 
+                                                            <button class="btn btn-default btn-sm disabled">
+                                                            <i class="fa fa-trash"></i></button></div>
+                                                        </a>
+                                                        {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody> {% endcomment %}
+                                </table>
+                            </div>
+                    </div>            
+                </div>
+            </div>
+        </div>
+        </section>
+
+
+{% if messages %}
+    {% for message in messages %}
+        {% if message.tags == 'success'%}
+            <script type=text/javascript>
+                toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": true,
+                    "positionClass": "toast-top-center",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                }
+                toastr.success('{{ message }}')</script>
+        {% elif message.tags == 'info' %}
+            <script type=text/javascript>
+                toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": true,
+                    "positionClass": "toast-top-center",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                }
+                toastr.{{ message.tags }}('{{ message }}')</script>
+        {% elif message.tags == 'warning' %}
+            <script type=text/javascript>
+                toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": true,
+                    "positionClass": "toast-top-center",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                }
+                toastr.{{ message.tags }}('{{ message }}')</script>
+        {% elif message.tags == 'error' %}
+            <script type=text/javascript>
+                toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": true,
+                    "positionClass": "toast-top-center",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                }
+                toastr.{{ message.tags }}('{{ message }}')</script>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+<script>
+$(document).ready(function () {
+        $('#settings_user_list_table').DataTable({
+
+            dom: 'tp',
+            serverSide: true,
+            ajax: "{% url 'users:admin_settings_users_list' %}",
+            columns: [
+                {"data": "id"},
+                {"data": "name"},
+                {"data": "surname"},
+                {"data": "patronymic"},
+                {"data": "phone"},
+                {"data": "email"},
+                {"data": "status"},
+            ],
+
+
+        });
+    });
+</script>
+{% endblock content %}

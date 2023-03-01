@@ -1,3 +1,7 @@
+import math
+import operator
+from functools import reduce
+
 from django.shortcuts import render, redirect
 # from django.views.generic import LoginView
 from django.contrib.auth.views import LoginView, LogoutView
@@ -10,7 +14,11 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_text
-from django.views.generic.base import View
+from django.views.generic.base import View, TemplateView
+from django.http import  JsonResponse
+from django.db.models import Q
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 from django.contrib.auth.models import User
 
@@ -80,7 +88,10 @@ class SignUpSimpleUser(CreateView):
     def form_valid(self, form):
         user = form.save(commit=False)
         user.is_active = False
+        password = form.cleaned_data['password']
+        user.set_password(password)
         user.save()
+
         current_site = get_current_site(self.request)
         subject = 'Activate You MySite Account'
         message = render_to_string('email_templates/account_activation_email.html', {
@@ -89,6 +100,7 @@ class SignUpSimpleUser(CreateView):
             'uid': urlsafe_base64_encode(force_bytes(user.pk)),
             'token': account_activation_token.make_token(user),
         })
+        # ******тут отправляю. можно добавить ссылку туда**********
         user.email_user(subject, message)
         print('Ваш профиль зарегистрирован, но не активирован. Пожалуйста подтвердите регистрацию через письмо полученное на почту.')
         messages.info(self.request, ('Ваш профиль зарегистрирован, но не активирован. Пожалуйста подтвердите регистрацию через письмо полученное на почту.'))
@@ -133,3 +145,98 @@ class LogOutUser(LogoutView):
 
     def get_success_url(self):
         return reverse_lazy('users:login_user')
+
+
+
+# ***************************************************************************************
+# *******************************Settings---->Users Logic********************************
+# ***************************************************************************************
+
+class AdminSettingsUsersListLogic(TemplateView):
+    template_name = "users/admin_settings_users_list.html"
+
+    def get(self, request, *args, **kwargs):
+        if self.request.is_ajax() and self.request.method == 'GET':
+            # server-side processing - columns search parameters
+            data_table_request = request.GET
+            search_full_name_list_parameter = list((request.GET.get('columns[1][search][value]').strip()).split(" "))
+            search_role_parameter = request.GET.get('columns[2][search][value]')
+            search_phone_parameter = request.GET.get('columns[3][search][value]')
+            search_email_parameter = request.GET.get('columns[4][search][value]')
+            search_status_parameter = request.GET.get('columns[5][search][value]')
+
+            # initial data
+            draw = int(data_table_request.get("draw"))
+            start = int(data_table_request.get("start"))
+            length = int(data_table_request.get("length"))
+
+            # server-side processing - db handling
+            raw_data = User.objects.filter(
+                                        # full name filter
+                                            ((reduce(operator.and_, (Q(name__icontains=name) for name in search_full_name_list_parameter)))\
+                                             |(reduce(operator.and_, (Q(surname__icontains=surname) for surname in search_full_name_list_parameter)))\
+                                             |(reduce(operator.and_, (Q(patronymic__icontains=patronymic) for patronymic in search_full_name_list_parameter)))
+                                            )\
+                                        # role filter
+                                            & Q(role__icontains=search_role_parameter)\
+                                        # phone filter
+                                            & Q(phone__icontains=search_phone_parameter)\
+                                        # email filter
+                                            & Q(email__icontains=search_email_parameter)\
+                                        # role filter
+                                            & Q(status__icontains=search_status_parameter)
+                                            )\
+                                    .only('id','name', 'surname', 'patronymic', 'phone', 'role', 'email', 'status')\
+                                    .order_by('id')\
+                                    .values('id','name', 'surname', 'patronymic', 'phone', 'role', 'email', 'status')
+                                    
+            data = list(raw_data)
+            verbose_status_dict = User.get_verbose_status_dict()
+            verbose_roles_dict = User.get_verbose_roles_dict()
+
+            for user in data:
+                user['full_name'] = f"{user['name']} {user['surname']} {user['patronymic']}"
+                verbose_role = ""
+                try: 
+                    verbose_role = verbose_roles_dict[user['role']]
+                    user['verbose_role'] = verbose_role
+                except:
+                    user['verbose_role'] = ''
+                verbose_status = ""
+                try: 
+                    verbose_status = verbose_status_dict[user['status']]
+                    user['verbose_status'] = verbose_status
+                except:
+                    user['verbose_status'] = ''
+
+            paginator = Paginator(data, length)
+            page_number = start / length + 1
+            try:
+                obj = paginator.page(page_number).object_list
+            except PageNotAnInteger:
+                obj = paginator.page(1).object_list
+            except EmptyPage:
+                obj = paginator.page(1).object_list
+
+            total = len(data)
+            records_filter = total
+
+            response = {
+                'data': obj,
+                'draw': draw,
+                'recordsTotal:': total,
+                'recordsFiltered': records_filter,
+            }
+            return JsonResponse(response, safe=False)
+        else:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+# class AdminSettingsUserCardView(TemplateView):
+#     template_name = "users/admin_settings_user_card.html"

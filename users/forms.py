@@ -88,7 +88,6 @@ class LoginAdminUserForm(AuthenticationForm):
         elif current_user.exists() == False:
             self.add_error('username', 'Пользователь с таким именем не зарегистрирован.')
             messages.error(self.request,'Пользователь с таким именем не зарегистрирован.')
-
         else:
             return email
 
@@ -121,7 +120,7 @@ class SignUpSimpleUserForm(forms.ModelForm):
 
     def clean_password(self):
         password = self.cleaned_data['password']
-        # validate_password(password)
+        validate_password(password)
         return password
 
     def clean(self):
