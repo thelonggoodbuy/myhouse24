@@ -1,6 +1,6 @@
-from django.urls import path
+from django.urls import path, re_path
 from .views import LoginSimpleUser, LoginAdminUser, LogOutUser, SignUpSimpleUser, ActivateAccount, \
-                    AdminSettingsUsersListLogic \
+                    AdminSettingsUsersListLogic, AdminSettingsUserCardView, AdminSettingsUsersDeleteView, AdminSettingsUsersUpdateView
                         # temp_funct_users_listlogic
 
 
@@ -20,5 +20,17 @@ urlpatterns = [
 
     # **************users settings by admin*************************
     path('admin_settings_users_list/', AdminSettingsUsersListLogic.as_view(), name='admin_settings_users_list'),
-    # path('temp_funct_users_listlogic/', temp_funct_users_listlogic, name='temp_funct_users_listlogic'),
+    #---------------------------------вот очень сомнительный кусок дальше. узнать в среду-----------------------------
+    #следующий путь возможно удалю. решение выглядит как то сомнительно: две ссылки сразу - но по другому не получается
+    # JS генерить ссылки на вьюшку с параметром. Выдает ошибки.
+    path('admin_settings_users_card/', AdminSettingsUserCardView.as_view(), name='admin_settings_users_card'), 
+    path('admin_settings_users_card/<int:pk>/', AdminSettingsUserCardView.as_view(), name='admin_settings_users_card'),
+    # re_path(r'^admin_settings_users_card/(?P<pk>[0-9]+)/$', AdminSettingsUserCardView.as_view(), name='admin_settings_users_card'),
+    #---------------------------------конец очень сомнительного куса кода---------------------------------------------
+    path('admin_settings_users_delete/', AdminSettingsUsersDeleteView.as_view(), name='admin_settings_users_delete'),
+    path('admin_settings_users_delete/<int:pk>/', AdminSettingsUsersDeleteView.as_view(), name='admin_settings_users_delete'),
+
+    path('admin_settings_users_update/', AdminSettingsUsersUpdateView.as_view(), name='admin_settings_users_update'),
+    path('admin_settings_users_update/<int:pk>/', AdminSettingsUsersUpdateView.as_view(), name='admin_settings_users_update'),
+
 ]

@@ -4,10 +4,24 @@
     <title> список пользователей </title>
 {% endblock title %}
 
+{% block additionaly_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+{% endblock additionaly_css %}
+
+{% block additionaly_js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+{% endblock additionaly_js %}
+
+
+
 {% block content %}
 
         <section class="content">
-                
+
+            <div id="myDialog">
+                Content of the modal dialog box.
+            </div>
+
             <div class="row">
                 <div class="col-xs-12">
                     <div class="pull-right margin-bottom">
@@ -71,6 +85,7 @@
                                             <td>&nbsp;</td>
                                         </tr>
                                     </thead>
+                                    
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -169,8 +184,29 @@
 <script>
 
 
+
     
+
 $(document).ready(function () {
+
+
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      };
+
+
         var table = $('#settings_user_list_table').DataTable({
             "initComplete": function(){
                 //logic for input search element
@@ -216,33 +252,66 @@ $(document).ready(function () {
                 {"data": "verbose_status", "name": "verbose_status"},
                 {"data": "null", render: function ( data, type, row, meta ) 
                                         {
-                                            return "<a class='btn btn-default btn-sm' href='#' title='Отправить приглашение' data-toggle='tooltip' id='invite_button'>\
-                                                                        <i class='fa fa-repeat'></i>\
-                                                                    </a>\
-                                                                    <a class='btn btn-default btn-sm' href='#' title='Редактировать' data-toggle='tooltip id='edite_button''>\
-                                                                        <i class='fa fa-pencil'></i>\
-                                                                    </a>\
-                                                                    <a class='btn btn-default btn-sm' href='#' title='Удалить' data-toggle='tooltip' data-pjax='0' data-method='post' id='delete_button data-confirm='Вы уверены, что хотите удалить этот элемент?'>\
-                                                                        <i class='fa fa-trash'></i>\
-                                                                    </a>";
+                                            return "<div id='buttons_interaction'>\
+                                                        <a class='btn btn-default btn-sm' href='#' title='Отправить приглашение' data-toggle='tooltip' id='invite_button'>\
+                                                            <i class='fa fa-repeat'></i>\
+                                                        </a>\
+                                                        <a class='btn btn-default btn-sm' href='#' title='Редактировать' data-toggle='tooltip' id='edite_button'>\
+                                                            <i class='fa fa-pencil'></i>\
+                                                        </a>\
+                                                        <a class='btn btn-default btn-sm' title='Удалить' data-toggle='tooltip' id='delete_button'>\
+                                                            <i class='fa fa-trash'></i>\
+                                                        </a>\
+                                                    </div>";
                                         }
                 },
                 ],
             "rowId": 'id',
         });
 
-        table.on('click', 'tbody > tr', function () {
-            table.row(this).id();
-            window.open("{% url 'users:login_user' %}", "_self");
-        } );
-
-
+        //cleaning searh filters
         $('.box-header').on('click', '#clear_filters', function () {
-            
             $("*[colnumb]").val('').change()
-            
+        } ); 
+
+
+        //reversion logic for row except links to send inviting, deleting and editing
+        table.on('click', 'tbody > tr > td', function () {
+            if(
+                $(this).find("div").attr("id") != "buttons_interaction"
+                )
+            {
+                var basic_url = "{% url 'users:admin_settings_users_card' %}"
+                var url_index = table.row(this).id().toString();
+                document.location.href = basic_url + url_index;
+            }
         } );
 
+
+        // delete and confirm display lofic
+        $("#myDialog").dialog({
+            autoOpen  : false,
+            modal     : true,
+            title     : "avadamedia.myhoise24",
+            buttons   : {
+                      'удалить пользователя' : function() {
+                            var textValue = $('#myTextBox').val();
+                            var basic_url = "{% url 'users:admin_settings_users_delete' %}"
+                            var row_number = $(this).data('row_number')
+                            document.location.href = basic_url + row_number;
+                      },
+                      'отмена' : function() {
+                          $(this).dialog('close');
+                      }
+                        }
+        });
+
+        table.on('click', '#delete_button', function(){
+            var row_number = $(this).closest('tr').attr('id')
+            $("#myDialog").text(`Удалить пользователя с id ${row_number}?`).data('row_number', row_number).dialog("open");
+        })
     });
+
+    
 </script>
 {% endblock content %}

@@ -18,13 +18,19 @@ from django.views.generic.base import View, TemplateView
 from django.http import  JsonResponse
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import json
+from django.urls import reverse
 
-
+from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 
 from .tokens import account_activation_token
 from .models import User
 from django.contrib.messages.views import SuccessMessageMixin
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import DeleteView, BaseDeleteView
+from django.views.generic.detail import SingleObjectTemplateResponseMixin
+from django.views.generic.base import TemplateResponseMixin
 
 
 import html2text
@@ -233,10 +239,52 @@ class AdminSettingsUsersListLogic(TemplateView):
             return self.render_to_response(context)
 
 
+
+    def post(self, request, *args, **kwargs):
+        if self.request.is_ajax() and self.request.method == 'POST':
+            user_id = request.POST.get("data", None)
+            print(f'you use AJAX Post method. Congradulations! User number is {user_id}')
+            # User.objects.get(id = user_id).delete()
+            uri = request.build_absolute_uri(reverse('users:admin_settings_users_card', args=(user_id, )))
+            print(uri)
+            return JsonResponse({'uri': uri})
+
+        else:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
 
 
-# class AdminSettingsUserCardView(TemplateView):
-#     template_name = "users/admin_settings_user_card.html"
+class AdminSettingsUserCardView(DetailView):
+
+    model = User
+    template_name = "users/admin_settings_user_card.html"
+    context_object_name = 'user'
+
+
+class AdminSettingsUsersDeleteView(DeleteView):
+
+    model = User
+    success_url = reverse_lazy('users:admin_settings_users_list')
+    
+
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        user_id = self.object.id
+        success_url = self.get_success_url()
+        self.object.delete()
+        messages.success(request, (f'Пользователь с id {user_id}. Удален.'))
+        return HttpResponseRedirect(success_url)
+    
+
+class AdminSettingsUsersUpdateView(TemplateView):
+    # form_class = UserForm
+    # model = User
+    template_name = 'users/admin_settings_user_update_data.html'
