@@ -22,13 +22,13 @@ import json
 from django.urls import reverse
 
 from django.http import HttpResponseRedirect
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 
 from .tokens import account_activation_token
 from .models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import DeleteView, BaseDeleteView
+from django.views.generic.edit import DeleteView, UpdateView
 from django.views.generic.detail import SingleObjectTemplateResponseMixin
 from django.views.generic.base import TemplateResponseMixin
 
@@ -37,7 +37,7 @@ import html2text
 
 
 
-from .forms import LoginSimpleUserForm, LoginAdminUserForm, SignUpSimpleUserForm
+from .forms import LoginSimpleUserForm, LoginAdminUserForm, SignUpSimpleUserForm, AdminSettingsUsersUpdateForm
 
 
 
@@ -162,14 +162,27 @@ class AdminSettingsUsersListLogic(TemplateView):
     template_name = "users/admin_settings_users_list.html"
 
     def get(self, request, *args, **kwargs):
+        
         if self.request.is_ajax() and self.request.method == 'GET':
             # server-side processing - columns search parameters
+            Q_list = []
             data_table_request = request.GET
             search_full_name_list_parameter = list((request.GET.get('columns[1][search][value]').strip()).split(" "))
-            search_role_parameter = request.GET.get('columns[2][search][value]')
-            search_phone_parameter = request.GET.get('columns[3][search][value]')
-            search_email_parameter = request.GET.get('columns[4][search][value]')
-            search_status_parameter = request.GET.get('columns[5][search][value]')
+
+            Q_list.append(reduce(operator.and_, (Q(full_name__icontains=part_name) for part_name in search_full_name_list_parameter)))
+
+            if request.GET.get('columns[2][search][value]'):
+                Q_list.append(Q(role__icontains=request.GET.get('columns[2][search][value]')))
+
+            if request.GET.get('columns[3][search][value]'):
+                Q_list.append(Q(phone__icontains=request.GET.get('columns[3][search][value]')))
+
+            if request.GET.get('columns[4][search][value]'):
+                Q_list.append(Q(email__icontains=request.GET.get('columns[4][search][value]')))
+
+            if request.GET.get('columns[5][search][value]'):
+                Q_list.append(Q(status__icontains=request.GET.get('columns[5][search][value]')))
+
 
             # initial data
             draw = int(data_table_request.get("draw"))
@@ -177,25 +190,11 @@ class AdminSettingsUsersListLogic(TemplateView):
             length = int(data_table_request.get("length"))
 
             # server-side processing - db handling
-            raw_data = User.objects.filter(
-                                        # full name filter
-                                            ((reduce(operator.and_, (Q(name__icontains=name) for name in search_full_name_list_parameter)))\
-                                             |(reduce(operator.and_, (Q(surname__icontains=surname) for surname in search_full_name_list_parameter)))\
-                                             |(reduce(operator.and_, (Q(patronymic__icontains=patronymic) for patronymic in search_full_name_list_parameter)))
-                                            )\
-                                        # role filter
-                                            & Q(role__icontains=search_role_parameter)\
-                                        # phone filter
-                                            & Q(phone__icontains=search_phone_parameter)\
-                                        # email filter
-                                            & Q(email__icontains=search_email_parameter)\
-                                        # role filter
-                                            & Q(status__icontains=search_status_parameter)
-                                            )\
-                                    .only('id','name', 'surname', 'patronymic', 'phone', 'role', 'email', 'status')\
+            raw_data = User.objects.filter(*Q_list)\
+                                    .only('id','name', 'surname', 'patronymic', 'phone', 'role', 'email', 'status', 'is_superuser')\
                                     .order_by('id')\
-                                    .values('id','name', 'surname', 'patronymic', 'phone', 'role', 'email', 'status')
-                                    
+                                    .values('id','name', 'surname', 'patronymic', 'phone', 'role', 'email', 'status', 'is_superuser')
+                        
             data = list(raw_data)
             verbose_status_dict = User.get_verbose_status_dict()
             verbose_roles_dict = User.get_verbose_roles_dict()
@@ -233,6 +232,7 @@ class AdminSettingsUsersListLogic(TemplateView):
                 'recordsTotal:': total,
                 'recordsFiltered': records_filter,
             }
+            print(response)
             return JsonResponse(response, safe=False)
         else:
             context = self.get_context_data(**kwargs)
@@ -284,7 +284,11 @@ class AdminSettingsUsersDeleteView(DeleteView):
         return HttpResponseRedirect(success_url)
     
 
-class AdminSettingsUsersUpdateView(TemplateView):
-    # form_class = UserForm
-    # model = User
+class AdmSettingsUsersUpdateView(UpdateView):
+    form_class = AdminSettingsUsersUpdateForm
+    model = User
     template_name = 'users/admin_settings_user_update_data.html'
+    success_url = reverse_lazy('users:admin_settings_users_list')
+
+class AdminSettingsUsersRoles(TemplateView):
+    template_name = "users/admin_settings_users_roles.html"

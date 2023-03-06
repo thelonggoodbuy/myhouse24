@@ -29,15 +29,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
-    surname = models.CharField(max_length=200, null=True)
-    name = models.CharField(max_length=200, null=True)
-    patronymic = models.CharField(max_length=200, null=True)
+    surname = models.CharField(max_length=200, blank=True, null=True)
+    name = models.CharField(max_length=200, blank=True, null=True)
+    patronymic = models.CharField(max_length=200, blank=True, null=True)
     full_name = models.CharField(max_length=600, blank=True, null=True)
     burn = models.DateField(null=True, blank=True)
     note = models.TextField(null=True, blank=True)
-    phone = models.CharField(max_length=200, null=True)
-    viber = models.CharField(max_length=200, null=True)
-    telegam = models.CharField(max_length=200, null=True)
+    phone = models.CharField(max_length=200, blank=True, null=True)
+    viber = models.CharField(max_length=200, blank=True, null=True)
+    telegam = models.CharField(max_length=200, blank=True, null=True)
     email = models.EmailField(max_length=200, unique=True)
     password = models.CharField(max_length=200, blank=True)
     image = models.ImageField(blank=True, null=True, verbose_name='Аватар', upload_to='galery/')
@@ -65,11 +65,24 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
     
+    # get verbouse name for filters in list of users 
     def get_verbose_role(self):
-        return dict(User.USERS_ROLE)[self.role]
+        if self.role != None:
+            return dict(User.USERS_ROLE)[self.role]
+        else:
+            return 'Роль не назначена'
     
     def get_verbose_status(self):
         return dict(User.USERS_STATUS)[self.status]
+    
+    # get choiches tupples for forms
+    @classmethod 
+    def get_users_role_tupple(cls):
+        return User.USERS_ROLE
+    
+    @classmethod
+    def get_users_status_tupple(cls):
+        return User.USERS_STATUS
     
     @classmethod
     def get_verbose_status_dict(cls):

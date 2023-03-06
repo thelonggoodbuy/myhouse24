@@ -250,23 +250,42 @@ $(document).ready(function () {
                 {"data": "phone", "name": "phone"},
                 {"data": "email", "name": "email"},
                 {"data": "verbose_status", "name": "verbose_status"},
-                {"data": "null", render: function ( data, type, row, meta ) 
-                                        {
-                                            return "<div id='buttons_interaction'>\
-                                                        <a class='btn btn-default btn-sm' href='#' title='Отправить приглашение' data-toggle='tooltip' id='invite_button'>\
-                                                            <i class='fa fa-repeat'></i>\
-                                                        </a>\
-                                                        <a class='btn btn-default btn-sm' href='#' title='Редактировать' data-toggle='tooltip' id='edite_button'>\
-                                                            <i class='fa fa-pencil'></i>\
-                                                        </a>\
-                                                        <a class='btn btn-default btn-sm' title='Удалить' data-toggle='tooltip' id='delete_button'>\
-                                                            <i class='fa fa-trash'></i>\
-                                                        </a>\
-                                                    </div>";
+                {"data": "is_superuser", render: function ( data, type, row, meta ) 
+                                        {   //if (row.is_superuser == 'True'){console.log('true data')}
+                                            
+                                            //console.log(data)
+                                            if (data === true){
+                                                prerendered_last_cell = "<div id='buttons_interaction'>\
+                                                    <a class='btn btn-default btn-sm' href='#' title='Отправить приглашение' data-toggle='tooltip' id='invite_button'>\
+                                                        <i class='fa fa-repeat'></i>\
+                                                    </a>\
+                                                    <a class='btn btn-default btn-sm' title='Редактировать' data-toggle='tooltip' id='edite_button'>\
+                                                        <i class='fa fa-pencil'></i>\
+                                                    </a>\
+                                                    <a class='btn btn-default btn-sm disabled' title='Удалить' data-toggle='tooltip' id='desible_delete_button'>\
+                                                        <i class='fa fa-trash'></i>\
+                                                    </a>\
+                                                </div>";
+                                            } else {
+                                                prerendered_last_cell = "<div id='buttons_interaction'>\
+                                                    <a class='btn btn-default btn-sm' href='#' title='Отправить приглашение' data-toggle='tooltip' id='invite_button'>\
+                                                        <i class='fa fa-repeat'></i>\
+                                                    </a>\
+                                                    <a class='btn btn-default btn-sm' title='Редактировать' data-toggle='tooltip' id='edite_button'>\
+                                                        <i class='fa fa-pencil'></i>\
+                                                    </a>\
+                                                    <a class='btn btn-default btn-sm' title='Удалить' data-toggle='tooltip' id='delete_button'>\
+                                                        <i class='fa fa-trash'></i>\
+                                                    </a>\
+                                                </div>";
+                                            };
+                                            //console.log(data)
+                                            return prerendered_last_cell
                                         }
                 },
                 ],
             "rowId": 'id',
+            
         });
 
         //cleaning searh filters
@@ -310,6 +329,17 @@ $(document).ready(function () {
             var row_number = $(this).closest('tr').attr('id')
             $("#myDialog").text(`Удалить пользователя с id ${row_number}?`).data('row_number', row_number).dialog("open");
         })
+
+        table.on('click', '#edite_button', function(){
+            var row_number = $(this).closest('tr').attr('id')
+            console.log(`This is row_number ${row_number}`)
+            var basic_url = "{% url 'users:adm_settings_users_update' %}"
+            console.log(`This is basic_url ${basic_url}`)
+            document.location.href = basic_url + row_number;
+            console.log(`This is url ${basic_url + row_number}`)
+        })
+
+
     });
 
     

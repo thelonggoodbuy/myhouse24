@@ -4,51 +4,171 @@
     <title> пользователь </title>
 {% endblock title %}
 
+{% block content-header %}
+    <h1>Пользовать</h1>
+{% endblock %}
+
+
 {% block content %}
-<div class="box">
-    <div class="box-header with-border">
-    <h3 class="box-title"></h3>
-    <div class="box-tools">
-        <a href="/admin/user-admin/update/5" class="btn btn-primary btn-sm">
-            <span class="hidden-xs">Редактировать пользователя</span><i class="fa fa-pencil visible-xs" aria-hidden="true"></i>
-        </a>
-    </div>
-</div>
-    <div class="box-body">
-    <div class="row">
-        <div class="col-xs-12 col-lg-4">
-            <table class="table table-bordered table-striped table-view">
-                <tbody>
-                    <tr>
-                        <td>Пользователь</td>
-                        <td>{{ user.name }} {{ user.surname }}</td>
-                    </tr>
-                    <tr>
-                        <td>Роль</td>
-                        <td>{{ user.get_verbose_role }}</td>
-                    </tr>
-                    <tr>
-                        <td>Телефон</td>
-                        <td>{{ user.phone }}</td>
-                    </tr>
-                    <tr>
-                        <td>Email(логин)</td>
-                        <td>{{ user.email }}</td>
-                    </tr>
-                    <tr>
-                        <td>Статус</td>
-                        {% if user.status == "active" %}
-                            <td><small class='label label-success my-3'>Активен</small></td>
-                        {% elif user.status == "new" %}
-                            <td><small class='label label-warning my-3'>Новый</small></td>
-                        {% else %}
-                            <td><small class="label label-danger">Отключен</small></td>
-                        {% endif %}
-                    </tr>
-                </tbody>
-            </table>
+<section class="content">                
+    <div class="box">
+        <div class="box-body">
+            <form method="post" id="user_change_data_form">
+
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <div class="col-xs-12 col-md-6">
+                        <div class="form-group">
+                            <label>{{ form.name.label }}</label>
+                            {{ form.name }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            {% comment %} <label class="control-label" for="useradminform-lastname">Фамилия</label>
+                            <input type="text" id="useradminform-lastname" class="form-control" name="UserAdminForm[lastname]" value="Пушкин" maxlength="255"> {% endcomment %}
+                            <label>{{ form.surname.label }}</label>
+                            {{ form.surname }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            {% comment %} <label class="control-label" for="useradminform-phone">Телефон</label>
+                            <input type="text" id="useradminform-phone" class="form-control" name="UserAdminForm[phone]" value="+380930000000" maxlength="255"> {% endcomment %}
+                            <label>{{ form.phone.label }}</label>
+                            {{ form.phone }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            {% comment %} <label class="control-label" for="useradminform-role">Роль</label>
+                            <select id="useradminform-role" class="form-control" name="UserAdminForm[role]">
+                                <option value="admin">Директор</option>
+                                <option value="manager">Управляющий</option>
+                                <option value="accountant">Бухгалтер</option>
+                                <option value="electrician">Электрик</option>
+                                <option value="plumber" selected="">Сантехник</option>
+                            </select> {% endcomment %}
+                            <label>{{ form.role.label }}</label>
+                            {{ form.role }}
+                
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            {% comment %} <label class="control-label" for="useradminform-status">Статус</label>
+                            <select id="useradminform-status" class="form-control" name="UserAdminForm[status]">
+                                <option value="10">Активен</option>
+                                <option value="5">Новый</option>
+                                <option value="0" selected="">Отключен</option>
+                            </select> {% endcomment %}
+                            <label>{{ form.status.label }}</label>
+                            {{ form.status }}
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-md-6">
+                        <div class="form-group">
+                            {% comment %} <label class="control-label" for="useradminform-username">Email (логин)</label>
+                            <input type="text" id="useradminform-username" class="form-control" name="UserAdminForm[username]" value="e@admin.com" maxlength="255" aria-required="true"> {% endcomment %}
+                            <label>{{ form.email.label }}</label>
+                            {{ form.email }}
+                            <div class="help-block"></div>
+                        </div>        
+                        <div class="form-group">
+                            <label class="control-label">Пароль</label>
+                                <div id="password_group" class="input-group">
+                                    {% comment %} <input type="password" id="useradminform-password" class="form-control pass-value" name="UserAdminForm[password]" maxlength="255"> {% endcomment %}
+                                    {{ form.password }}                                    
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button" id="generate_user_password">
+                                            Сгенерировать
+                                        </button>
+
+                                        <button type="button" class="btn btn-primary" id="make_visible_password">
+                                            <i class="fa fa-eye" aria-hidden="true" ></i>
+                                        </button>
+                                    </span>
+                                </div>    
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            {% comment %} <label class="control-label" for="useradminform-password2">Повторить пароль</label>
+                            <input type="password" id="useradminform-password2" class="form-control pass-value" name="UserAdminForm[password2]" maxlength="255"> {% endcomment %}
+                            {{ form.confirm_password.label }}
+                            {{ form.confirm_password }}
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 text-right">
+                        <a href="{% url 'users:admin_settings_users_list' %}" class="btn btn-default">Отменить</a>
+                        <button type="submit" class="btn btn-success">Сохранить</button>
+                    </div>
+                </div>
+            </form>
+            <script>
+                $(document).ready(function () {
+
+                    //var strange_labels = $('div[class^=form-group]').each(function(){
+                    //    console.log($(this).text())
+                    //})
+                    //console.log(strange_labels)
+
+
+                    $("#generate_user_password").click(function(){
+                        var pass = Math.random().toString(36).substring(4);
+                        $('#password').val(pass);
+                        $('#confirm_password').val(pass);
+                    })
+
+                    $("#make_visible_password").click(function(){
+                        password_state = $('#password').attr('type')
+                        confirm_password_state = $('#confirm_password').attr('type')
+                        if (password_state == 'password' && confirm_password_state == 'password'){
+                            password_state = $('#password').attr('type', 'text')
+                            confirm_password_state = $('#confirm_password').attr('type', 'text')
+                        } else {
+                            password_state = $('#password').attr('type', 'password')
+                            confirm_password_state = $('#confirm_password').attr('type', 'password')
+                        };
+                    })
+
+                    $("#user_change_data_form").validate({
+                        rules: {
+                          field: {
+                            required: true,
+                            email: true
+                          }
+                        },
+                        messages:{
+                            email: {
+                                required: "Это поле обязательно для заполнения",
+                                email: "Значение «Email (логин)» не является правильным email адресом",
+                            }
+                        },
+                        validClass: "success",
+                        highlight: function(element, errorClass, validClass) {
+                            $(element).closest('.form-group').addClass("has-error").removeClass("has-success");
+                      
+                          },
+                        unhighlight: function(element, errorClass, validClass) {
+                            $(element).closest('.form-group').addClass("has-success").removeClass("has-error");
+                      
+                          },
+                    //    errorPlacement: function(label, element) {
+                    //        label.addClass('arrow');
+                    //        label.insertAfter(element);
+                    //    },
+                    //  });
+
+                });
+                //jQuery.extend(jQuery.validator.messages, {
+                //    required: "Это поле обязательно для заполнения",
+                //    email: "<h1>Значение «Email (логин)» не является правильным email адресом.</h1>"
+                });
+            </script>
         </div>
     </div>
-</div>
-</div>
+</section>
 {% endblock content %}

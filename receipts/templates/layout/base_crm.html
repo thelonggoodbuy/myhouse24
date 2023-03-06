@@ -26,6 +26,7 @@
         <link rel="stylesheet" type="text/css" href="{% static 'users/css/custom.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/components/font-awesome/css/font-awesome.min.css' %}">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+
         {% block additionaly_css %}
         {% endblock additionaly_css %}
 
@@ -45,6 +46,10 @@
         <script type="text/javascript" src="{% static 'users/plugins/jvectormap/jquery-jvectormap-world-mill-en.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/components/jquery-slimscroll/jquery.slimscroll.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/components/chart.js/Chart.js' %}"></script>
+
+        <script type="text/javascript" src="{% static 'users/plugins/jquery-validation/dist/jquery.validate.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/plugins/jquery-validation/dist/additional-methods.min.js' %}"></script>
+
         <script type="text/javascript" src="{% static 'users/js/yii.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/js/main.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/js/custom.js' %}"></script>
@@ -268,6 +273,12 @@
                             <a href="#">
                                 <i class="fa fa-money"></i>  
                                 <span>Тарифы</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'users:adm_settings_users_roles' %}">
+                                <i class="fa fa-users"></i>  
+                                <span>Роли</span>
                             </a>
                         </li>
                         <li>
