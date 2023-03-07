@@ -1,21 +1,96 @@
 {% extends "layout/base_crm.html" %}
 
+{% block additionaly_css %}
+<style>
+    .col-title{
+        transform: rotate(90deg); 
+     }
+</style>
+{% endblock additionaly_css %}
+
 {% block title %}
     <title> роли </title>
 {% endblock title %}
+
+{% block content-header %}
+    <h1>Роли</h1>
+{% endblock %}
 
 {% block content %}
 <div class="box">
     <div class="box-header with-border">
     <h3 class="box-title"></h3>
     <div class="box-tools">
-        <a href="/admin/user-admin/update/5" class="btn btn-primary btn-sm">
-            <span class="hidden-xs">Роли</span><i class="fa fa-pencil visible-xs" aria-hidden="true"></i>
-        </a>
+
     </div>
 </div>
     <div class="box-body">
-    <h1>тут будет логика для настройки ролей</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ roles_formset.management_form }}
+        <table class="table table-striped w-auto">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-center">Роль</th>
+                    
+                    <th scope="col" class="text-center"><small>Статистика</small></th>
+                    <th scope="col" class="text-center"><small>Касса</small></th>
+                    <th scope="col" class="text-center"><small>Квитанция на оплату</small></th>
+
+                    <th scope="col" class="text-center"><small>Лицевые счета</small></th>
+                    <th scope="col" class="text-center"><small>Квартиры</small></th>
+                    <th scope="col" class="text-center"><small>Владельцы квартир</small></th>
+                    <th scope="col" class="text-center"><small>Дома</small></th>
+
+                    <th scope="col" class="text-center"><small>Сообщения</small></th>
+                    <th scope="col" class="text-center"><small>Заявки вызова мастера</small></th>
+                    <th scope="col" class="text-center"><small>Счетчики</small></th>
+                    <th scope="col" class="text-center"><small>Управление сайтом</small></th>
+
+                    <th scope="col" class="text-center"><small>Услуги</small></th>
+                    <th scope="col" class="text-center"><small>Тарифы</small></th>
+                    <th scope="col" class="text-center"><small>Роли</small></th>
+                    <th scope="col" class="text-center"><small>Пользователи</small></th>
+
+                    <th scope="col" class="text-center"><small>платежные реквизиты</small></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in roles_formset %}
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+                    <tr>
+                        <th class="text-center">{{ form.instance.name }}</th>
+                        <td class="text-center">{{ form.statistic_permission }}</td>
+                        <td class="text-center">{{ form.fund_permission }}</td>
+                        <td class="text-center">{{ form.receipt_permission }}</td>
+
+                        <td class="text-center">{{ form.accounts_permission }}</td>
+                        <td class="text-center">{{ form.appartments_permission }}</td>
+                        <td class="text-center">{{ form.owners_permission }}</td>
+                        <td class="text-center">{{ form.house_permission }}</td>
+
+                        <td class="text-center">{{ form.messages_permission }}</td>
+                        <td class="text-center">{{ form.masters_request_permission }}</td>
+                        <td class="text-center">{{ form.counter_permission }}</td>
+                        <td class="text-center">{{ form.site_managing_permission }}</td>
+
+                        <td class="text-center">{{ form.utility_services_permission }}</td>
+                        <td class="text-center">{{ form.tarif_permission }}</td>
+                        <td class="text-center">{{ form.role_section_permission }}</td>
+                        <td class="text-center">{{ form.users_sections_permission }}</td>
+
+                        <td class="text-center">{{ form.requisite_sections_permission }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            {% comment %} {% for form in roles_formset %}
+            {{ form }}
+            {% endfor %} {% endcomment %}
+        </table>      
+            <button type='submit'>внести изменения</button>
+    </form>
 </div>
 </div>
 {% endblock content %}

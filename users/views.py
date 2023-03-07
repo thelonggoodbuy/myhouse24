@@ -20,24 +20,25 @@ from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import json
 from django.urls import reverse
-
+from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 # from django.contrib.auth.models import User
 
 from .tokens import account_activation_token
-from .models import User
+from .models import User, Role
 from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import DeleteView, UpdateView
+from django.views.generic.edit import DeleteView, UpdateView, FormView
 from django.views.generic.detail import SingleObjectTemplateResponseMixin
 from django.views.generic.base import TemplateResponseMixin
-
+from django.views.generic.list import ListView
 
 import html2text
 
 
 
-from .forms import LoginSimpleUserForm, LoginAdminUserForm, SignUpSimpleUserForm, AdminSettingsUsersUpdateForm
+from .forms import LoginSimpleUserForm, LoginAdminUserForm, SignUpSimpleUserForm, AdminSettingsUsersUpdateForm,\
+                    UsersRolesFormSet, AdminSettingsUsersRolesCellForm
 
 
 
@@ -172,7 +173,7 @@ class AdminSettingsUsersListLogic(TemplateView):
             Q_list.append(reduce(operator.and_, (Q(full_name__icontains=part_name) for part_name in search_full_name_list_parameter)))
 
             if request.GET.get('columns[2][search][value]'):
-                Q_list.append(Q(role__icontains=request.GET.get('columns[2][search][value]')))
+                Q_list.append(Q(role__name__icontains=request.GET.get('columns[2][search][value]')))
 
             if request.GET.get('columns[3][search][value]'):
                 Q_list.append(Q(phone__icontains=request.GET.get('columns[3][search][value]')))
@@ -190,23 +191,23 @@ class AdminSettingsUsersListLogic(TemplateView):
             length = int(data_table_request.get("length"))
 
             # server-side processing - db handling
-            raw_data = User.objects.filter(*Q_list)\
-                                    .only('id','name', 'surname', 'patronymic', 'phone', 'role', 'email', 'status', 'is_superuser')\
+            raw_data = User.objects.select_related('role').filter(*Q_list)\
+                                    .only('id','name', 'surname', 'patronymic', 'phone', 'role__name', 'email', 'status', 'is_superuser')\
                                     .order_by('id')\
-                                    .values('id','name', 'surname', 'patronymic', 'phone', 'role', 'email', 'status', 'is_superuser')
+                                    .values('id','name', 'surname', 'patronymic', 'phone', 'role__name', 'email', 'status', 'is_superuser')
                         
             data = list(raw_data)
             verbose_status_dict = User.get_verbose_status_dict()
-            verbose_roles_dict = User.get_verbose_roles_dict()
+            # verbose_roles_dict = User.get_verbose_roles_dict()
 
             for user in data:
                 user['full_name'] = f"{user['name']} {user['surname']} {user['patronymic']}"
-                verbose_role = ""
-                try: 
-                    verbose_role = verbose_roles_dict[user['role']]
-                    user['verbose_role'] = verbose_role
-                except:
-                    user['verbose_role'] = ''
+                # verbose_role = ""
+                # try: 
+                #     verbose_role = verbose_roles_dict[user['role']]
+                #     user['verbose_role'] = verbose_role
+                # except:
+                #     user['verbose_role'] = ''
                 verbose_status = ""
                 try: 
                     verbose_status = verbose_status_dict[user['status']]
@@ -261,7 +262,7 @@ class AdminSettingsUsersListLogic(TemplateView):
 
 class AdminSettingsUserCardView(DetailView):
 
-    model = User
+    queryset = User.objects.select_related('role').only('name', 'surname', 'role__name', 'phone', 'email', 'status')
     template_name = "users/admin_settings_user_card.html"
     context_object_name = 'user'
 
@@ -290,5 +291,37 @@ class AdmSettingsUsersUpdateView(UpdateView):
     template_name = 'users/admin_settings_user_update_data.html'
     success_url = reverse_lazy('users:admin_settings_users_list')
 
-class AdminSettingsUsersRoles(TemplateView):
+
+class AdminSettingsUsersRolesView(FormView):
+    model = Role
     template_name = "users/admin_settings_users_roles.html"
+    success_url = reverse_lazy('users:adm_settings_users_roles')
+    
+    form_class = AdminSettingsUsersRolesCellForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['roles_formset'] = UsersRolesFormSet(queryset=Role.objects.all())
+        return context
+    
+    def post(self, request, *args, **Kwargs):
+        current_formset = UsersRolesFormSet(request.POST)
+        if current_formset.is_valid():
+            return self.form_valid(current_formset)
+        else:
+            print(current_formset.errors)
+        
+    def form_valid(self, current_formset):
+        current_formset.save()
+        # return reverse_lazy('users:admin_settings_users_list')
+        return super(AdminSettingsUsersRolesView, self).form_valid(current_formset)
+    
+
+
+
+# -----------------------------------------------------------------------------------------
+# -----------------------------Appartments Owner-------------------------------------------
+# -----------------------------------------------------------------------------------------
+
+class AppartmentsOwners(TemplateView):
+    templates = "users/appartments_owners.html"

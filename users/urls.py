@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 from .views import LoginSimpleUser, LoginAdminUser, LogOutUser, SignUpSimpleUser, ActivateAccount, \
                     AdminSettingsUsersListLogic, AdminSettingsUserCardView, AdminSettingsUsersDeleteView, AdmSettingsUsersUpdateView,\
-                    AdminSettingsUsersRoles
+                    AdminSettingsUsersRolesView
                         # temp_funct_users_listlogic
 
 
@@ -33,8 +33,9 @@ urlpatterns = [
 
     path('admin_settings_users_update/', AdmSettingsUsersUpdateView.as_view(), name='adm_settings_users_update'),
     path('admin_settings_users_update/<int:pk>/', AdmSettingsUsersUpdateView.as_view(), name='adm_settings_users_update'),
-
     # roles
-    path('admin_settings_users_roles/', AdminSettingsUsersRoles.as_view(), name='adm_settings_users_roles'),
+    path('admin_settings_users_roles/', AdminSettingsUsersRolesView.as_view(), name='adm_settings_users_roles'),
+
+    path('appartments_owners/', AppartmentsOwners.as_view(), name='appartments_owners'),
 
 ]

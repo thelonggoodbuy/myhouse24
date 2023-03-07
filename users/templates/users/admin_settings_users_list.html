@@ -48,7 +48,7 @@
                                         <tr>
                                             <th id="id">#</th>
                                             <th id="full_name">Пользователь</th>
-                                            <th id="verbose_role">роль</th>
+                                            <th id="role__name">роль</th>
                                             <th id="phone">телефон</th>
                                             <th id="email">email</th>
                                             <th id="verbose_status">статус</th>
@@ -61,12 +61,12 @@
                                             <td>
                                                 <select colnumb="2" id="useradminsearch-role" class="form-control select2-hidden-accessible" placeholder="роль">
                                                     <option value=""></option>
-                                                    <option value="director">Директор</option>
-                                                    <option value="manager">Управляющий</option>
-                                                    <option value="accounter">Бухгалтер</option>
-                                                    <option value="electrician">Электрик</option>
-                                                    <option value="plumber">Сантехник</option>
-                                                    <option value="locksmith">Слесарь</option>
+                                                    <option>Директор</option>
+                                                    <option>Управляющий</option>
+                                                    <option>Бухгалтер</option>
+                                                    <option>Электрик</option>
+                                                    <option>Сантехник</option>
+                                                    <option>Слесарь</option>
                                                 </select>
                                             </td>
                                             <td>
@@ -246,7 +246,7 @@ $(document).ready(function () {
             "columns": [
                 {"data": "id", "name": "id"},
                 {"data": "full_name", "name": "full_name"},
-                {"data": "verbose_role", "name": "verbose_role"},
+                {"data": "role__name", "name": "role__name"},
                 {"data": "phone", "name": "phone"},
                 {"data": "email", "name": "email"},
                 {"data": "verbose_status", "name": "verbose_status"},

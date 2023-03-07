@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.html import strip_tags
 
-from .models import User
+from .models import User, Role
 
 
 
@@ -144,7 +144,7 @@ class SignUpSimpleUserForm(forms.ModelForm):
 
 
 class AdminSettingsUsersUpdateForm(forms.ModelForm):
-    roles_tuple = User.get_users_role_tupple()
+    # roles_tuple = User.get_users_role_tupple()
     status_tupple = User.get_users_status_tupple()
 
     name = forms.CharField(required=False, label="Имя",
@@ -159,8 +159,9 @@ class AdminSettingsUsersUpdateForm(forms.ModelForm):
                         widget=forms.TextInput(attrs={'class': 'form-control',
                                                     'placeholder':'номер телефона'}))
     
-    role = forms.ChoiceField(required=False, label="роль", choices=roles_tuple,
-                             widget=forms.Select(attrs={'class':'form-control'}))
+    role = forms.ModelChoiceField(required=False, label="роль", 
+                                    queryset=Role.objects.all(),
+                                    widget=forms.Select(attrs={'class':'form-control'}))
 
     status = forms.ChoiceField(required=True, label="статус", choices=status_tupple,
                                widget=forms.Select(attrs={'class':'form-control'}))
@@ -179,6 +180,9 @@ class AdminSettingsUsersUpdateForm(forms.ModelForm):
                                                         'placeholder':'password',
                                                         'id': 'confirm_password'}))
 
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.fields['role'] = self.instance.role
 
     def clean_email(self):
         try:
@@ -215,6 +219,9 @@ class AdminSettingsUsersUpdateForm(forms.ModelForm):
             if current_form_cleaned['password'] == '':
                 current_form.save(update_fields=["name", "surname", "phone", \
                                             "role", "status", "email"])
+            # if current_form_cleaned['password'] == '':
+            #     current_form.save(update_fields=["name", "surname", "phone", \
+            #                                 "status", "email"])
             else:
                 current_form.set_password(current_form_cleaned['password'])
                 current_form.save()
@@ -231,4 +238,27 @@ class AdminSettingsUsersUpdateForm(forms.ModelForm):
         model = User
         fields = ("name", "surname", "phone", "email",\
                     "role", "status", "password", "confirm_password")
+        # fields = ("name", "surname", "phone", "email",\
+        #     "status", "password", "confirm_password")
     
+class AdminSettingsUsersRolesCellForm(forms.ModelForm):
+    # id = forms.CharField(required=False)
+
+    # i_agree = forms.BooleanField(required=False)
+
+    class Meta:
+        model = Role
+        fields = ("id", "statistic_permission", "fund_permission", "receipt_permission",
+                    "accounts_permission", "appartments_permission", "owners_permission", 
+                    "house_permission", "messages_permission", "masters_request_permission",
+                    "counter_permission", "site_managing_permission", "utility_services_permission",
+                    "tarif_permission", "role_section_permission", "users_sections_permission", "requisite_sections_permission")
+        
+    # def save(self, commit=True):
+    #     current_form = super(AdminSettingsUsersRolesCellForm, self).save(commit=False)
+        
+    #     if commit:
+    #         current_form['id'] = self.instance.id
+    #     return current_form
+
+UsersRolesFormSet = forms.modelformset_factory(model=Role, form=AdminSettingsUsersRolesCellForm, can_delete=False, extra=0)
