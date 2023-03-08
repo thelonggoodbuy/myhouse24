@@ -32,6 +32,7 @@ from django.views.generic.edit import DeleteView, UpdateView, FormView
 from django.views.generic.detail import SingleObjectTemplateResponseMixin
 from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.list import ListView
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
 import html2text
 
@@ -323,5 +324,69 @@ class AdminSettingsUsersRolesView(FormView):
 # -----------------------------Appartments Owner-------------------------------------------
 # -----------------------------------------------------------------------------------------
 
-class AppartmentsOwners(TemplateView):
-    templates = "users/appartments_owners.html"
+class RolePassesTestMixin(UserPassesTestMixin, LoginRequiredMixin):
+
+    def test_func(self):
+        # try to get needfull_user_status class field
+        if hasattr(self.__class__, 'needfull_user_status'):
+            needfull_user_status = self.__class__.needfull_user_status
+            if getattr(self.request.user, needfull_user_status) == False:
+                self.permission_denied_message = 'Вы не обладаете нужным статусом пользователя'
+                return False
+
+
+        # try to get needfull_permission class field
+        if hasattr(self.__class__, 'needfull_permission'):
+            needfull_permission = self.__class__.needfull_permission
+            try:
+                this_role_perm = self.request.user.role.return_permission_is(needfull_permission)
+                if this_role_perm == True:
+                    return True
+                else:
+                    self.permission_denied_message = "У вашей роли нет права работать с этими данными"
+                    return False
+            except AttributeError:
+                return False
+
+        
+    # def test_role(self, needfull_permission):
+    #     try:
+    #         this_role_perm = self.request.user.role.return_permission_is(needfull_permission)
+    #         if this_role_perm == True:
+    #             return True
+    #         else:
+    #             self.permission_denied_message = "У вашей роли нет права работать с этими данными"
+    #             return False
+    #     except AttributeError:
+    #         return False
+
+
+    #     if hasattr(self.__class__, 'needfull_permission'):
+    #         needfull_permission = self.test_role(self.__class__.needfull_permission)
+    #         return(needfull_permission)
+        
+    # def test_role(self, needfull_permission):
+    #     try:
+    #         this_role_perm = self.request.user.role.return_permission_is(needfull_permission)
+    #         if this_role_perm == True:
+    #             return True
+    #         else:
+    #             self.permission_denied_message = "У вашей роли нет права работать с этими данными"
+    #             return False
+    #     except AttributeError:
+    #         return False
+
+    def handle_no_permission(self):
+        error_text = self.get_permission_denied_message()
+        messages.error(self.request, error_text)
+        return redirect('users:permission_denied')
+
+
+class AppartmentsOwnersView(RolePassesTestMixin, TemplateView):
+    template_name = "users/appartments_owners.html"
+    needfull_permission = 'owners_permission'
+    needfull_user_status = 'is_staff'
+
+
+class PermissionDeniedView(TemplateView):
+    template_name = "users/permission_denied.html"

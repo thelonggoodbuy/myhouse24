@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 import random
 
 
-from users.models import User
+from users.models import User, Role
 
 
 from faker import Faker
@@ -26,6 +26,8 @@ class Command(BaseCommand):
             print('***************уже есть в базе данных************')
             print('*************************************************')
         else:
+            all_roles = Role.objects.exclude(name='Директор')
+
             for index in range(1, 350):
                 password = 'Te5t_pasSword'
                 if User.objects.filter(email=f'initial_simple_user_{index}@gmail.com'):
@@ -46,7 +48,7 @@ class Command(BaseCommand):
                     phone = '0637149378'
                     is_role = random.choice([True, False])
                     role = None
-                    if is_role == True: role = random.choice(('accounter', 'electrician', 'plumber', 'locksmith'))
+                    if is_role == True: role = random.choice(all_roles)
                     status = random.choice(('active', 'new', 'disable'))
                     user = User(email=email,
                                 surname=surname,
@@ -57,7 +59,6 @@ class Command(BaseCommand):
                                 is_staff=is_staff,
                                 note=note,
                                 phone=phone,
-                                # role=role,
                                 )
                     if role != None: user.role = role
                     user.status = status

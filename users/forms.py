@@ -83,7 +83,7 @@ class LoginAdminUserForm(AuthenticationForm):
     def clean_username(self):
         email = self.cleaned_data['username']
         current_user = User.objects.filter(email=email)
-        if current_user.exists() and current_user[0].is_superuser == False:
+        if current_user.exists() and current_user[0].is_staff == False:
             self.add_error('username', 'Этот профиль принадлежит обычному пользователю. Войдите в систему как пользотватель.')
             messages.error(self.request, 'Этот профиль принадлежит обычному пользователю. Войдите в систему как пользотватель.')
 
@@ -242,10 +242,6 @@ class AdminSettingsUsersUpdateForm(forms.ModelForm):
         #     "status", "password", "confirm_password")
     
 class AdminSettingsUsersRolesCellForm(forms.ModelForm):
-    # id = forms.CharField(required=False)
-
-    # i_agree = forms.BooleanField(required=False)
-
     class Meta:
         model = Role
         fields = ("id", "statistic_permission", "fund_permission", "receipt_permission",
@@ -253,12 +249,6 @@ class AdminSettingsUsersRolesCellForm(forms.ModelForm):
                     "house_permission", "messages_permission", "masters_request_permission",
                     "counter_permission", "site_managing_permission", "utility_services_permission",
                     "tarif_permission", "role_section_permission", "users_sections_permission", "requisite_sections_permission")
-        
-    # def save(self, commit=True):
-    #     current_form = super(AdminSettingsUsersRolesCellForm, self).save(commit=False)
-        
-    #     if commit:
-    #         current_form['id'] = self.instance.id
-    #     return current_form
+
 
 UsersRolesFormSet = forms.modelformset_factory(model=Role, form=AdminSettingsUsersRolesCellForm, can_delete=False, extra=0)

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+{% load static %}
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title> вход </title>
+
+        <link rel="stylesheet" type="text/css" href="{% static 'users/components/bootstrap/dist/css/bootstrap.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/components/bootstrap/dist/css/bootstrap.min.css.map' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/css/AdminLTE.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/css/style.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/plugins/toastr/build/toastr.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/components/Ionicons/css/ionicons.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/components/jvectormap/jquery-jvectormap.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/plugins/iCheck/flat/blue.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/css/skins/_all-skins.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/css/custom.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/components/font-awesome/css/font-awesome.min.css' %}">
+
+
+
+        <script type="text/javascript" src="{% static 'users/components/jquery/dist/jquery.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/components/fastclick/lib/fastclick.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/js/adminlte.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/plugins/toastr/build/toastr.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/plugins/iCheck/icheck.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.ru-RU.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/components/jquery-sparkline/dist/jquery.sparkline.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/plugins/jvectormap/jquery-jvectormap-world-mill-en.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/components/jquery-slimscroll/jquery.slimscroll.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/components/chart.js/Chart.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/js/main.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/js/custom.js' %}"></script>
+
+        <link rel="shortcut icon" type="image/png" href="{% static 'users/img/favicon.png' %}"/>
+    </head>
+    <body class="login-page">
+        <div class="login-box">
+            <div class="login-logo">
+                <a href="#">
+                    <img src="{% static 'users/img/logo.svg' %}" alt="logo">
+                </a>
+            </div>
+            <div class="tab-content">
+                <div class="login-box-body">
+                    <p class="login-box-msg">вы не имеете доступа к этому ресурсу</p>
+                    <p class="login-box-msg">пожалуйста свяжитесь с администрацией</p>
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class={{ message.tags }}>{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </body>
+
+
+<html>

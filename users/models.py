@@ -16,14 +16,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     ('new', 'новый'),
     ('disable', 'отключен'),
     )
-    # USERS_ROLE = (
-    # ('director', 'директор'),
-    # ('manager', 'управляющий'),
-    # ('accounter', 'бухгалтер'),
-    # ('electrician', 'электрик'),
-    # ('plumber', 'сантехник'),
-    # ('locksmith', 'слесарь'),
-    # )
+
     username = None
     status = models.CharField(max_length=200, choices=USERS_STATUS, null=True)
     is_active = models.BooleanField(default=False)
@@ -65,20 +58,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
     
-    # get verbouse name for filters in list of users 
-    # def get_verbose_role(self):
-    #     if self.role != None:
-    #         return dict(User.USERS_ROLE)[self.role]
-    #     else:
-    #         return 'Роль не назначена'
-    
     def get_verbose_status(self):
         return dict(User.USERS_STATUS)[self.status]
-    
-    # get choiches tupples for forms
-    # @classmethod 
-    # def get_users_role_tupple(cls):
-    #     return User.USERS_ROLE
     
     @classmethod
     def get_users_status_tupple(cls):
@@ -89,42 +70,36 @@ class User(AbstractBaseUser, PermissionsMixin):
         status_verbose_dict = dict((status, verbose_status) for status, verbose_status in cls.USERS_STATUS)
         return status_verbose_dict
 
-    # @classmethod
-    # def get_verbose_roles_dict(cls):
-    #     role_verbose_dict = dict((role, verbose_role) for role, verbose_role in cls.USERS_ROLE)
-    #     return role_verbose_dict
-
     def save(self, *args, **kwargs):
         self.full_name = (f"{self.surname} {self.name} {self.patronymic}").strip()
         super(User, self).save(*args, **kwargs)
 
-# В таблицу с ролями необходимо будет создать такие дополнительные методы:
-# 1. отдать verbouse name
-# 2. варианты ролей для формы
-# 3. cсловарь с ролями
-
 class Role(models.Model):
-    name = models.CharField(max_length=200)
-    statistic_permission = models.BooleanField(default=True)
-    fund_permission = models.BooleanField(default=False)
-    receipt_permission = models.BooleanField(default=False)
-    accounts_permission = models.BooleanField(default=False)
-    appartments_permission = models.BooleanField(default=False)
-    owners_permission = models.BooleanField(default=False)
-    house_permission = models.BooleanField(default=True)
-    messages_permission = models.BooleanField(default=False)
-    masters_request_permission = models.BooleanField(default=True)
-    counter_permission = models.BooleanField(default=False)
-    site_managing_permission = models.BooleanField(default=False)
-    utility_services_permission = models.BooleanField(default=False)
-    tarif_permission = models.BooleanField(default=False)
-    role_section_permission = models.BooleanField(default=False)
-    users_sections_permission = models.BooleanField(default=False)
-    requisite_sections_permission = models.BooleanField(default=False)
+    name = models.CharField(max_length=200, verbose_name = 'название')
+    type = models.CharField(max_length=200, null=True)
+    statistic_permission = models.BooleanField(default=True, verbose_name = 'статистика')
+    fund_permission = models.BooleanField(default=False, verbose_name = 'касса')
+    receipt_permission = models.BooleanField(default=False, verbose_name = 'квитанции на оплату')
+    accounts_permission = models.BooleanField(default=False, verbose_name = 'лицевые счета')
+    appartments_permission = models.BooleanField(default=False, verbose_name = 'квартиры')
+    owners_permission = models.BooleanField(default=False, verbose_name = 'владельцы квартир')
+    house_permission = models.BooleanField(default=True, verbose_name = 'дома')
+    messages_permission = models.BooleanField(default=False, verbose_name = 'сообщения')
+    masters_request_permission = models.BooleanField(default=True, verbose_name = 'заявки вызова мастера')
+    counter_permission = models.BooleanField(default=False, verbose_name = 'счетчики')
+    site_managing_permission = models.BooleanField(default=False, verbose_name = 'управление сайтом')
+    utility_services_permission = models.BooleanField(default=False, verbose_name = 'услуги')
+    tarif_permission = models.BooleanField(default=False, verbose_name = 'тарифы')
+    role_section_permission = models.BooleanField(default=False, verbose_name = 'роли')
+    users_sections_permission = models.BooleanField(default=False, verbose_name = 'пользователи')
+    requisite_sections_permission = models.BooleanField(default=False, verbose_name = 'платежные реквизиты')
 
     def __str__(self):
         return self.name
 
+    def return_permission_is(self, require_perm):
+        is_permit = getattr(self, require_perm)
+        return is_permit
 
 
 class Profile(models.Model):

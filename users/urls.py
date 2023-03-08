@@ -1,7 +1,8 @@
 from django.urls import path, re_path
 from .views import LoginSimpleUser, LoginAdminUser, LogOutUser, SignUpSimpleUser, ActivateAccount, \
                     AdminSettingsUsersListLogic, AdminSettingsUserCardView, AdminSettingsUsersDeleteView, AdmSettingsUsersUpdateView,\
-                    AdminSettingsUsersRolesView
+                    AdminSettingsUsersRolesView, AppartmentsOwnersView,\
+                    PermissionDeniedView
                         # temp_funct_users_listlogic
 
 
@@ -36,6 +37,7 @@ urlpatterns = [
     # roles
     path('admin_settings_users_roles/', AdminSettingsUsersRolesView.as_view(), name='adm_settings_users_roles'),
 
-    path('appartments_owners/', AppartmentsOwners.as_view(), name='appartments_owners'),
+    path('appartments_owners/', AppartmentsOwnersView.as_view(), name='appartments_owners'),
+    path('permission_denide/', PermissionDeniedView.as_view(), name='permission_denied')
 
 ]
