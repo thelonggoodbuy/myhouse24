@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import House, HouseAdditionalImage, Section
+from .models import House, HouseAdditionalImage, Section, Floor
 
 
 @admin.register(House)
@@ -15,6 +15,11 @@ class UserAdmin(admin.ModelAdmin):
 
 
 @admin.register(Section)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('house', 'title')
+    list_filter = ('house', 'title')
+
+@admin.register(Floor)
 class UserAdmin(admin.ModelAdmin):
     list_display = ('house', 'title')
     list_filter = ('house', 'title')

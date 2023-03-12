@@ -106,9 +106,11 @@
                                                     <div class="form-group">
                                                         <label>{{ section_form.title.label }}</label>
                                                         <div class="input-group">
-                                                                {{ section_form.title }}
-                                                                <span class="input-group-btn">
-                                                                <button type="button" class="btn btn-danger form-row-remove-btn"><i class="fa fa-trash"></i></button>                
+                                                            {{ section_form.title }}
+                                                            <span id="delete_button" class="input-group-btn">
+                                                                <button type="button" class="btn btn-danger form-row-remove-btn">
+                                                                    <i class="fa fa-trash"></i>
+                                                                </button>                
                                                             </span>
                                                         </div>
                                                         {{ section_form.DELETE }}
@@ -126,8 +128,10 @@
                                                 <label>{{ section_formset.empty_form.title.label }}</label>
                                                 <div class="input-group">
                                                         {{ section_formset.empty_form.title }}
-                                                        <span class="input-group-btn">
-                                                        <button type="button" class="btn btn-danger form-row-remove-btn"><i class="fa fa-trash"></i></button>                
+                                                        <span id="delete_button" class="input-group-btn">
+                                                            <button type="button" class="btn btn-danger form-row-remove-btn">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>                
                                                     </span>
                                                 </div>
                                                 {{ section_formset.empty_form.DELETE }}
@@ -139,40 +143,53 @@
                             </div>                            
                             {#----------------------- END section view logic--------------------------------- #}
                             {#----------------------- floors view logic--------------------------------- #}
-                            {% comment %} <div class="tab-pane clearfix" id="tab-floors">
-                                <div id="form-floor-rows">            
-                                    <div class="row form-floor">
-                                        <div class="col-xs-12">
-                                            <div class="form-group">
-                                                <label>Название</label>
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control" value="Этаж 1">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="btn btn-danger form-row-remove-btn">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
-                                                    </span>
+                            <div class="tab-pane clearfix" id="tab-floors">
+                                {{ floor_formset.management_form }}
+
+                                {% for floor_form in floor_formset %}
+                                    {% for hidden in floor_form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+
+                                    <div id="floor_container">
+                                        
+                                        <div class="row">
+                                            <div class="col-xs-12">
+                                                <div class="form-group">
+                                                    <label>{{ floor_form.title.label }}</label>
+                                                    <div class="input-group">
+                                                            {{ floor_form.title }}
+                                                            <span id="delete_button" class="input-group-btn">
+                                                                <button type="button" class="btn btn-danger form-row-remove-btn">
+                                                                    <i class="fa fa-trash"></i>
+                                                                </button>                
+                                                        </span>
+                                                    </div>
+                                                    {{ floor_form.DELETE }}
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="row form-floor">
+                                    </div>
+                                {% endfor %}
+
+                                <div id="empty_form_container">                  
+                                    <div class="row">
                                         <div class="col-xs-12">
                                             <div class="form-group">
-                                                <label>Название</label>
+                                                <label>{{ floor_formset.empty_form.title.label }}</label>
                                                 <div class="input-group">
-                                                    <input type="text" class="form-control" value="Этаж 2">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="btn btn-danger form-row-remove-btn">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
+                                                        {{ floor_formset.empty_form.title }}
+                                                        <span id="delete_button" class="input-group-btn">
+                                                            <button type="button" class="btn btn-danger form-row-remove-btn">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>                
                                                     </span>
                                                 </div>
+                                                {{ floor_formset.empty_form.DELETE }}
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
                                 <button class="btn btn-success pull-right" type="button" id="add_floor">Добавить</button>
                             </div>
@@ -212,11 +229,13 @@
                                 </div>
                                 <button class="btn btn-success pull-right form-row-add-houseuseradmin-btn" type="button">Добавить</button>
                             </div>
-                        </div> {% endcomment %}
-
+                        </div>
+{% comment %} ~!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {% endcomment %}
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
             <div class="row">
                 <div class="col-xs-12 text-right">
                     <div class="form-group">
@@ -234,13 +253,29 @@
         $("div[id^='tab']").on('click', "button[id^='add']", function(){
             current_form_tab = $(this).parent()
             form_index = $(current_form_tab).find("input[id$='TOTAL_FORMS']").val()
-            var new_form = $('#empty_form_container').html().replace(/__prefix__/g, form_index);
-            //$(new_form).insertBefore($(this).parent());
+            var new_form = $(current_form_tab).find('#empty_form_container').html().replace(/__prefix__/g, form_index);
             $(new_form).insertBefore($(this));
             $(current_form_tab).find("input[id$='TOTAL_FORMS']").val(parseInt(form_index) + 1);
+
+            console.log($(current_form_tab).attr('id'))
+            if($(current_form_tab).attr('id') === 'tab-floors'){
+                new_form_number = parseInt(form_index) + 1
+                search_task = "id_floor_formset-" + form_index + "-title"
+                current_field = $("#" + search_task).val('Этаж ' + new_form_number)
+            } else if($(current_form_tab).attr('id') === 'tab-sections') {
+                new_form_number = parseInt(form_index) + 1
+                search_task = "id_section_formset-" + form_index + "-title"
+                current_field = $("#" + search_task).val('Секция ' + new_form_number)
+            }
             
         })
-        
+
+
+        $("div[id^='tab']").on('click', "*[id='delete_button']", function(){
+            $(this).closest('.form-group').find("input[id$='-DELETE']").prop('checked', true)
+        })
+
+
 
     });
 </script>

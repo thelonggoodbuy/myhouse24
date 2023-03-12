@@ -13,7 +13,7 @@ from django.views.generic.edit import DeleteView, FormView, UpdateView
 
 
 from .models import House, HouseAdditionalImage, Section
-from .forms import HouseEditeForm, HouseEditeFormSetImage, SectionEditeFormSet
+from .forms import HouseEditeForm, HouseEditeFormSetImage, SectionEditeFormSet, FloorEditeFormSet
 
 
 # view for testing role using
@@ -57,52 +57,37 @@ class HouseEditeView(UpdateView):
  
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         additiona_images = HouseAdditionalImage.objects.select_related('house').filter(house=self.object)
         context['simple_images_formset'] = HouseEditeFormSetImage(queryset=additiona_images, prefix='simple_images_formset')
-
-        sections = Section.objects.select_related('house').filter(house=self.object)
-        # print(sections)
-        context['section_formset'] = SectionEditeFormSet(queryset=sections, prefix="section_formset")
-
-        # SectionEditeFormSet
+        context['section_formset'] = SectionEditeFormSet(instance=self.get_object(), prefix="section_formset")
+        context['floor_formset'] = FloorEditeFormSet(instance=self.get_object(), prefix="floor_formset")
         return context
 
     def post(self, request, *args, **Kwargs):
         main_form = HouseEditeForm(request.POST, request.FILES, instance=self.get_object())
         addition_images_formset = HouseEditeFormSetImage(request.POST, request.FILES, queryset=HouseAdditionalImage.objects.filter(house=self.get_object()), prefix='simple_images_formset')
-        sections_formset = SectionEditeFormSet(request.POST, queryset=Section.objects.select_related('house').filter(house=self.get_object()), prefix="section_formset")
-        if main_form.is_valid() and addition_images_formset.is_valid() and sections_formset.is_valid():
-            return self.form_valid(main_form, addition_images_formset, sections_formset)
+        sections_formset = SectionEditeFormSet(request.POST, instance=self.get_object(), prefix="section_formset")
+        floor_formset = FloorEditeFormSet(request.POST, instance=self.get_object(), prefix="floor_formset")
+
+        if main_form.is_valid() and addition_images_formset.is_valid() and sections_formset.is_valid() and floor_formset.is_valid():
+            return self.form_valid(main_form, addition_images_formset, sections_formset, floor_formset)
         else:
             print('------------------------SMTH WRONG-----------------------')
             print(main_form.errors)
             print(addition_images_formset.errors)
             print(sections_formset.errors)
 
-    def form_valid(self, main_form, addition_images_formset, sections_formset):
+    def form_valid(self, main_form, addition_images_formset, sections_formset, floor_formset):
         
         house = main_form.save(commit=False)
         house_images_formset = addition_images_formset.save(commit=False)
-        current_section_formset = sections_formset.save(commit=False)
 
         for image in house_images_formset:
             image.house = house
             image.save()
         
-
-        
-
-        for section in current_section_formset:
-            section.house = house
-            section.save()
-
-        # for section in current_section_formset:
-        #     # print(section)
-        #     # section.house = self.get_object().id
-        #     section.house = 
-        #     # print(section)
-        #     section.save()
+        sections_formset.save()
+        floor_formset.save()
 
         house.save()
         success_url = self.success_url

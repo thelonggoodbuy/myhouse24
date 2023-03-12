@@ -1,5 +1,5 @@
 from django import forms
-from .models import House, HouseAdditionalImage, Section
+from .models import House, HouseAdditionalImage, Section, Floor
 
 class HouseEditeForm(forms.ModelForm):
 
@@ -45,9 +45,24 @@ class SectionForm(forms.ModelForm):
         model = Section
         fields = ("title",)
 
-SectionEditeFormSet = forms.modelformset_factory(model=Section,
-                                               form=SectionForm,
-                                            #    empty_form=True, 
-                                               can_delete=True,
-                                               extra=0, 
-                                               min_num=0)
+SectionEditeFormSet = forms.inlineformset_factory(House,
+                                                    Section,
+                                                    form=SectionForm,
+                                                    can_delete=True,
+                                                    extra=0, 
+                                                    min_num=0)
+
+class FloorForm(forms.ModelForm):
+    title = forms.CharField(required=False, label="Название",
+                            widget=forms.TextInput(attrs={'class': 'form-control'}))
+    
+    class Meta:
+        model = Floor
+        fields = ("title",)
+
+FloorEditeFormSet = forms.inlineformset_factory(House,
+                                                Floor,
+                                                form=FloorForm,
+                                                can_delete=True,
+                                                extra=0,
+                                                min_num=0)
