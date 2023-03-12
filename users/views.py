@@ -203,12 +203,7 @@ class AdminSettingsUsersListLogic(TemplateView):
 
             for user in data:
                 user['full_name'] = f"{user['name']} {user['surname']} {user['patronymic']}"
-                # verbose_role = ""
-                # try: 
-                #     verbose_role = verbose_roles_dict[user['role']]
-                #     user['verbose_role'] = verbose_role
-                # except:
-                #     user['verbose_role'] = ''
+
                 verbose_status = ""
                 try: 
                     verbose_status = verbose_status_dict[user['status']]
@@ -314,7 +309,6 @@ class AdminSettingsUsersRolesView(FormView):
         
     def form_valid(self, current_formset):
         current_formset.save()
-        # return reverse_lazy('users:admin_settings_users_list')
         return super(AdminSettingsUsersRolesView, self).form_valid(current_formset)
     
 
@@ -348,33 +342,6 @@ class RolePassesTestMixin(UserPassesTestMixin, LoginRequiredMixin):
             except AttributeError:
                 return False
 
-        
-    # def test_role(self, needfull_permission):
-    #     try:
-    #         this_role_perm = self.request.user.role.return_permission_is(needfull_permission)
-    #         if this_role_perm == True:
-    #             return True
-    #         else:
-    #             self.permission_denied_message = "У вашей роли нет права работать с этими данными"
-    #             return False
-    #     except AttributeError:
-    #         return False
-
-
-    #     if hasattr(self.__class__, 'needfull_permission'):
-    #         needfull_permission = self.test_role(self.__class__.needfull_permission)
-    #         return(needfull_permission)
-        
-    # def test_role(self, needfull_permission):
-    #     try:
-    #         this_role_perm = self.request.user.role.return_permission_is(needfull_permission)
-    #         if this_role_perm == True:
-    #             return True
-    #         else:
-    #             self.permission_denied_message = "У вашей роли нет права работать с этими данными"
-    #             return False
-    #     except AttributeError:
-    #         return False
 
     def handle_no_permission(self):
         error_text = self.get_permission_denied_message()

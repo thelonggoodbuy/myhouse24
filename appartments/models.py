@@ -1,24 +1,40 @@
 from django.db import models
 from users.models import User
 
+ 
 
+
+
+# Images for class House contents in currents app. It is determined by different resolves in different objects' galleries.
 class House(models.Model):
-    title = models.CharField(max_length=500)
-    address = models.CharField(max_length=500)
-    main_image = models.ImageField(blank=True, verbose_name='Изображения', upload_to='galery/')
+    title = models.CharField(max_length=500, verbose_name='Название дома')
+    address = models.CharField(max_length=500, verbose_name='Адресс')
+    main_image = models.ImageField(verbose_name='Изображения', upload_to='galery/', blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+
+
+class HouseAdditionalImage(models.Model):
+    house = models.ForeignKey(House, on_delete=models.CASCADE)
+    image = models.ImageField(verbose_name='Изображения', upload_to='galery/')
+
 
 
 class Section(models.Model):
     title = models.CharField(max_length=500)
-    main_image = models.ImageField(blank=True, verbose_name='Изображения', upload_to='galery/')
+    # main_image = models.ImageField(blank=True, verbose_name='Изображения', upload_to='galery/')
     house = models.ForeignKey(House, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{ self.title }: { self.house.title }"
 
 
 class Floor(models.Model):
     title = models.CharField(max_length=500)
-    main_image = models.ImageField(blank=True, verbose_name='Изображения', upload_to='galery/')
+    # main_image = models.ImageField(blank=True, verbose_name='Изображения', upload_to='galery/')
     house = models.ForeignKey(House, on_delete=models.CASCADE)
-    sections = models.ForeignKey(Section, on_delete=models.CASCADE)
+    # sections = models.ForeignKey(Section, on_delete=models.CASCADE)
     
 
 class Appartment(models.Model):

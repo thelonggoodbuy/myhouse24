@@ -38,3 +38,9 @@ class SeoBlock(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     keyword = models.TextField()
+
+
+class SlideBlock(models.Model):
+    image = models.ImageField(blank=True, verbose_name='фото', upload_to='galery/')
+    title = models.CharField(max_length=200, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)

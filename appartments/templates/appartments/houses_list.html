@@ -1,0 +1,142 @@
+{% extends "layout/base_crm.html" %}
+
+{% block additionaly_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+{% endblock additionaly_css %}
+
+{% block additionaly_js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+{% endblock additionaly_js %}
+
+{% block title %}
+    <title> пользователь </title>
+{% endblock title %}
+
+{% block content %}
+<div id="myDialog">
+    Content of the modal dialog box.
+</div>
+<div class="box">
+    <div class="box-header with-border">
+    <h3 class="box-title"></h3>
+    <div class="box-tools">
+        <button class="btn btn-default btn-sm" id="clear_houses_filters">
+            <span class="hidden-xs">Очистить</span><i class="fa fa-eraser visible-xs" aria-hidden="true"></i>
+        </button>
+    </div>
+    </div>
+        <div class="box-body">
+            <table id="houses_table" class="display table-bordered" style="width:100%">
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>Название</th>
+                    <th>Адресс</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <thead id="search_thead">
+                <tr>
+                    <th></th>
+                    <th colnumb="1"><input type="text" class="form-control search-multiple-field"/></th>
+                    <th colnumb="2"><input type="text" class="form-control search-multiple-field"/></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for house in houses_list %}
+                <tr id="{{ house.id }}">
+                    <td>{{ house.id }}</td>
+                    <td>{{ house.title }}</td>
+                    <td>{{ house.address }}</td>
+                    <td class="text-center pl-0">
+                        <div class="btn-group pull-center" role="group">
+                            <a class='btn btn-default btn-sm' href="{% url "appartments:house_edit" pk=house.id %}" title='Редактировать' data-toggle='tooltip'>
+                                <i class='fa fa-pencil'></i>
+                            </a>
+                                <a id="delete_house_button" class='btn btn-default btn-sm' title='Удалить' data-toggle='tooltip'>
+                                <i class='fa fa-trash'></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            </table>
+            <div class="box-footer mt-1">
+                <div>Количество домов: <span class="text-bold" id="houses_numbers"></span></div>
+            </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    $(document).ready(function () { 
+
+        //creating and initializating datatable
+        var houses_list_table = $('#houses_table').DataTable({
+            initComplete: function(){
+                $('#search_thead input').on('keyup change clear', function(){
+                    input_data = $(this).val() 
+                    col_numb = $(this).parent().attr('colnumb')
+                    houses_list_table.column(col_numb).search(this.value).draw();    
+                    })
+                },
+                "columns": [
+                    null,
+                    null,
+                    null,
+                    { "width": "10%" },
+                ],
+            "pageLength": 5,
+            "ordering": false,
+            dom: '<"top">rt<"bottom"p><"clear">',            
+        });
+
+
+        //calculate numbers of houses in DT
+        var houses_numbers = houses_list_table.page.info().recordsTotal
+        $('#houses_numbers').text(houses_numbers)
+
+
+        //clear fields
+        $('#clear_houses_filters').on('click', function(){
+            $('#search_thead input').val('').trigger('clear')
+        })
+
+
+
+    // confirm window about deleting house
+    // Ui dialog
+
+    $("#myDialog").dialog({
+        autoOpen  : false,
+        modal     : true,
+        title     : "avadamedia.myhoise24",
+        buttons   : {
+                  'удалить дом' : function() {
+                        var textValue = $('#myTextBox').val();
+                        
+                        var basic_url = "{% url 'appartments:houses_delete' %}"
+                        var row_number = $(this).data('row_number')
+                        document.location.href = basic_url + row_number;
+                  },
+                  'отмена' : function() {
+                      $(this).dialog('close');
+                  }
+                    }
+    });
+
+    // confirm event
+    houses_list_table.on('click', '#delete_house_button', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        $("#myDialog").text(`Удалить дом ${row_number}?`).data('row_number', row_number).dialog("open");
+    })
+
+
+
+    });
+</script>
+{% endblock content %}

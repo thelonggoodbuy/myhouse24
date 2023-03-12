@@ -1,0 +1,247 @@
+
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+{% comment %} {% block additionaly_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+{% endblock additionaly_css %}
+
+{% block additionaly_js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+{% endblock additionaly_js %} {% endcomment %}
+
+{% block title %}
+    <title> Данные о доме </title>
+{% endblock title %}
+
+{% block content-header %}
+    <h1>{{ object.title }}</h1>
+{% endblock %}
+
+{% block content %}
+
+<div class="box">
+    <div class="box-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-xs-12 col-lg-4">
+                    <div class="form-group">
+                    <label class="control-label">{{ form.title.label}}</label>
+                    {{ form.title }}
+                    <div class="help-block"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label">{{ form.address.label }}</label>
+                    {{ form.address }}
+                    <div class="help-block"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label">{{ form.main_image.label }}</label>
+                    {{ form.main_image }}
+                    <div class="help-block"></div>
+                </div>
+
+
+                {{ simple_images_formset.management_form }}
+
+                {% for image_form in simple_images_formset %}
+                    {% for hidden in image_form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+                    <div class="form-group">
+                        <label>Изображение #{{ forloop.counter|add:"1"}} Размер: (248x160)</label>
+                        {{ image_form.image }}
+                        <div class="help-block"></div>
+                    </div>
+                {% endfor %}
+                </div>
+                <div class="col-xs-12 col-lg-8">
+                    <div class="row">
+
+                        <div class="col-xs-12 col-md-6">
+                            <img src="{{ object.main_image.url }}" class="img-responsive largeImg margin-bottom-30" alt="Изображение #1. Размер: (522x350)">
+                        </div>
+
+                        {% for preview_form in simple_images_formset %}
+                            {% if preview_form.instance.image %}
+                                <div class="col-xs-6 col-md-3">
+                                    <img src="{{ preview_form.instance.image.url }}" class="img-responsive smallImg margin-bottom-30">
+                                </div>
+                            {% else %}
+                                <div class="col-xs-6 col-md-3">
+                                    <img src="{% static 'appartments/img/empty_image.jpeg' %}" class="img-responsive smallImg margin-bottom-30">
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12 col-lg-8">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#tab-sections" data-toggle="tab" aria-expanded="true">Секции</a></li>
+                            <li><a href="#tab-floors" data-toggle="tab" aria-expanded="false">Этажи</a></li>
+                            <li><a href="#tab-houseuseradmins" data-toggle="tab" aria-expanded="false">Пользователи</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            {#----------------------- section view logic--------------------------------- #}
+                            <div class="tab-pane active clearfix" id="tab-sections">
+                                {{ section_formset.management_form}}
+                                
+                                {% for section_form in section_formset %}
+                                    {% for hidden in section_form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+                                    
+
+                                        <div id="section_container">                  
+                                            <div class="row">
+                                                <div class="col-xs-12">
+                                                    <div class="form-group">
+                                                        <label>{{ section_form.title.label }}</label>
+                                                        <div class="input-group">
+                                                                {{ section_form.title }}
+                                                                <span class="input-group-btn">
+                                                                <button type="button" class="btn btn-danger form-row-remove-btn"><i class="fa fa-trash"></i></button>                
+                                                            </span>
+                                                        </div>
+                                                        {{ section_form.DELETE }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% comment %} {% if forloop.last %} <p id="last_instance_index">{{ section_form.instance.id }}</p> {% endif %} {% endcomment %}
+                                {% endfor %}
+
+                                <div id="empty_form_container">                  
+                                    <div class="row">
+                                        <div class="col-xs-12">
+                                            <div class="form-group">
+                                                <label>{{ section_formset.empty_form.title.label }}</label>
+                                                <div class="input-group">
+                                                        {{ section_formset.empty_form.title }}
+                                                        <span class="input-group-btn">
+                                                        <button type="button" class="btn btn-danger form-row-remove-btn"><i class="fa fa-trash"></i></button>                
+                                                    </span>
+                                                </div>
+                                                {{ section_formset.empty_form.DELETE }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-success pull-right" type="button" id="add_section">Добавить</button>
+                            </div>                            
+                            {#----------------------- END section view logic--------------------------------- #}
+                            {#----------------------- floors view logic--------------------------------- #}
+                            {% comment %} <div class="tab-pane clearfix" id="tab-floors">
+                                <div id="form-floor-rows">            
+                                    <div class="row form-floor">
+                                        <div class="col-xs-12">
+                                            <div class="form-group">
+                                                <label>Название</label>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" value="Этаж 1">
+                                                    <span class="input-group-btn">
+                                                        <button type="button" class="btn btn-danger form-row-remove-btn">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row form-floor">
+                                        <div class="col-xs-12">
+                                            <div class="form-group">
+                                                <label>Название</label>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" value="Этаж 2">
+                                                    <span class="input-group-btn">
+                                                        <button type="button" class="btn btn-danger form-row-remove-btn">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <button class="btn btn-success pull-right" type="button" id="add_floor">Добавить</button>
+                            </div>
+                            {#----------------------- END floors view logic--------------------------------- #}                            
+
+                        <div class="tab-pane clearfix" id="tab-houseuseradmins">
+                                <div id="form-houseuseradmin-rows">
+                                                                
+                                    <div id="form-houseuseradmin-0" class="row form-houseuseradmin">
+                                        <div class="col-xs-12 col-sm-7">
+                                            <div class="form-group">
+                                                <label>ФИО</label>
+                                                <select class="form-control useradmin-select">
+                                                    <option value="">Выберите...</option>
+                                                    <option value="1">Elon Musk</option>
+                                                    <option value="2">Виктория Виктория</option>
+                                                    <option value="3">Александр Пушкин</option>
+                                                </select>        
+                                            </div>
+                                        </div>
+
+                                        <div class="col-xs-12 col-sm-5">
+                                            <div class="form-group">
+                                                <label>Роль</label>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control useradmin-role" value="Бухгалтер">
+                                                    <span class="input-group-btn">
+                                                        <button type="button" class="btn btn-danger form-row-remove-btn">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <button class="btn btn-success pull-right form-row-add-houseuseradmin-btn" type="button">Добавить</button>
+                            </div>
+                        </div> {% endcomment %}
+
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 text-right">
+                    <div class="form-group">
+                        <a class="btn btn-default">Отменить</a>
+                        <button type="submit" class="btn btn-success">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>    
+</div>
+<script>
+    $(document).ready(function () {
+
+        $("div[id^='tab']").on('click', "button[id^='add']", function(){
+            current_form_tab = $(this).parent()
+            form_index = $(current_form_tab).find("input[id$='TOTAL_FORMS']").val()
+            var new_form = $('#empty_form_container').html().replace(/__prefix__/g, form_index);
+            //$(new_form).insertBefore($(this).parent());
+            $(new_form).insertBefore($(this));
+            $(current_form_tab).find("input[id$='TOTAL_FORMS']").val(parseInt(form_index) + 1);
+            
+        })
+        
+
+    });
+</script>
+{% endblock content %}
