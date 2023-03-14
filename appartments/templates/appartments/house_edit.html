@@ -2,13 +2,21 @@
 {% extends "layout/base_crm.html" %}
 {% load static %}
 
-{% comment %} {% block additionaly_css %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+
+{% block additionaly_css %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.css }} 
+    {% endfor %}
 {% endblock additionaly_css %}
 
+
+
 {% block additionaly_js %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-{% endblock additionaly_js %} {% endcomment %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.js }}
+    {% endfor %}
+{% endblock additionaly_js %}
+
 
 {% block title %}
     <title> Данные о доме </title>
@@ -196,36 +204,25 @@
                             {#----------------------- END floors view logic--------------------------------- #}                            
 
                         <div class="tab-pane clearfix" id="tab-houseuseradmins">
-                                <div id="form-houseuseradmin-rows">
-                                                                
-                                    <div id="form-houseuseradmin-0" class="row form-houseuseradmin">
+                                <div>
+                                    {{ responsibilities_formset.management_form }}
+                                    
+                                    {% for responsibility_form in responsibilities_formset %}
+                                        {% for hidden in responsibility_form.hidden_fields %}
+                                            {{ hidden }}
+                                        {% endfor %}
+
+
+                                    <div class="row">
                                         <div class="col-xs-12 col-sm-7">
                                             <div class="form-group">
                                                 <label>ФИО</label>
-                                                <select class="form-control useradmin-select">
-                                                    <option value="">Выберите...</option>
-                                                    <option value="1">Elon Musk</option>
-                                                    <option value="2">Виктория Виктория</option>
-                                                    <option value="3">Александр Пушкин</option>
-                                                </select>        
+                                                {{ responsibility_form.responsibilities }}
+                                                {% comment %} {{ responsibility_form.id }} {% endcomment %}
                                             </div>
                                         </div>
-
-                                        <div class="col-xs-12 col-sm-5">
-                                            <div class="form-group">
-                                                <label>Роль</label>
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control useradmin-role" value="Бухгалтер">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="btn btn-danger form-row-remove-btn">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-
                                     </div>
+                                    {% endfor %}
                                 </div>
                                 <button class="btn btn-success pull-right form-row-add-houseuseradmin-btn" type="button">Добавить</button>
                             </div>

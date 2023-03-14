@@ -1,5 +1,12 @@
 from django import forms
 from .models import House, HouseAdditionalImage, Section, Floor
+from users.models import User
+from django.db.models import Q
+
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+
+from django_select2 import forms as s2forms
 
 class HouseEditeForm(forms.ModelForm):
 
@@ -66,3 +73,32 @@ FloorEditeFormSet = forms.inlineformset_factory(House,
                                                 can_delete=True,
                                                 extra=0,
                                                 min_num=0)
+
+
+        
+class ResponsibilitiesForm(forms.ModelForm):
+    responsibilities = forms.ModelChoiceField(required=False,label="ФИО",
+                                            # empty_label='Выберите сотрудника',
+                                            queryset=User.objects.filter(Q(role__isnull=False)),
+                                            widget=forms.Select(attrs={'class': 'form-control'})
+                                         )
+    id = forms.CharField(required=False)
+
+    def return_choosen_obj(self):
+        # self
+        resp = User.objects.get(email=self.cleaned_data['responsibilities'])
+        # return self.cleaned_data['responsibilities']
+        return resp
+
+    
+    class Meta:
+        model = House
+        fields = ("responsibilities", "id")
+
+
+
+ResponsibilitiesEditeFormset = forms.modelformset_factory(model=House, form = ResponsibilitiesForm, 
+                                                        extra=0, 
+                                                        min_num=1, 
+                                                        )
+

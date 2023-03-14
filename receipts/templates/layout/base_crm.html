@@ -32,6 +32,8 @@
 
         
         <script type="text/javascript" src="{% static 'users/components/jquery/dist/jquery.min.js' %}"></script>
+        {% block additionaly_js %}
+        {% endblock additionaly_js %}
         <script type="text/javascript" src="{% static 'users/components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/components/fastclick/lib/fastclick.js' %}"></script>
@@ -53,8 +55,8 @@
         <script type="text/javascript" src="{% static 'users/js/yii.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/js/main.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/js/custom.js' %}"></script>
-        {% block additionaly_js %}
-        {% endblock additionaly_js %}
+        {% comment %} {% block additionaly_js %}
+        {% endblock additionaly_js %} {% endcomment %}
         <link rel="shortcut icon" type="image/png" href="{% static 'users/img/favicon.png' %}"/>
     </head>
     <body class="skin-black-light sidebar-mini fixed sidebar-mini-expand-feature" style="height: auto; min-height: 100%;">

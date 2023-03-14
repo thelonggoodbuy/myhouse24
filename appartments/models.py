@@ -10,6 +10,8 @@ class House(models.Model):
     title = models.CharField(max_length=500, verbose_name='Название дома')
     address = models.CharField(max_length=500, verbose_name='Адресс')
     main_image = models.ImageField(verbose_name='Изображения', upload_to='galery/', blank=True, null=True)
+    responsibilities = models.ManyToManyField(User, verbose_name='обязанности')
+
 
     def __str__(self):
         return self.title

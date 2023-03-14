@@ -51,6 +51,7 @@ INSTALLED_APPS = [
 
     'debug_toolbar',
     'django_cleanup.apps.CleanupConfig',
+    'django_select2',
 
     'users.apps.UsersConfig',
     'appartments.apps.AppartmentsConfig',
@@ -139,7 +140,7 @@ LOGOUT_REDIRECT_URL = '/users/login_user/'
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
 # LANGUAGE_CODE = 'en-us'
-LANGUAGE_CODE = 'uk'
+# LANGUAGE_CODE = 'uk'
 
 TIME_ZONE = 'UTC'
 
