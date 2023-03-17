@@ -1,0 +1,95 @@
+
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+
+
+{% block title %}
+    <title> Данные о доме </title>
+{% endblock title %}
+
+{% block content-header %}
+    <h1>{{ house.title }}</h1>
+{% endblock %}
+
+{% block content %}
+<div class="box">
+    <div class="box-header with-border">
+    <h3 class="box-title"></h3>
+    <div class="box-tools">
+        <a href="{% url 'appartments:house_edit' pk=house.id %}" class="btn btn-primary btn-sm">
+            <span class="hidden-xs">Редактировать дом</span><i class="fa fa-pencil visible-xs" aria-hidden="true"></i>
+        </a>
+    </div>
+</div>
+    <div class="box-body">
+    <div class="row">
+        <div class="col-xs-12 col-lg-4">
+            <table class="table table-bordered table-striped table-view">
+                <tbody>
+                    <tr>
+                        <td><strong>Название</strong></td>
+                        <td>{{ house.title }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Адрес</strong></td>
+                        <td>{{ house.address }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Секций</strong></td>
+                        <td>{{ house.sections.all.count }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Этажей</strong></td>
+                        <td>{{ house.floors.all.count }}</td>
+                    </tr>
+                    <tr>
+                        <td>Пользователи</td>
+                        <td>
+                            {% for user in responsibility_users %}
+                                <p><strong>{{ user.role.name }}</strong>: <a href="{% url 'users:admin_settings_users_card' pk=user.id %}">{{ user.name }} {{ user.surname }}</a></p>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-xs-12 col-lg-8">
+            <div class="row">
+                {% if house.main_image %}
+                    <div class="col-xs-12 col-md-6">
+                        <img src="{{ house.main_image.url }}" class="img-responsive largeImg margin-bottom-30">
+                    </div>
+                {% else %}
+                    <div class="col-xs-12 col-md-6">
+                        <img src="{% static 'appartments/img/empty_image.jpeg' %}" class="img-responsive largeImg margin-bottom-30">
+                    </div>
+                {% endif %}
+                {% for simple_image in house.addition_images.all %}
+                    <div class="col-xs-6 col-md-3 simple_image_container">
+                        <img src="{{ simple_image.image.url }}" class="img-responsive smallImg margin-bottom-30" alt="alt image 1">
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<script>
+    $(document).ready(function() {
+
+        // adding 
+        var empty_images_numbers = 4 - $("div[class$='simple_image_container']").length
+        while (empty_images_numbers > 0){
+            $("div[class$='simple_image_container']").last().after(
+                '<div class="col-xs-6 col-md-3">\
+                    <img src="{% static "appartments/img/empty_image.jpeg" %}" class="img-responsive smallImg margin-bottom-30" alt="alt image 3">\
+                </div>'
+            );
+            empty_images_numbers--;
+        }
+        
+    });
+</script>
+
+{% endblock content %}

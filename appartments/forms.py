@@ -31,6 +31,8 @@ class HouseEditeFormImage(forms.ModelForm):
     image = forms.ImageField(label='Изображение. Размер: (248x160)', 
                                     required=False, widget=forms.FileInput)
 
+    
+
     class Meta:
         model = HouseAdditionalImage
         fields = ("image",)
@@ -76,28 +78,19 @@ FloorEditeFormSet = forms.inlineformset_factory(House,
 
 
         
-class ResponsibilitiesForm(forms.ModelForm):
+class ResponsibilitiesForm(forms.Form):
     responsibilities = forms.ModelChoiceField(required=False,label="ФИО",
-                                            # empty_label='Выберите сотрудника',
                                             queryset=User.objects.filter(Q(role__isnull=False)),
-                                            widget=forms.Select(attrs={'class': 'form-control'})
+                                            widget=forms.Select(attrs={'class': 'form-control',
+                                                                       'id': 'responsible_field'})
                                          )
-    id = forms.CharField(required=False)
-
-    def return_choosen_obj(self):
-        # self
-        resp = User.objects.get(email=self.cleaned_data['responsibilities'])
-        # return self.cleaned_data['responsibilities']
-        return resp
-
     
-    class Meta:
-        model = House
-        fields = ("responsibilities", "id")
+    role = forms.CharField(required=False, widget=forms.TextInput(attrs={"class": "form-control", "readonly":""}))
+
+    DELETE = forms.BooleanField(required=False)
 
 
-
-ResponsibilitiesEditeFormset = forms.modelformset_factory(model=House, form = ResponsibilitiesForm, 
+ResponsibilitiesEditeFormset = forms.formset_factory(form = ResponsibilitiesForm, 
                                                         extra=0, 
                                                         min_num=1, 
                                                         )

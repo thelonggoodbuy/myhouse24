@@ -45,12 +45,12 @@
             </thead>
             <tbody>
                 {% for house in houses_list %}
-                <tr id="{{ house.id }}">
+                <tr id="{{ house.id }}" href={% url 'appartments:house_detail' pk=house.id %}>
                     <td>{{ house.id }}</td>
                     <td>{{ house.title }}</td>
                     <td>{{ house.address }}</td>
                     <td class="text-center pl-0">
-                        <div class="btn-group pull-center" role="group">
+                        <div class="btn-group pull-center" role="group" id='buttons_interaction'>
                             <a class='btn btn-default btn-sm' href="{% url "appartments:house_edit" pk=house.id %}" title='Редактировать' data-toggle='tooltip'>
                                 <i class='fa fa-pencil'></i>
                             </a>
@@ -136,6 +136,29 @@
     })
 
 
+    //make row clickable
+    houses_list_table.on('click', 'tbody > tr > td', function(){
+        if(
+            $(this).find("div").attr("id") != "buttons_interaction"
+            )
+            {
+                var basic_url = "{% url 'appartments:house_detail' %}"
+                var url_index = houses_list_table.row(this).id().toString();
+                document.location.href = basic_url + url_index;
+            }
+    })
+
+    //change row coursor
+    houses_list_table.on('mouseover', 'tbody > tr > td', function(){
+        $(this).css('cursor','pointer')
+        }
+    )
+    houses_list_table.on('mouseout', 'tbody > tr > td', function(){
+        $(this).css('cursor','auto');
+        }
+    )
+
+    
 
     });
 </script>

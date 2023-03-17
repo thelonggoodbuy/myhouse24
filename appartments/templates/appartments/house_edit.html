@@ -95,7 +95,7 @@
                         <ul class="nav nav-tabs">
                             <li class="active"><a href="#tab-sections" data-toggle="tab" aria-expanded="true">Секции</a></li>
                             <li><a href="#tab-floors" data-toggle="tab" aria-expanded="false">Этажи</a></li>
-                            <li><a href="#tab-houseuseradmins" data-toggle="tab" aria-expanded="false">Пользователи</a></li>
+                            <li><a href="#tab-responsibilities" data-toggle="tab" aria-expanded="false">Пользователи</a></li>
                         </ul>
                         <div class="tab-content">
                             {#----------------------- section view logic--------------------------------- #}
@@ -109,7 +109,7 @@
                                     
 
                                         <div id="section_container">                  
-                                            <div class="row">
+                                            <div class="row" id="data_row">
                                                 <div class="col-xs-12">
                                                     <div class="form-group">
                                                         <label>{{ section_form.title.label }}</label>
@@ -130,7 +130,7 @@
                                 {% endfor %}
 
                                 <div id="empty_form_container">                  
-                                    <div class="row">
+                                    <div class="row" id="data_row">
                                         <div class="col-xs-12">
                                             <div class="form-group">
                                                 <label>{{ section_formset.empty_form.title.label }}</label>
@@ -161,7 +161,7 @@
 
                                     <div id="floor_container">
                                         
-                                        <div class="row">
+                                        <div class="row" id="data_row">
                                             <div class="col-xs-12">
                                                 <div class="form-group">
                                                     <label>{{ floor_form.title.label }}</label>
@@ -182,7 +182,7 @@
                                 {% endfor %}
 
                                 <div id="empty_form_container">                  
-                                    <div class="row">
+                                    <div class="row" id="data_row">
                                         <div class="col-xs-12">
                                             <div class="form-group">
                                                 <label>{{ floor_formset.empty_form.title.label }}</label>
@@ -203,7 +203,7 @@
                             </div>
                             {#----------------------- END floors view logic--------------------------------- #}                            
 
-                        <div class="tab-pane clearfix" id="tab-houseuseradmins">
+                        <div class="tab-pane clearfix" id="tab-responsibilities">
                                 <div>
                                     {{ responsibilities_formset.management_form }}
                                     
@@ -211,23 +211,62 @@
                                         {% for hidden in responsibility_form.hidden_fields %}
                                             {{ hidden }}
                                         {% endfor %}
-
-
-                                    <div class="row">
+                                    <div class="row" id="data_row">
                                         <div class="col-xs-12 col-sm-7">
                                             <div class="form-group">
                                                 <label>ФИО</label>
                                                 {{ responsibility_form.responsibilities }}
-                                                {% comment %} {{ responsibility_form.id }} {% endcomment %}
+                                                
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-5">
+                                            <div class="form-group">
+                                                <label>Роль</label>
+                                                <div class="input-group">
+                                                    {% comment %} <input type="text" class="form-control" value="initial" readonly=""> {% endcomment %}
+                                                    {{ responsibility_form.role }}
+                                                    <span id="delete_button" class="input-group-btn">
+                                                        <button type="button" class="btn btn-danger form-row-remove-btn">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                                {{ responsibility_form.DELETE }}
                                             </div>
                                         </div>
                                     </div>
+
+
                                     {% endfor %}
+                                    <div id="empty_form_container"> 
+                                        <div class="row" id="data_row" >
+                                            <div class="col-xs-12 col-sm-7">
+                                                <div class="form-group">
+                                                    <label>ФИО</label>
+                                                    {{ responsibilities_formset.empty_form.responsibilities }}
+                                                    
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-12 col-sm-5">
+                                                <div class="form-group">
+                                                    <label>Роль</label>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control" value="выберите пользователя" readonly="">
+                                                        <span id="delete_button" class="input-group-btn">
+                                                            <button type="button" class="btn btn-danger form-row-remove-btn">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>
+                                                        </span>
+                                                    </div>
+                                                    {{ responsibilities_formset.empty_form.DELETE }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <button class="btn btn-success pull-right form-row-add-houseuseradmin-btn" type="button">Добавить</button>
+                                <button class="btn btn-success pull-right" type="button" id="add_responsibilities">Добавить</button>
                             </div>
                         </div>
-{% comment %} ~!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {% endcomment %}
                     </div>
                 </div>
             </div>
@@ -236,7 +275,7 @@
             <div class="row">
                 <div class="col-xs-12 text-right">
                     <div class="form-group">
-                        <a class="btn btn-default">Отменить</a>
+                        <a class="btn btn-default" href="{% url "appartments:house_edit" pk=object.id %}">Отменить</a>
                         <button type="submit" class="btn btn-success">Сохранить</button>
                     </div>
                 </div>
@@ -247,14 +286,17 @@
 <script>
     $(document).ready(function () {
 
+
+        $("div[id='empty_form_container']").hide()
+
+
         $("div[id^='tab']").on('click', "button[id^='add']", function(){
             current_form_tab = $(this).parent()
             form_index = $(current_form_tab).find("input[id$='TOTAL_FORMS']").val()
             var new_form = $(current_form_tab).find('#empty_form_container').html().replace(/__prefix__/g, form_index);
             $(new_form).insertBefore($(this));
             $(current_form_tab).find("input[id$='TOTAL_FORMS']").val(parseInt(form_index) + 1);
-
-            console.log($(current_form_tab).attr('id'))
+            
             if($(current_form_tab).attr('id') === 'tab-floors'){
                 new_form_number = parseInt(form_index) + 1
                 search_task = "id_floor_formset-" + form_index + "-title"
@@ -263,16 +305,42 @@
                 new_form_number = parseInt(form_index) + 1
                 search_task = "id_section_formset-" + form_index + "-title"
                 current_field = $("#" + search_task).val('Секция ' + new_form_number)
-            }
-            
+
+            } else if($(current_form_tab).attr('id') === 'tab-responsibilities') {
+            }    
         })
 
+
+        $("div[id^='tab']").on('change', '#responsible_field', function(){
+            var choosen_user = $(this).find(":selected").attr('value')
+            var role_field = $(this).closest(".form-group").parent().next().find('.form-control')
+            if(choosen_user){
+                $.ajax({
+                    url: "{% url 'appartments:house_edit' %}",
+                    data: {
+                        'choosen_user': choosen_user
+                    },
+                    dataType: 'json',
+                    success:function(data){
+                        console.log(data)
+                        $(role_field).attr('value', data['user_id'])
+                    }
+                })
+                console.log(role_field)
+            } else {
+                console.log('empty!!!!!!!!!')
+                console.log(role_field)
+                $(role_field).attr('value', '')   
+            }
+        })
+       
 
         $("div[id^='tab']").on('click', "*[id='delete_button']", function(){
             $(this).closest('.form-group').find("input[id$='-DELETE']").prop('checked', true)
+            $(this).closest('#data_row').hide()
         })
 
-
+        $("input[type='checkbox']").hide()
 
     });
 </script>

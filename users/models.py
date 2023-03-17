@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from django.urls import reverse
 
 
+
 from .managers import CustomUserManager
 
 
@@ -56,7 +57,7 @@ class User(AbstractBaseUser, PermissionsMixin):
          return reverse('users:login_user')
 
     def __str__(self):
-        return self.email
+        return self.full_name
     
     def get_verbose_status(self):
         return dict(User.USERS_STATUS)[self.status]

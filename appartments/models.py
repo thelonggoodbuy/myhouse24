@@ -10,23 +10,21 @@ class House(models.Model):
     title = models.CharField(max_length=500, verbose_name='Название дома')
     address = models.CharField(max_length=500, verbose_name='Адресс')
     main_image = models.ImageField(verbose_name='Изображения', upload_to='galery/', blank=True, null=True)
-    responsibilities = models.ManyToManyField(User, verbose_name='обязанности')
-
+    responsibilities = models.ManyToManyField(User, verbose_name='Обязанности', related_name='responsibilities')
 
     def __str__(self):
         return self.title
 
 
 class HouseAdditionalImage(models.Model):
-    house = models.ForeignKey(House, on_delete=models.CASCADE)
+    house = models.ForeignKey(House, on_delete=models.CASCADE, related_name='addition_images')
     image = models.ImageField(verbose_name='Изображения', upload_to='galery/')
 
 
 
 class Section(models.Model):
     title = models.CharField(max_length=500)
-    # main_image = models.ImageField(blank=True, verbose_name='Изображения', upload_to='galery/')
-    house = models.ForeignKey(House, on_delete=models.CASCADE)
+    house = models.ForeignKey(House, on_delete=models.CASCADE, related_name='sections')
 
     def __str__(self):
         return f"{ self.title }: { self.house.title }"
@@ -34,9 +32,7 @@ class Section(models.Model):
 
 class Floor(models.Model):
     title = models.CharField(max_length=500)
-    # main_image = models.ImageField(blank=True, verbose_name='Изображения', upload_to='galery/')
-    house = models.ForeignKey(House, on_delete=models.CASCADE)
-    # sections = models.ForeignKey(Section, on_delete=models.CASCADE)
+    house = models.ForeignKey(House, on_delete=models.CASCADE, related_name='floors')
     
 
 class Appartment(models.Model):
