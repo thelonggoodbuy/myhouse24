@@ -8,6 +8,7 @@ class Tariff(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     updated_datetime = models.DateTimeField()
+    appartments = models.ManyToManyField(Appartment, verbose_name='квартиры', related_name='tariff')
 
 
 class TariffCell(models.Model):

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import House, HouseAdditionalImage, Section, Floor
+from .models import House, HouseAdditionalImage, Section, Floor, Appartment, PersonalAccount
 
 
 @admin.register(House)
@@ -23,3 +23,15 @@ class UserAdmin(admin.ModelAdmin):
 class UserAdmin(admin.ModelAdmin):
     list_display = ('house', 'title')
     list_filter = ('house', 'title')
+
+
+@admin.register(Appartment)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('house', 'number', 'personal_account')
+    list_filter = ('house', )
+
+
+@admin.register(PersonalAccount)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('number', 'status', 'balance')
+    list_filter = ('number', )

@@ -1,0 +1,195 @@
+{% extends "layout/base_crm.html" %}
+{% load static  %}
+
+{% block title %}
+    <title> пользователь </title>
+{% endblock title %}
+
+{% block content-header %}
+    <h1>Пользовать</h1>
+{% endblock %}
+
+{% block additionaly_css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2/dist/css/select2.min.css' %}">
+{% endblock additionaly_css %}
+
+{% block additionaly_js %}
+    <script src="{% static 'appartments/plugins/select2/dist/js/select2.min.js' %}"></script>
+{% endblock additionaly_js %}
+
+
+{% block content %}
+<section class="content">                
+    <div class="box">
+        <div class="box-body">
+            <form method="post" id="appartments_change_table">
+
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <div class="col-xs-12 col-md-6">
+                        <div class="form-group">
+                            <label>{{ main_form.number.label }}</label>
+                            {{ main_form.number }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ main_form.area.label }}</label>
+                            {{ main_form.area }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ main_form.house.label }}</label>
+                            {{ main_form.house }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ main_form.sections.label }}</label>
+                            {{ main_form.sections }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ main_form.floor.label }}</label>
+                            {{ main_form.floor }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ main_form.owner_user.label }}</label>
+                            {{ main_form.owner_user }}
+                            <div class="help-block"></div>
+                        </div>
+                        {% comment %} <div class="form-group">
+                            <label>{{ main_form.tariff.label }}</label>
+                            {{ main_form.tariff }}
+                            <div class="help-block"></div>
+                        </div> {% endcomment %}
+                    </div>
+
+                    <div class="col-xs-12 col-md-6">
+                        <div class="form-group">
+                            <label>{{ form.personal_account.label }}</label>
+                            {{ personal_account_form.number }}
+                            {% comment %} {{ personal_account_form.personal_account_choice }} {% endcomment %}
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 text-right">
+                        <a href="{% url 'users:admin_settings_users_list' %}" class="btn btn-default">Отменить</a>
+                        <button type="submit" class="btn btn-success">Сохранить</button>
+                    </div>
+                </div>
+            </form>
+            <script>
+                $(document).ready(function () {
+
+                    $('#appartments_change_table').on('change', '#house_dropdown', function(){
+                        
+                        //console.log($(this).val())
+                        var house_id = $(this).val()
+                        $.ajax({
+                            url: "{% url 'appartments:appartment_edite' %}",
+                            dataType: "json",
+                            data: {"house_id": house_id},
+                            success: (data) =>{
+                                //console.log(data)
+                                //console.log($("select[name$='floor']"))
+                                //console.log($("select[name$='sections']"))
+
+                                // floors
+                                var floors = data['floors']
+                                var additional_floor_html = "<option id='empty_floor'></option>"
+                                for (floor of floors){
+                                    additional_floor_html +=`<option value=${floor["id"]}>${floor["title"]}</option>`
+                                }
+                                $("select[name$='floor']").not("option[value='']").empty().append(additional_floor_html)
+
+                                // sections
+                                var sections = data['sections']
+                                var additional_sections_html = "<option id='empty_section'></option>"
+                                for (section of sections){
+                                    additional_sections_html +=`<option value=${section["id"]}>${section["title"]}</option>`
+                                }
+                                $("select[name$='sections']").not("option[value='']").empty().append(additional_sections_html)
+                                
+                            }
+                        })
+                    })
+
+
+                    //------------------------------------------------------------------------------
+                    //current_floor_val = $("select[name$='floor']").find("option:selected").val()
+                    //current_sections_val = $("select[name$='sections']").find("option:selected").val()
+                    //$('#house_dropdown').trigger("change")
+
+
+                    //$("select[name$='floor']").val(`${current_floor_val}`).change();
+
+                    //$("#id_main_form-sections").val("4").change();
+
+                    //console.log($(`select[name$='floor'] > option[value='${current_floor_val}']`))
+
+                    //$("select[name$='floor'] > option[value="+ current_floor_val +"]").prop('selected', true)
+
+                    //$(`select[name$='sections'] > option[value=${current_sections_val}]`).attr('selected','selected');
+
+
+                    //console.log($(`select[name$='floor'] > option[value=${current_floor_val}]`))
+                    //console.log($(`select[name$='sections'] > option[value=${current_sections_val}]`))
+
+
+
+
+
+                    //console.log($("select[name$='floor']").find("option:selected").val())
+                    //console.log($("select[name$='sections']").find("option:selected").val())
+                    //------------------------------------------------------------------------------
+
+                    $('#personal_account_number').select2({
+                        ajax: {
+                            url: "{% url 'appartments:appartment_edite' %}",
+                            dataType: 'json',
+                            data: function(params){
+                                var query = {
+                                    search: params.term,
+                                    type: 'public',
+                                    issue_marker: 'personal_account'
+                                }
+                            }
+                        }
+                    })
+                
+
+
+//                    $("#user_change_data_form").validate({
+//                        rules: {
+//                          field: {
+//                            required: true,
+//                            email: true
+//                          }
+//                        },
+//                        messages:{
+//                            email: {
+//                                required: "Это поле обязательно для заполнения",
+//                                email: "Значение «Email (логин)» не является правильным email адресом",
+//                            }
+//                        },
+//                        validClass: "success",
+//                        highlight: function(element, errorClass, validClass) {
+//                            $(element).closest('.form-group').addClass("has-error").removeClass("has-success");
+//                      
+//                          },
+//                        unhighlight: function(element, errorClass, validClass) {
+//                            $(element).closest('.form-group').addClass("has-success").removeClass("has-error");
+//                      
+//                          },
+//
+//                });
+                });
+            </script>
+        </div>
+    </div>
+</section>
+{% endblock content %}

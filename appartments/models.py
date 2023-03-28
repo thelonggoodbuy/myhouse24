@@ -33,17 +33,23 @@ class Section(models.Model):
 class Floor(models.Model):
     title = models.CharField(max_length=500)
     house = models.ForeignKey(House, on_delete=models.CASCADE, related_name='floors')
+
+    def __str__(self):
+        return f"{self.house.title}: {self.title}"
     
 
 class Appartment(models.Model):
     number = models.PositiveSmallIntegerField()
     area = models.DecimalField(max_digits=7, decimal_places=2)
-    personal_account = models.OneToOneField('PersonalAccount', on_delete=models.CASCADE, related_name="personal_account")
+    personal_account = models.OneToOneField('PersonalAccount', on_delete=models.SET_NULL, related_name="personal_account", null=True, blank=True)
     house = models.ForeignKey(House, on_delete=models.CASCADE)
     sections = models.ForeignKey(Section, on_delete=models.CASCADE)
     floor = models.ForeignKey(Floor, on_delete=models.CASCADE)
-    owner_user = models.ForeignKey(User, on_delete=models.CASCADE)
-    balance = models.DecimalField(max_digits=10, decimal_places=2)
+    owner_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="owning")
+    # balance = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f'{ self.house }: {self.sections}: {self.floor}: {self.number}'
 
 
 class PersonalAccount(models.Model):
@@ -53,5 +59,7 @@ class PersonalAccount(models.Model):
     )
     number = models.CharField(max_length=200)
     status = models.CharField(max_length=200, choices=PERSONAL_ACCOUNT_STATUS)
-    appartment = models.OneToOneField(Appartment, on_delete=models.CASCADE)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.number}"

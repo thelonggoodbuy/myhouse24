@@ -229,7 +229,7 @@ class AdminSettingsUsersListLogic(TemplateView):
                 'recordsTotal:': total,
                 'recordsFiltered': records_filter,
             }
-            print(response)
+            # print(response)
             return JsonResponse(response, safe=False)
         else:
             context = self.get_context_data(**kwargs)

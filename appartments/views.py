@@ -11,14 +11,15 @@ from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
 from django.views.generic.edit import DeleteView, FormView, UpdateView
 from django.views.generic.detail import DetailView
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.exceptions import ImproperlyConfigured
 
 
-
-
-from .models import House, HouseAdditionalImage, Section
+from .models import House, HouseAdditionalImage, Section, Appartment, Floor, PersonalAccount
 from users.models import User
 
-from .forms import HouseEditeForm, HouseEditeFormSetImage, SectionEditeFormSet, FloorEditeFormSet, ResponsibilitiesEditeFormset
+from .forms import HouseEditeForm, HouseEditeFormSetImage, SectionEditeFormSet, FloorEditeFormSet, ResponsibilitiesEditeFormset,\
+                    AppartmentEditeForm, AppartmentPersonalAccountEditeForm
 
 
 # view for testing role using
@@ -154,10 +155,289 @@ class HouseDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
 
-        context = super().get_context_data(**kwargs)
-        # context['users'] = User.objects.select_related('role').filter(responsibilities=self.get_object())
-        
+        context = super().get_context_data(**kwargs)     
         context['responsibility_users'] = self.get_object().responsibilities.select_related('role').filter()
-        # print(self.get_object().responsibilities.select_related('role').filter())
-
         return context
+    
+
+class AppartmentsListView(TemplateView):
+    template_name = 'appartments/appartments_list.html'
+
+    def get(self, request, *args, **kwargs):
+
+        # get sections and floors data from dropboxes
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('choosen_house') != None:
+            house_data = House.objects.get(title=self.request.GET.get('choosen_house'))
+            section_data = list(house_data.sections.values('id', 'title'))
+            floors_data = list(house_data.floors.values('id', 'title'))
+            data = {'section_data': section_data,
+                    'floors_data': floors_data}
+            return JsonResponse(data)
+
+        # get data owners and users
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('target') == 'get_choose_owners_data':
+            print('----------------------------USER-OWNER-FILTER------------------------')
+            owners_dict = list(User.objects.filter(owning__isnull=False).values('id', 'full_name'))
+            data = {'owners_dict': owners_dict}
+            return JsonResponse(data)
+
+        # test code for ajax_requests
+        if self.request.is_ajax() and self.request.GET.get('issue_marker') == 'owners':
+            if self.request.GET.get('search'):
+                search_data = self.request.GET.get('search')
+                owners_data = list(User.objects.filter(Q(owning__isnull=False) & Q(full_name__icontains=search_data)).values('id', 'full_name'))
+                for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
+                data = {'results': owners_data}
+                return JsonResponse(data)
+            
+
+        # users search using Select2
+        if self.request.is_ajax() and self.request.GET.get('issue_marker') == 'all_owners':
+            owners_data = list(User.objects.filter(owning__isnull=False).values('id', 'full_name'))
+            for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
+            data = {'results': owners_data}
+            return JsonResponse(data)
+
+
+        # datatables serverside logic
+        if self.request.is_ajax() and self.request.method == 'GET':
+            appartments_data_get_request = request.GET
+
+            #search logic 
+            Q_list = []
+
+            if request.GET.get('columns[0][search][value]'):
+                Q_list.append(Q(number=request.GET.get('columns[0][search][value]')))
+
+            if request.GET.get('columns[1][search][value]'):
+                print('----------------------------HOUSE-FILTER------------------------')
+                if request.GET.get('columns[1][search][value]') != 'all_houses':
+                    chooset_house = House.objects.get(id=request.GET.get('columns[1][search][value]'))
+                    Q_list.append(Q(house=chooset_house))
+                
+
+            if request.GET.get('columns[2][search][value]'):
+                print('----------------------------SECTION-FILTER------------------------')
+                if request.GET.get('columns[2][search][value]') != 'empty_sect':
+                    choosed_section = Section.objects.get(id=request.GET.get('columns[2][search][value]'))
+                    Q_list.append(Q(sections=choosed_section))
+
+            if request.GET.get('columns[3][search][value]'):
+                print('-----------------FLOOR-FILTER-----------------------------')
+                print(request.GET.get('columns[3][search][value]'))
+                if request.GET.get('columns[3][search][value]') != 'empty_floor':
+                    print(request.GET.get('columns[3][search][value]'))
+                    choose_floor = Floor.objects.get(id=request.GET.get('columns[3][search][value]'))
+                    Q_list.append(Q(floor=choose_floor))
+
+
+            if request.GET.get('columns[4][search][value]'):
+                print('----------------------------OWNERS-FILTER------------------------')
+                # if request.GET.get('columns[4][search][value]') != 'empty_sect':
+                
+                if request.GET.get('columns[4][search][value]'):
+                    print(request.GET.get('columns[4][search][value]'))
+                    user = User.objects.get(id=request.GET.get('columns[4][search][value]'))
+                    Q_list.append(Q(owner_user=user))
+
+
+            if request.GET.get('columns[5][search][value]'):
+                print('-----------------BALANCE-FILTER-----------------------------')
+                print(request.GET.get('columns[5][search][value]'))
+                if request.GET.get('columns[5][search][value]') == 'debt':
+                    Q_list.append(Q(personal_account__balance__lt=0))
+                elif request.GET.get('columns[5][search][value]') == 'no_debt':
+                    Q_list.append(Q(personal_account__balance__gte=0))
+                elif request.GET.get('columns[5][search][value]') == 'all_balance':
+                    pass
+
+
+                        # initial data
+            draw = int(appartments_data_get_request.get("draw"))
+            start = int(appartments_data_get_request.get("start"))
+            length = int(appartments_data_get_request.get("length"))
+
+            # order logic
+            order_column_task = 'number'
+            if appartments_data_get_request.get('order[0][column]'):
+                number_column = appartments_data_get_request.get('order[0][column]')
+                order_column_task = appartments_data_get_request.get(f'columns[{number_column}][name]')
+                if appartments_data_get_request.get('order[0][dir]') == 'desc':
+                    order_column_task = f"-{order_column_task}"
+
+
+            raw_data = Appartment.objects.filter(*Q_list)\
+                                .only('number', 'house__title', 'sections__title', 'floor__title', 'owner_user__full_name', 'personal_account__balance', 'id')\
+                                .order_by(order_column_task)\
+                                .values('number', 'house__title', 'sections__title', 'floor__title', 'owner_user__full_name', 'personal_account__balance', 'id')
+
+            data = list(raw_data)
+
+            # paginator here
+            paginator = Paginator(data, length)
+            page_number = start / length + 1
+            try:
+                obj = paginator.page(page_number).object_list
+            except PageNotAnInteger:
+                obj = paginator(1).object_list
+            except EmptyPage:
+                obj = paginator.page(1).object_list
+
+            total = len(data)
+            records_filter = total
+
+
+            response = {
+                'data': obj,
+                'draw': draw,
+                'recordsTotal:': total,
+                'recordsFiltered': records_filter,
+            }
+            return JsonResponse(response, safe=False)
+    
+        else:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+        
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['houses'] = House.objects.all()
+        return context
+    
+
+
+class AppartmentsCardView(DetailView):
+    queryset = Appartment.objects.select_related('personal_account', 'house', 'sections', 'floor', 'owner_user').all()    
+    template_name = "appartments/appartments_card.html"
+    context_object_name = 'appartment'
+
+
+class AppartmentDeleteView(DeleteView):
+
+    model = Appartment
+    success_url = reverse_lazy('appartments:appartments_list')
+    
+
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        appartment_id = self.object.id
+        print(self.get_success_url())
+        success_url = self.get_success_url()
+        self.object.delete()
+        messages.success(request, (f'Квартира с id {appartment_id}. Удален.'))
+        return HttpResponseRedirect(success_url)
+    
+
+class AppartmentEditeView(UpdateView):
+
+    model = Appartment
+    template_name = 'appartments/appartments_edit.html'
+    success_url = reverse_lazy('appartments:appartments_list')
+    form_class = AppartmentEditeForm
+    
+
+    def get(self, request, *args, **kwargs):
+
+        # users search using Select2
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'personal_account':
+
+            print(self.request.GET.get('issue_marker'))
+            print(self.request.GET)
+            # personal_account_data = list(PersonalAccount.objects.filter().values('id', 'number'))
+
+            # for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
+            data = {'results': 'test data'}
+            return JsonResponse(data)
+
+
+        if self.request.method == 'GET' and self.request.GET.get('house_id') != None:
+            house_id = self.request.GET.get('house_id')
+            house = House.objects.get(id=house_id)
+            sections = list(Section.objects.only('id', 'title').filter(house=house).values('id', 'title'))
+            floors = list(Floor.objects.only('id', 'title').filter(house=house).values('id', 'title'))
+            data = {'sections': sections,
+                    'floors': floors}
+            return JsonResponse(data)            
+        else:
+            self.object = self.get_object()
+            return super().get(request, *args, **kwargs)
+        
+
+    def post(self, *args, **kwargs):
+        main_form = AppartmentEditeForm(self.request.POST, instance=self.get_object(), prefix='main_form')
+        personal_account_form = AppartmentPersonalAccountEditeForm(self.request.POST, instance=self.get_object().personal_account, prefix='personal_account_form')
+        if (main_form.is_valid() and personal_account_form.is_valid()):
+            return self.form_valid(main_form, personal_account_form)
+        else: 
+            return self.form_invalid(main_form, personal_account_form)
+
+
+    def get_object(self):
+        pk = self.kwargs.get(self.pk_url_kwarg)
+        return self.model.objects.select_related('personal_account', 'house', 'sections', 'floor', 'owner_user').get(id=pk)
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['main_form'] = AppartmentEditeForm(instance=self.get_object(), prefix='main_form')
+        context['personal_account_form'] = AppartmentPersonalAccountEditeForm(instance=self.get_object().personal_account, prefix='personal_account_form')
+        return context
+
+
+    def form_valid(self, main_form, personal_account_form):
+        
+        appartment = main_form.save(commit=False)
+        change_account_indicator = personal_account_form.changed_data
+
+        if 'number' in change_account_indicator \
+                    and personal_account_form.cleaned_data['number'] != '':
+            appartment.personal_account = None
+            personal_account_form.save(commit=False)
+            new_account = PersonalAccount(number = personal_account_form.cleaned_data['number'], status='active', balance=0)
+            new_account.save()
+            appartment.personal_account = new_account
+
+        elif 'number' in change_account_indicator \
+                     and personal_account_form.cleaned_data['number'] == '':
+            
+            appartment.personal_account = None
+            
+        else:
+            appartment.personal_account = personal_account_form.instance
+        appartment.save()
+        messages.success(self.request, 'Квартира обновлена')
+        success_url = self.success_url
+        return HttpResponseRedirect(success_url)
+
+
+    def form_invalid(self, main_form, personal_account_form):
+        if main_form.errors:
+            for field, error in main_form.errors.items():
+                print(field)
+                print(error)
+                error_text = f"{''.join(error)}"
+                print(f'{field}: {error}')
+                messages.error(self.request, error_text)
+
+        if personal_account_form.errors:
+            for field, error in personal_account_form.errors.items():
+                error_text = f"{''.join(error)}"
+                print(f'{field}: {error}')
+                messages.error(self.request, error_text)
+        success_url = self.success_url
+        return HttpResponseRedirect(success_url)
+    
+
+
+    # ------------------------------------------------------------------------
+    # -------------------PERSONALE-ACCOUNT-CRUD-------------------------------
+    # ------------------------------------------------------------------------
+
+class PersonalAccountsListView(TemplateView):
+    template_name = 'appartments/personal_accounts_list.html'
+
