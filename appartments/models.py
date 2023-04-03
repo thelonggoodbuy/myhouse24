@@ -41,7 +41,7 @@ class Floor(models.Model):
 class Appartment(models.Model):
     number = models.PositiveSmallIntegerField()
     area = models.DecimalField(max_digits=7, decimal_places=2)
-    personal_account = models.OneToOneField('PersonalAccount', on_delete=models.SET_NULL, related_name="personal_account", null=True, blank=True)
+    personal_account = models.OneToOneField('PersonalAccount', on_delete=models.SET_NULL, related_name="appartment_account", null=True, blank=True)
     house = models.ForeignKey(House, on_delete=models.CASCADE)
     sections = models.ForeignKey(Section, on_delete=models.CASCADE)
     floor = models.ForeignKey(Floor, on_delete=models.CASCADE)
@@ -63,3 +63,8 @@ class PersonalAccount(models.Model):
 
     def __str__(self):
         return f"{self.number}"
+    
+    @classmethod
+    def get_verbose_status_dict(cls):
+        status_verbose_dict = dict((status, verbose_status) for status, verbose_status in cls.PERSONAL_ACCOUNT_STATUS)
+        return status_verbose_dict

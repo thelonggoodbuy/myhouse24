@@ -2,11 +2,11 @@
 {% load static %}
 
 {% block title %}
-    <title> лицевые счета </title>
+    <title> Владельцы квартир</title>
 {% endblock title %}
 
 {% block content-header %}
-    <h1>Лицевые счета</h1>
+    <h1>Владельцы квартир</h1>
 {% endblock %}
 
 {% block additionaly_css %}
@@ -18,75 +18,38 @@
 {% block additionaly_js %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
     <script src="{% static 'appartments/plugins/select2/dist/js/select2.min.js' %}"></script>
+    <script src="{% static 'appartments/plugins/bootstrap-datepicker/js/locales/bootstrap-datepicker.ru.js' %}"></script>
 {% endblock additionaly_js %}
 
 
 
 {% block content %}
-
+{% comment %} <style>
+    div.dataTables_wrapper {
+        width: 800px;
+        margin: 0 auto;
+    }
+</style> {% endcomment %}
 
         <section class="content">
 
             <div id="myDialog">
                 Content of the modal dialog box.
             </div>
-
-{% comment %} ------------------------------------------------------------------------------------------------------------------ {% endcomment %}
-
             <div class="row">
-                <div class="col-xs-12 col-lg-9">
-                    
-                    <div class="row">
-                        <div class="col-xs-12 col-md-4">
-                            <div class="small-box bg-green overflow-hidden">
-                                <div class="inner">
-                                    <h3>100 999.06 грн</h3>
-                                    <p>Состояние кассы</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="fa fa-dollar"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xs-12 col-md-4">
-                            <div class="small-box bg-blue overflow-hidden">
-                                <div class="inner">
-                                    <h3>16 999.14 грн</h3>
-                                    <p>Баланс по счетам</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="fa fa-dollar"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xs-12 col-md-4">
-                            <div class="small-box bg-red overflow-hidden">
-                                <div class="inner">
-                                    <h3>568 914.00 грн</h3>
-                                    <p>Задолженность по счетам</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="fa fa-dollar"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xs-12 col-lg-3">
+                <div class="col-xs-12">
                     <div class="btn-group pull-right margin-bottom">
                         <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Выберите действие <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a href="#">Добавить лицевой счет</a></li>
-                            <li><a href="#">Выгрузить в Excel</a></li>
+                            <li><a href="{% url 'appartments:owner_create' %}">Добавить владельца квартиры</a></li>
+                            <li><a href="#">Отправить сообщение должникам</a></li>
+                            <li><a href="#">Отправить приглашение</a></li>
                         </ul>
                     </div>
                 </div>
             </div>
-{% comment %} ------------------------------------------------------------------------------------------------------------------ {% endcomment %}
-
-
             <div class="row">
                 <div class="col-xs-12">
                     <div class="box">
@@ -100,38 +63,40 @@
                         </div>
                         <div id="w0" class="grid-view">
                             <div class="box-body table-responsive no-padding">
-                                <table class="table table-bordered table-hover table-striped linkedRow" id="appartments_list_table">
+                                <table class="table table-bordered table-hover table-striped linkedRow" id="owners_list_table">
                                     <thead>
                                         <tr id="order_links">
-                                            <th sort-index="0" id="№_personal_account">№</th>
-                                            <th sort-index="1" id="status">Статус</th>
-                                            <th sort-index="2" id="appartment">Квартира</th>
-                                            <th sort-index="3" id="house">Дом</th>
-                                            <th sort-index="4" id="sections">Секция</th>
-                                            <th sort-index="5" id="owner">Владелец</th>
-                                            <th sort-index="6" id="balance">Остаток(грн)</th>
+                                            <th sort-index="0" id="ID">ID</th>
+                                            <th sort-index="1" id="full_name">ФИО</th>
+                                            <th sort-index="2" id="phone">Телефон</th>
+                                            <th sort-index="3" id="email">Email</th>
+                                            <th sort-index="4" id="house">Дом</th>
+                                            <th sort-index="5" id="appartment">квартира(ы)</th>
+                                            <th sort-index="6" id="added">Добавлен</th>
+                                            <th sort-index="7" id="status">Статус</th>
+                                            <th sort-index="8" id="debt">долг</th>
                                             <th>&nbsp;</th>
                                         </tr>
                                         <tr class="filters">
 
                                             <td>
-                                                <input colnumb="0" type="text" class="form-control" placeholder="" id="search_№_personal_account">
+                                                <input colnumb="0" type="text" class="form-control" placeholder="" id="ID">
                                             </td>
 
                                             <td>
-                                                <select colnumb="1" id="debt" class="form-control" id="choose_status">
-                                                    <option id="all_status"></option>
-                                                    <option id="active">активен</option>
-                                                    <option id="nonactive">не активен</option>
-                                                </select>
+                                                <input colnumb="1" type="text" class="form-control" placeholder="" id="full_name">
                                             </td>
 
                                             <td>
-                                                <input colnumb="2" type="text" class="form-control" placeholder="" id="search_appartment">
+                                                <input colnumb="2" type="text" class="form-control" placeholder="" id="phone">
                                             </td>
 
                                             <td>
-                                                <select colnumb="3" class="form-control" placeholder="" id="choose_house">
+                                                <input colnumb="3" type="text" class="form-control" placeholder="" id="email">
+                                            </td>
+
+                                            <td>
+                                                <select colnumb="4" class="form-control" placeholder="" id="choose_house">
                                                     <option id="all_houses"></option>
                                                     {% for house in houses %} 
                                                         <option id="{{ house.id }}">{{ house.title }}</option>
@@ -140,22 +105,26 @@
                                             </td>
 
                                             <td>
-                                                <select colnumb="4" id="choose_section" class="form-control" placeholder="выберите дом">
-                                                    <option>выберите дом</option>
+                                                <input colnumb="5" type="text" class="form-control" placeholder="" id="appartment">
+                                            </td>
+
+                                            <td>
+                                                <input colnumb="6" type="text" class="form-control datepicker_added" placeholder="" id="added">
+                                            </td>
+
+                                            <td>
+                                                <select colnumb="7" class="form-control" id="choose_status">
+                                                    <option id="all_status"></option>
+                                                    <option id="active">активен</option>
+                                                    <option id="new">новый</option>
+                                                    <option id="disable">отключен</option>
                                                 </select>
                                             </td>
-
                                             <td>
-                                                <select colnumb="5" id="choose_owner" class="form-control" placeholder="">
-                                                    <option value=""></option>
-                                                </select>                                            
-                                            </td>
-
-                                            <td>
-                                                <select colnumb="6" id="choose_balance" class="form-control">
-                                                    <option id="all_balance"></option>
-                                                    <option id="debt">есть долг</option>
-                                                    <option id="no_debt">нет долга</option>
+                                                <select colnumb="8" id="choose_balance" class="form-control">
+                                                    <option id="all_balance">ВСЕ</option>
+                                                    <option id="debt">ДА</option>
+                                                  
                                                 </select>
                                             </td>
 
@@ -200,7 +169,7 @@ $(document).ready(function () {
       };
 
 
-        var table = $('#appartments_list_table').DataTable({
+        var table = $('#owners_list_table').DataTable({
             "initComplete": function(){
 
                 //logic for input search element
@@ -218,22 +187,15 @@ $(document).ready(function () {
                 })
 
 
-                //logic for select element from Select2
-                $('#choose_owner').on('change', function(){
-                    var choosen_numb = $(this).attr("colnumb")
-                    var choosen_option = $(this).select2('data')[0]['id']
-                    console.log(choosen_numb)
-
-                    table.columns(choosen_numb).search(choosen_option).draw();
-                })
-
             },
 
             "rowCallback": function(row, data){
-                if (data.status === "Активен") {
-                    $('td:eq(1)', row).wrapInner("<small class='label label-success my-3'></small>");
-                } else if (data.status === "Неактивен") {
-                    $('td:eq(1)', row).wrapInner("<small class='label label-danger'></small>");
+                if (data.status === "активен") {
+                    $('td:eq(7)', row).wrapInner("<small class='label label-success my-3'></small>");
+                } else if (data.status === "новый") {
+                    $('td:eq(7)', row).wrapInner("<small class='label label-warning'></small>");
+                } else if (data.status === "отключен") {
+                    $('td:eq(7)', row).wrapInner("<small class='label label-danger'></small>");
                 }
             },
 
@@ -242,16 +204,17 @@ $(document).ready(function () {
             "serverSide": true,
             "pageLength": 5,
             "ordering": false,
+            "scrollX": true,
             "ajax": {
                 "type": "GET",
-                "url": "{% url 'appartments:personal_accounts_list' %}",
+                "url": "{% url 'appartments:owner_list' %}",
                 "dataSrc": "data",
                 "dataType": "json",
             },
             "columns": [
-                {"data": "number", "name": "number", "width": "10%"},
-                {"data": "status", "name": "status", "width": "10%"},
-                {"data": "appartment_account__number", "name": "appartment_number", "width": "10%", render: function (data, type, row, meta) 
+                {"data": "id", "name": "id", "width": "50pt"},
+                {"data": "full_name", "name": "full_name", "width": "200pt"},
+                {"data": "phone", "name": "phone", "width": "100pt", render: function (data, type, row, meta) 
                                                                                         {if (data == null)
                                                                                             {return '(не задано)'
                                                                                         } else {
@@ -259,34 +222,69 @@ $(document).ready(function () {
                     }
                 }
                 },
-                {"data": "appartment_account__house__title", "name": "house", "width": "15%", render: function (data, type, row, meta)
-                                                                                        {if (data == null)
-                                                                                            {return '(не задано)'} else {return data}
-                                                                                        }
-                },
-                {"data": "appartment_account__sections__title", "name": "section", "width": "15%", render: function (data, type, row, meta)
-                                                                                        {if (data == null)
-                                                                                            {return '(не задано)'} else {return data}
-                                                                                        }
-                },
-                
-                {"data": "appartment_account__owner_user__full_name", "name": "owner_user", "width": "20%", render: function (data, type, row, meta) 
+                {"data": "email", "name": "email", "width": "100pt", render: function (data, type, row, meta)
                                                                                         {if (data == null)
                                                                                             {return '(не задано)'
                                                                                         } else {
                                                                                             return data}
+                                                                                        }
+                },
+                {"data": "house_in_owning", "name": "house_in_owning", "width": "100pt", render: function (data, type, row, meta)
+                                                                                        {if (data == null)
+                                                                                            {return '(не задано)'
+                                                                                        } else {
+                                                                                            houses_html = ''
+                                                                                            for (house of data){
+                                                                                                houses_html += `<p><a href="#">${house}</a></p>`
+                                                                                            }
+                                                                                            return houses_html}
+                                                                                        }
+                },
+                
+                {"data": "appartments_in_owning", "name": "appartments_in_owning", "width": "100pt", render: function (data, type, row, meta) 
+                                                                                        {if (data == null)
+                                                                                            {return '(не задано)'
+                                                                                        } else {
+                                                                                            owning_html = ''
+                                                                                            for (owning of data)
+                                                                                            {
+                                                                                                var owning_arr = owning.match(/\[(.*?)\]/g)
+                                                                                                var id = owning_arr[0].replace(/[\[\]']+/g, '');
+                                                                                                var house = owning_arr[1].replace(/[\[\]']+/g, '');
+                                                                                                var number = owning_arr[2].replace(/[\[\]']+/g, '');
+                                                                                                owning_html += `<p><a href="#" id=${id}>${house}, ${number}</a></p>`
+                                                                                            }
+                                                                                            return owning_html}
                     }
                 },
-                {"data": "balance", "name": "balance", "width": "10%", render: function (data, type, row, meta) 
+                {"data": "created_at", "name": "created_at", "width": "100pt", render: function (data, type, row, meta) 
                                                                                         {if (data == null)
                                                                                             {return '(нет счета)'
                                                                                         } else {
                                                                                             return data}
                     }
                 },
-                {"data": "", render: function ( data, type, row, meta ) 
+                {"data": "status", "name": "status", "width": "100pt", render: function (data, type, row, meta) 
+                                                                                        {if (data == null)
+                                                                                            {return '(нет счета)'
+                                                                                        } else {
+                                                                                            return data}
+                    }
+                },
+                {"data": "current_balance", "name": "current_balance",
+                                                    "width": "100pt", render: function (data, type, row, meta) 
+                                                                                        {if (data == null)
+                                                                                            {return '(нет счета)'
+                                                                                        } else {
+                                                                                            return data}
+                    }
+                },
+                {"data": "", "width": "200pt", render: function ( data, type, row, meta ) 
                                         { prerendered_last_cell = "<div id='buttons_interaction'>\
                                                     <div class='col=12'>\
+                                                        <a class='btn btn-default btn-sm' href='#' title='Отправить сообщение' data-toggle='tooltip'>\
+                                                            <i class='fa fa-envelope'></i>\
+                                                        </a>\
                                                         <a class='btn btn-default btn-sm' title='Удалить' data-toggle='tooltip' id='delete_button'>\
                                                             <i class='fa fa-trash'></i>\
                                                         </a>\
@@ -387,6 +385,11 @@ $(document).ready(function () {
     })
 
     
+    $("input[class$='datepicker_added']").datepicker({
+        format: "dd.mm.yyyy",
+        language: 'ru'
+    })
+
     //change row coursor
 //    table.on('mouseover', "a[id^='order-link']", function(){
 //        $(this).css('cursor','pointer')
@@ -400,55 +403,55 @@ $(document).ready(function () {
 
 
 
-        //cleaning searh filters
-//    $('.box-header').on('click', '#clear_filters', function () {
-//        $("*[colnumb]").val('').change()
-//    } ); 
+    //cleaning searh filters
+    $('.box-header').on('click', '#clear_filters', function () {
+        $("*[colnumb]").val('').change()
+    } ); 
 
 
-        //reversion logic for row except links to send inviting, deleting and editing
-//    table.on('click', 'tbody > tr > td', function () {
-//        if(
-//            $(this).find("div").attr("id") != "buttons_interaction"
-//            )
-//        {
-//            var basic_url = "{% url 'appartments:appartment_detail' %}"
-//            var url_index = table.row(this).id().toString();
-//            document.location.href = basic_url + url_index;
-//        }
-//    } );
+    //reversion logic for row except links to send inviting, deleting and editing
+    table.on('click', 'tbody > tr > td', function () {
+        if(
+            $(this).find("div").attr("id") != "buttons_interaction"
+            )
+        {
+            var basic_url = "{% url 'appartments:owner_detail' %}"
+            var url_index = table.row(this).id().toString();
+            document.location.href = basic_url + url_index;
+        }
+    } );
 
 
     // delete and confirm display lofic
-//    $("#myDialog").dialog({
-//        autoOpen  : false,
-//        modal     : true,
-//        title     : "avadamedia.myhoise24",
-//        buttons   : {
-//                    'удалить квартиру' : function() {
-//                        var textValue = $('#myTextBox').val();
-//                        var basic_url = "{% url 'appartments:appartment_delete' %}"
-//                        var row_number = $(this).data('row_number')
-//                        document.location.href = basic_url + row_number;
-//                    },
-//                    'отмена' : function() {
-//                        $(this).dialog('close');
-//                    }
-//                    }
-//    });
+    $("#myDialog").dialog({
+        autoOpen  : false,
+        modal     : true,
+        title     : "avadamedia.myhoise24",
+        buttons   : {
+                    'удалить квартиру' : function() {
+                        var textValue = $('#myTextBox').val();
+                        var basic_url = "{% url 'appartments:owner_delete' %}"
+                        var row_number = $(this).data('row_number')
+                        document.location.href = basic_url + row_number;
+                    },
+                    'отмена' : function() {
+                        $(this).dialog('close');
+                    }
+                    }
+    });
 
 
-//    table.on('click', '#delete_button', function(){
-//        var row_number = $(this).closest('tr').attr('id')
-//        $("#myDialog").text(`Удалить квартиру с id ${row_number}?`).data('row_number', row_number).dialog("open");
-//    })
+    table.on('click', '#delete_button', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        $("#myDialog").text(`Удалить квартиру с id ${row_number}?`).data('row_number', row_number).dialog("open");
+    })
 
 
-//    table.on('click', '#edite_button', function(){
-//        var row_number = $(this).closest('tr').attr('id')
-//        var basic_url = "{% url 'appartments:appartment_edite' %}"
-//        document.location.href = basic_url + row_number;
-//    })
+    table.on('click', '#edite_button', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        var basic_url = "{% url 'appartments:owner_edite' %}"
+        document.location.href = basic_url + row_number;
+    })
 
 
     });

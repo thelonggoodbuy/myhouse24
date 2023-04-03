@@ -1,0 +1,107 @@
+{% extends "layout/base_crm.html" %}
+
+{% block title %}
+    <title> Профиль владельца </title>
+{% endblock title %}
+
+{% block content-header %}
+<h1>Профиль владельца</h1>
+<ul class="breadcrumb"><li><a href="#"><i class="fa fa-home"></i> Главная</a></li>
+    <li><a href="{% url 'appartments:owners_list' %}">Владельца квартир</a></li>
+    <li class="active">Профиль владельца</li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="box">
+    <div class="box-header with-border">
+        <h3 class="box-title">Просмотр квартиры</h3>
+    <div class="box-tools">
+        <a href="#" class="btn btn-default btn-sm">
+            <i class="fa fa-external-link"></i> Перейти в кабинет
+        </a>
+        <a href="{% url 'appartments:owner_edite' pk=owner.id %}" class="btn btn-primary btn-sm">
+            <span class="hidden-xs">Редактировать профиль</span><i class="fa fa-pencil visible-xs" aria-hidden="true"></i>
+        </a>
+    </div>
+</div>
+<div class="box-body">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="userAvatar">
+                <img class="img-circle img-responsive" src="http://myhouse24.avada-media.ua/site/glide?path=%2Fupload%2Fplaceholder.jpg&amp;w=160&amp;h=160&amp;fit=crop" alt="йцуке фіва нрт">
+            </div>
+            <div class="table-responsive no-padding">
+                <table class="table table-bordered table-striped table-view">
+                    <tbody>
+                        <tr>
+                            <td><strong>Статус</strong></td>
+                            {% if owner.status == 'active' %}
+                                <td><small class="label label-success">активен</small></td>
+                            {% elif owner.status == 'new' %}
+                                <td><small class="label label-warning">новый</small></td>
+                            {% elif owner.status == 'disable' %}
+                                <td><small class="label label-danger">отключен</small></td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td><strong>ID</strong></td>
+                            <td>{{ owner.id }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Фамилия</strong></td>
+                            <td>{{ owner.surname }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Имя</strong></td>
+                            <td>{{ owner.name }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Отчество</strong></td>
+                            <td>{{ owner.patronymic }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Дата рождения</strong></td>
+                            {% if owner.burn %}
+                                <td>{{ owner.burn|date:"d.m.Y" }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td><strong>О владельце (заметки)</strong></td>
+                            {% if owner.burn %}
+                                <td style="width:50%;">{{ owner.note }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td><strong>Телефон</strong></td>
+                            {% if owner.phone %}
+                                <td>{{ owner.phone }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td><strong>Viber</strong></td>
+                            {% if owner.viber %}
+                                <td>{{ owner.viber }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td><strong>Telegram</strong></td>
+                            {% if owner.telegam %}
+                                <td>{{ owner.telegam }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td><strong>Email</strong></td>
+                            {% if owner.email %}
+                                <td>{{ owner.email }}</td>
+                            {% endif %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+{% endblock content %}

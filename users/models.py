@@ -31,12 +31,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     note = models.TextField(null=True, blank=True)
     phone = models.CharField(max_length=200, blank=True, null=True)
     viber = models.CharField(max_length=200, blank=True, null=True)
-    telegam = models.CharField(max_length=200, blank=True, null=True)
+    telegram = models.CharField(max_length=200, blank=True, null=True)
     email = models.EmailField(max_length=200, unique=True)
     password = models.CharField(max_length=200, blank=True)
     image = models.ImageField(blank=True, null=True, verbose_name='Аватар', upload_to='galery/')
     role = models.ForeignKey('Role', on_delete=models.SET_NULL, blank=True, null=True)
     email_confirmed = models.BooleanField(default=False)
+    created_at = models.DateField(auto_now_add=True)
 
     # username = None
     USERNAME_FIELD = 'email'
@@ -70,6 +71,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_verbose_status_dict(cls):
         status_verbose_dict = dict((status, verbose_status) for status, verbose_status in cls.USERS_STATUS)
         return status_verbose_dict
+
+    
 
     def save(self, *args, **kwargs):
         self.full_name = (f"{self.surname} {self.name} {self.patronymic}").strip()

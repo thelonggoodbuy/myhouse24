@@ -180,9 +180,6 @@ class AdminSettingsUsersUpdateForm(forms.ModelForm):
                                                         'placeholder':'password',
                                                         'id': 'confirm_password'}))
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     self.fields['role'] = self.instance.role
 
     def clean_email(self):
         try:
@@ -219,9 +216,6 @@ class AdminSettingsUsersUpdateForm(forms.ModelForm):
             if current_form_cleaned['password'] == '':
                 current_form.save(update_fields=["name", "surname", "phone", \
                                             "role", "status", "email"])
-            # if current_form_cleaned['password'] == '':
-            #     current_form.save(update_fields=["name", "surname", "phone", \
-            #                                 "status", "email"])
             else:
                 current_form.set_password(current_form_cleaned['password'])
                 current_form.save()
@@ -238,8 +232,7 @@ class AdminSettingsUsersUpdateForm(forms.ModelForm):
         model = User
         fields = ("name", "surname", "phone", "email",\
                     "role", "status", "password", "confirm_password")
-        # fields = ("name", "surname", "phone", "email",\
-        #     "status", "password", "confirm_password")
+
     
 class AdminSettingsUsersRolesCellForm(forms.ModelForm):
     class Meta:

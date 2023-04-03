@@ -1,15 +1,24 @@
 from copy import deepcopy
+import operator
+from functools import reduce
 
+
+from django.db import models
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.contrib import messages
-from django.db.models import F
-from django.db.models import Q
+from django.db.models import F, Q, OuterRef, Subquery, CharField, Value, Count, Sum, DecimalField
 from django.http import HttpResponseRedirect, JsonResponse
+from datetime import datetime
+from django.utils.dateformat import DateFormat
+from django.db.models import Prefetch
+from django.contrib.postgres.aggregates import ArrayAgg, StringAgg
+from django.db.models.functions import Concat
 
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
-from django.views.generic.edit import DeleteView, FormView, UpdateView
+from django.views.generic.edit import DeleteView, FormView, UpdateView, CreateView
+
 from django.views.generic.detail import DetailView
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import ImproperlyConfigured
@@ -19,7 +28,7 @@ from .models import House, HouseAdditionalImage, Section, Appartment, Floor, Per
 from users.models import User
 
 from .forms import HouseEditeForm, HouseEditeFormSetImage, SectionEditeFormSet, FloorEditeFormSet, ResponsibilitiesEditeFormset,\
-                    AppartmentEditeForm, AppartmentPersonalAccountEditeForm
+                    AppartmentEditeForm, AppartmentPersonalAccountEditeForm, OwnerUpdateForm
 
 
 # view for testing role using
@@ -348,9 +357,6 @@ class AppartmentEditeView(UpdateView):
 
             print(self.request.GET.get('issue_marker'))
             print(self.request.GET)
-            # personal_account_data = list(PersonalAccount.objects.filter().values('id', 'number'))
-
-            # for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
             data = {'results': 'test data'}
             return JsonResponse(data)
 
@@ -441,3 +447,347 @@ class AppartmentEditeView(UpdateView):
 class PersonalAccountsListView(TemplateView):
     template_name = 'appartments/personal_accounts_list.html'
 
+    def get(self, request, *args, **kwargs):
+
+       # datatables serverside logic
+        if self.request.is_ajax() and self.request.method == 'GET' and request.GET.get('draw'):
+            print('-----------------------------FILTERINT------------------------------------------------------------------')
+            print(self.request)
+            account_data_get_request = request.GET
+
+            #search logic 
+            Q_list = []
+
+            if request.GET.get('columns[0][search][value]'):
+                print('----------------------ACCOUNT-NUMBER-FILTER---------------------')
+                Q_list.append(Q(number__icontains=request.GET.get('columns[0][search][value]')))
+
+
+            if request.GET.get('columns[1][search][value]'):
+                print('----------------------------STATUS-FILTER------------------------')
+                print(request.GET.get('columns[1][search][value]'))
+                if request.GET.get('columns[1][search][value]') != 'all_status':
+                    Q_list.append(Q(status__icontains=request.GET.get('columns[1][search][value]')))
+
+
+            if request.GET.get('columns[2][search][value]'):
+                print('---------------------APPARTMENT-NUMBER-FILTER---------------------')
+                Q_list.append(Q(appartment_account__number__icontains=request.GET.get('columns[2][search][value]')))
+
+
+            if request.GET.get('columns[3][search][value]'):
+                print('----------------------------HOUSE-FILTER------------------------')
+                if request.GET.get('columns[3][search][value]') != 'all_houses':
+                    chooset_house = House.objects.get(id=request.GET.get('columns[3][search][value]'))
+                    Q_list.append(Q(appartment_account__house=chooset_house))
+                
+
+            if request.GET.get('columns[4][search][value]'):
+                print('----------------------------SECTION-FILTER------------------------')
+                if request.GET.get('columns[4][search][value]') != 'empty_sect':
+                    print('-----------------TEST_DATA--------------------------------------------')
+                    choosed_section = Section.objects.get(id=request.GET.get('columns[4][search][value]'))
+
+                    Q_list.append(Q(appartment_account__sections__title=choosed_section.title))
+
+            if request.GET.get('columns[5][search][value]'):
+                print('----------------------------OWNERS-FILTER------------------------')               
+                if request.GET.get('columns[5][search][value]'):
+                    print(request.GET.get('columns[5][search][value]'))
+                    user = User.objects.get(id=request.GET.get('columns[5][search][value]'))
+                    Q_list.append(Q(appartment_account__owner_user__full_name=user))
+
+
+            if request.GET.get('columns[6][search][value]'):
+                print('-----------------BALANCE-FILTER-----------------------------')
+                print(request.GET.get('columns[6][search][value]'))
+                if request.GET.get('columns[6][search][value]') == 'debt':
+                    Q_list.append(Q(balance__lt=0))
+                elif request.GET.get('columns[6][search][value]') == 'no_debt':
+                    Q_list.append(Q(balance__gte=0))
+                elif request.GET.get('columns[6][search][value]') == 'all_balance':
+                    pass
+
+
+            draw = int(account_data_get_request.get("draw"))
+            start = int(account_data_get_request.get("start"))
+            length = int(account_data_get_request.get("length"))
+
+            raw_data = PersonalAccount.objects.filter(*Q_list)\
+                                .only('number','status', 'appartment_account__number',\
+                                       'appartment_account__house__title', 'appartment_account__sections__title',\
+                                          'appartment_account__owner_user__full_name', 'balance')\
+                                .order_by()\
+                                .values('number','status', 'appartment_account__number',\
+                                         'appartment_account__house__title', 'appartment_account__sections__title',\
+                                              'appartment_account__owner_user__full_name', 'balance')
+
+            data = list(raw_data)
+            verbose_status_dict = PersonalAccount.get_verbose_status_dict()
+
+
+            for account in data:
+                verbose_status = ""
+                try: 
+                    verbose_status = verbose_status_dict[account['status']]
+                    account['status'] = verbose_status
+                except:
+                    account['status'] = ''
+
+                
+
+
+            # paginator here
+            paginator = Paginator(data, length)
+            page_number = start / length + 1
+            try:
+                obj = paginator.page(page_number).object_list
+            except PageNotAnInteger:
+                obj = paginator(1).object_list
+            except EmptyPage:
+                obj = paginator.page(1).object_list
+
+            total = len(data)
+            records_filter = total
+
+            response = {
+                'data': obj,
+                'draw': draw,
+                'recordsTotal:': total,
+                'recordsFiltered': records_filter,
+            }
+            return JsonResponse(response, safe=False)
+
+        # datatable serverside sending sections for house changing
+        if self.request.is_ajax() and self.request.method == 'GET' and request.GET.get('choosen_house'):
+            choosen_house = House.objects.get(title=request.GET.get('choosen_house'))
+            sections = list(Section.objects.only('id', 'title').filter(house=choosen_house).values('id', 'title'))
+            response = {'sections': sections}
+            return JsonResponse(response, safe=False)
+
+        # users search using Select2
+        if self.request.is_ajax() and self.request.GET.get('issue_marker') == 'all_owners':
+            owners_data = list(User.objects.filter(owning__isnull=False).values('id', 'full_name'))
+            for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
+            data = {'results': owners_data}
+            return JsonResponse(data)
+
+        # test code for ajax_requests
+        if self.request.is_ajax() and self.request.GET.get('issue_marker') == 'owners':
+            if self.request.GET.get('search'):
+                search_data = self.request.GET.get('search')
+                owners_data = list(User.objects.filter(Q(owning__isnull=False) & Q(full_name__icontains=search_data)).values('id', 'full_name'))
+                for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
+                data = {'results': owners_data}
+                return JsonResponse(data)
+
+        else:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['houses'] = House.objects.all()
+        return context
+    
+
+    # ------------------------------------------------------------------------
+    # -------------------APPARTMENT-OWNERS-CRUD-------------------------------
+    # ------------------------------------------------------------------------
+class OwnersListView(TemplateView):
+    template_name = 'appartments/owner_list.html'
+
+    def get(self, request, *args, **kwargs):
+
+       # datatables serverside logic
+        if self.request.is_ajax() and self.request.method == 'GET' and request.GET.get('draw'):
+            # print('-----------------------START------FILTERINT----------------------------------')
+            account_data_get_request = request.GET
+
+            #search logic 
+            Q_list = []
+            Q_list.append(Q(owning__isnull=False))
+
+            # id filtering
+            if request.GET.get('columns[0][search][value]'):
+                Q_list.append(Q(id__icontains=request.GET.get('columns[0][search][value]')))
+
+            # full name filtering
+            if self.request.is_ajax() and request.GET.get('columns[1][search][value]'):
+                    search_full_name_list_parameter = list((request.GET.get('columns[1][search][value]').strip()).split(" "))
+                    Q_list.append(reduce(operator.and_, (Q(full_name__icontains=part_name) for part_name in search_full_name_list_parameter)))
+                
+            # phone filtering
+            if request.GET.get('columns[2][search][value]'):
+                if request.GET.get('columns[2][search][value]') != 'all_phones':
+                    Q_list.append(Q(phone__icontains=request.GET.get('columns[2][search][value]')))
+
+            # email filtering
+            if request.GET.get('columns[3][search][value]'):
+                if request.GET.get('columns[3][search][value]') != 'all_phones':
+                    Q_list.append(Q(email__icontains=request.GET.get('columns[3][search][value]')))
+
+            if request.GET.get('columns[4][search][value]'):
+                if request.GET.get('columns[4][search][value]') != 'all_houses':
+                    Q_list.append(Q(owning__house=request.GET.get('columns[4][search][value]')))
+
+
+            # appartment filtering
+            if self.request.is_ajax() and request.GET.get('columns[5][search][value]'):
+                    search_apartment_list_parameter = list((request.GET.get('columns[5][search][value]').strip()).split(" "))
+                    Q_list.append(reduce(operator.and_, (Q(appartments_in_owning__icontains=part_addr) for part_addr in search_apartment_list_parameter)))
+
+            # users creating
+            if request.GET.get('columns[6][search][value]'):
+                date_list = request.GET.get('columns[6][search][value]').split('.')
+                date_list.reverse()
+                date_string = ''
+                date_string = '-'.join(str(elem) for elem in date_list)
+                formated_date = datetime.strptime(date_string, '%Y-%m-%d')
+                Q_list.append(Q(created_at=formated_date))
+
+
+            # status filter
+            if request.GET.get('columns[7][search][value]'):
+                if request.GET.get('columns[7][search][value]') != 'all_status':
+                    Q_list.append(Q(status=request.GET.get('columns[7][search][value]')))
+
+            # debt filter
+            if request.GET.get('columns[8][search][value]'):
+                if request.GET.get('columns[8][search][value]') == 'debt':
+                    Q_list.append(Q(owning__personal_account__balance__lt=0))
+
+
+            draw = int(account_data_get_request.get("draw"))
+            start = int(account_data_get_request.get("start"))
+            length = int(account_data_get_request.get("length"))
+
+            
+            raw_data = User.objects.annotate(appartments_in_owning = ArrayAgg(Concat(Value('['),
+                                                                                    F('owning__id'),
+                                                                                    Value(']-['),
+                                                                                    F('owning__house__title'),
+                                                                                    Value(']-['),
+                                                                                    F('owning__number'),
+                                                                                    Value(']'),
+                                                                                    output_field=CharField())
+                                                                                    ,distinct=True))\
+                                    .annotate(house_in_owning = ArrayAgg('owning__house__title', distinct=True))\
+                                    .annotate(current_balance = Sum('owning__personal_account__balance', distinct=True))\
+                                    .filter(*Q_list)\
+                                    .order_by()\
+                                    .values('id','full_name', 'phone',\
+                                            'email', 'house_in_owning',\
+                                            'appartments_in_owning', 'created_at',\
+                                            'status', 'current_balance')
+
+            data = list(raw_data)
+            print(data)
+            verbose_status_dict = User.get_verbose_status_dict()
+
+            for owner in data:  
+                verbose_status = ""
+                try: 
+                    verbose_status = verbose_status_dict[owner['status']]
+                    owner['status'] = verbose_status
+                except:
+                    owner['status'] = ''
+
+
+            # paginator here
+            paginator = Paginator(data, length)
+            page_number = start / length + 1
+            try:
+                obj = paginator.page(page_number).object_list
+            except PageNotAnInteger:
+                obj = paginator(1).object_list
+            except EmptyPage:
+                obj = paginator.page(1).object_list
+
+            total = len(data)
+            records_filter = total
+
+            response = {
+                'data': obj,
+                'draw': draw,
+                'recordsTotal:': total,
+                'recordsFiltered': records_filter,
+            }
+            return JsonResponse(response, safe=False)
+        
+        else:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['houses'] = House.objects.all()
+        return context
+    
+
+class OwnerCardView(DetailView):
+    queryset = User.objects.all()    
+    template_name = "appartments/owner_card.html"
+    context_object_name = 'owner'
+
+
+
+class OwnerEditeView(UpdateView):
+    form_class = OwnerUpdateForm
+    model = User
+    template_name = 'appartments/owner_update.html'
+    success_url = reverse_lazy('appartments:owners_list')
+
+
+class OwnerDeleteView(DeleteView):
+
+    model = User
+    success_url = reverse_lazy('appartments:owners_list')
+
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        owner_email = self.object.email
+        success_url = self.get_success_url()
+        self.object.delete()
+        messages.success(request, (f"Собственник квартиры с электронной почтой '{owner_email}'. Удален."))
+        return HttpResponseRedirect(success_url)
+    
+
+class CreteNewUser(CreateView):
+
+    template_name = 'appartments/owner_create.html'
+    form_class = OwnerUpdateForm
+    success_url = reverse_lazy('appartments:owners_list')
+
+
+    # def form_valid(self, form):
+    #     user = form.save(commit=False)
+    #     user.is_active = False
+    #     password = form.cleaned_data['password']
+    #     user.set_password(password)
+    #     user.save()
+
+    #     current_site = get_current_site(self.request)
+    #     subject = 'Activate You MySite Account'
+    #     message = render_to_string('email_templates/account_activation_email.html', {
+    #         'user': user,
+    #         'domain': current_site.domain,
+    #         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+    #         'token': account_activation_token.make_token(user),
+    #     })
+    #     # ******тут отправляю. можно добавить ссылку туда**********
+    #     user.email_user(subject, message)
+    #     print('Ваш профиль зарегистрирован, но не активирован. Пожалуйста подтвердите регистрацию через письмо полученное на почту.')
+    #     messages.info(self.request, ('Ваш профиль зарегистрирован, но не активирован. Пожалуйста подтвердите регистрацию через письмо полученное на почту.'))
+    #     return super(SignUpSimpleUser, self).form_valid(form)
+
+
+    def form_invalid(self, form):
+        if form.errors:
+            for field, error in form.errors.items():
+                error_text = f"{''.join(error)}"
+                messages.error(self.request, error_text)
+        return self.render_to_response(self.get_context_data(form=form))

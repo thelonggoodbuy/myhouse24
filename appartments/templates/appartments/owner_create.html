@@ -1,0 +1,200 @@
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+{% block title %}
+    <title> пользователь </title>
+{% endblock title %}
+
+{% block content-header %}
+    <h1>Пользовать</h1>
+{% endblock %}
+
+{% block additionaly_js %}
+    <script src="{% static 'appartments/plugins/bootstrap-datepicker/js/locales/bootstrap-datepicker.ru.js' %}"></script>
+    
+{% endblock additionaly_js %}
+
+{% block content %}
+<section class="content">                
+    <div class="box">
+        <div class="box-body">
+            <form method="post" id="user_change_data_form">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-xs-12 col-md-6">
+                        <div class="userAvatar">
+                            {% if form.instance.image %}
+                                <img class="img-circle pull-left img-responsive" style="width:160px; height: 160px; object-fit: cover;" src="{{ form.instance.image.url }}">
+                            {% else %}
+                            <img class="img-circle pull-left img-responsive" style="width:160px; height: 160px; object-fit: cover;" src="{% static 'appartments/img/empty_image.jpeg' %}">
+                            {% endif %}
+                            <div class="form-group field-userform-image">
+                                <strong>{{ form.image.label }}</strong>
+                                {{ form.image }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-md-6">
+                        <div class="form-group">
+                            <label>{{ form.status.label }}</label>
+                            {{ form.status }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ form.id.label }}</label>
+                            {{ form.id }}
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 col-md-6">
+                        <div class="form-group">
+                            <label>{{ form.surname.label }}</label>
+                            {{ form.surname }}
+                            <div class="help-block"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>{{ form.name.label }}</label>
+                            {{ form.name }}
+                            <div class="help-block"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>{{ form.patronymic.label }}</label>
+                            {{ form.patronymic }}
+                            <div class="help-block"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>{{ form.burn.label }}</label>
+                            <div class="input-group date">
+                                {{ form.burn }}
+                                <span class="input-group-addon kv-date-calendar" title="Выбрать дату">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </span>
+                            </div>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-md-6">
+                        <label>{{ form.note.label }}</label>
+                            {{ form.note }}
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                    
+                <div class="row">
+                    <div class="col-xs-12 col-md-6">
+                        <h2 class="page-header">Контактные данные</h2>
+                        <div class="form-group">
+                            <label>{{ form.phone.label }}</label>
+                            {{ form.phone }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ form.viber.label }}</label>
+                            {{ form.viber }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ form.telegram.label }}</label>
+                            {{ form.telegram }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ form.email.label }}</label>
+                            {{ form.email }}
+                            <div class="help-block"></div>
+                        </div>  
+                    </div>    
+                    <div class="col-xs-12 col-md-6">
+                        <h2 class="page-header">Изменить пароль</h2>
+                        <div class="form-group">
+                            <label class="control-label">Пароль</label>
+                                <div id="password_group" class="input-group">
+                                    {{ form.password }}                                    
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button" id="generate_user_password">
+                                            Сгенерировать
+                                        </button>
+
+                                        <button type="button" class="btn btn-primary" id="make_visible_password">
+                                            <i class="fa fa-eye" aria-hidden="true" ></i>
+                                        </button>
+                                    </span>
+                                </div>    
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            {{ form.confirm_password.label }}
+                            {{ form.confirm_password }}
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 text-right">
+                        <a href="{% url 'users:admin_settings_users_list' %}" class="btn btn-default">Отменить</a>
+                        <button type="submit" class="btn btn-success">Сохранить</button>
+                    </div>
+                </div>
+            </form>
+            <script>
+                $(document).ready(function () {
+
+
+    $("#id_burn").datepicker({
+        format: "dd.mm.yyyy",
+        language: 'ru'
+    })
+
+                    $("#generate_user_password").click(function(){
+                        var pass = Math.random().toString(36).substring(4);
+                        $('#password').val(pass);
+                        $('#confirm_password').val(pass);
+                    })
+
+                    $("#make_visible_password").click(function(){
+                        password_state = $('#password').attr('type')
+                        confirm_password_state = $('#confirm_password').attr('type')
+                        if (password_state == 'password' && confirm_password_state == 'password'){
+                            password_state = $('#password').attr('type', 'text')
+                            confirm_password_state = $('#confirm_password').attr('type', 'text')
+                        } else {
+                            password_state = $('#password').attr('type', 'password')
+                            confirm_password_state = $('#confirm_password').attr('type', 'password')
+                        };
+                    })
+//
+//                    $("#user_change_data_form").validate({
+//                        rules: {
+//                          field: {
+//                            required: true,
+//                            email: true
+//                          }
+//                        },
+//                        messages:{
+//                            email: {
+//                                required: "Это поле обязательно для заполнения",
+//                                email: "Значение «Email (логин)» не является правильным email адресом",
+//                            }
+//                        },
+//                        validClass: "success",
+//                        highlight: function(element, errorClass, validClass) {
+//                            $(element).closest('.form-group').addClass("has-error").removeClass("has-success");
+//                      
+//                          },
+//                        unhighlight: function(element, errorClass, validClass) {
+//                            $(element).closest('.form-group').addClass("has-success").removeClass("has-error");
+//                      
+//                          },
+
+//                });
+                });
+            </script>
+        </div>
+    </div>
+</section>
+{% endblock content %}

@@ -1,9 +1,10 @@
 from django.urls import path
 
 from .views import ReportView,\
-                     HousesListView, HouseDeleteView, HouseEditeView, HouseDetailView,\
-                     AppartmentsListView, AppartmentsCardView, AppartmentDeleteView, AppartmentEditeView,\
-                     PersonalAccountsListView
+                    HousesListView, HouseDeleteView, HouseEditeView, HouseDetailView,\
+                    AppartmentsListView, AppartmentsCardView, AppartmentDeleteView, AppartmentEditeView,\
+                    PersonalAccountsListView,\
+                    OwnersListView, OwnerCardView, OwnerEditeView, OwnerDeleteView, CreteNewUser
 
 
 app_name='appartments'
@@ -32,4 +33,13 @@ urlpatterns = [
     # personal accounts CRUD
     path('personal_accounts_list/', PersonalAccountsListView.as_view(), name="personal_accounts_list"),
 
+    # owners CRUD
+    path('owners_list/', OwnersListView.as_view(), name="owner_list"),
+    path('owners_detail/', OwnerCardView.as_view(), name="owner_detail"),
+    path('owners_detail/<int:pk>', OwnerCardView.as_view(), name="owner_detail"),
+    path('owner_edite/', OwnerEditeView.as_view(), name="owner_edite"),
+    path('owner_edite/<int:pk>', OwnerEditeView.as_view(), name="owner_edite"),
+    path('owner_delete/', OwnerDeleteView.as_view(), name="owner_delete"),
+    path('owner_delete/<int:pk>', OwnerDeleteView.as_view(), name="owner_delete"),
+    path('owner_create', CreteNewUser.as_view(), name="owner_create"),
 ]

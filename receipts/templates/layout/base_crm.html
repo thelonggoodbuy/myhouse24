@@ -13,6 +13,7 @@
         <link rel="stylesheet" type="text/css" href="{% static 'users/components/bootstrap/dist/css/bootstrap.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/components/bootstrap/dist/css/bootstrap.min.css.map' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/plugins/DataTables/datatables.min.css'%}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/plugins/DataTables/DataTables-1.13.2/css/jquery.dataTables.min.css'%}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/css/AdminLTE.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/css/style.css' %}">
         
@@ -39,6 +40,7 @@
         <script type="text/javascript" src="{% static 'users/components/fastclick/lib/fastclick.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/js/adminlte.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/plugins/DataTables/datatables.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/plugins/DataTables/DataTables-1.13.2/js/jquery.dataTables.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/plugins/toastr/build/toastr.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/plugins/iCheck/icheck.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.js' %}"></script>
@@ -181,7 +183,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="{% url 'appartments:personal_accounts_list' %}">
                             <i class="fa fa-credit-card"></i><span>Лицевые счета</span>
                         </a>
                     </li>
@@ -191,7 +193,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'users:appartments_owners' %}">
+                        <a href="{% url 'appartments:owner_list' %}">
                             <i class="fa fa-users"></i><span>Владельцы квартир</span>
                         </a>
                     </li>
