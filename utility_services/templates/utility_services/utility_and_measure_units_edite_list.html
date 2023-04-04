@@ -1,0 +1,208 @@
+
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+
+{% block additionaly_css %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.css }} 
+    {% endfor %}
+{% endblock additionaly_css %}
+
+
+
+{% block additionaly_js %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.js }}
+    {% endfor %}
+{% endblock additionaly_js %}
+
+
+{% block title %}
+    <title> Данные о доме </title>
+{% endblock title %}
+
+{% block content-header %}
+    <h1>{{ object.title }}</h1>
+{% endblock %}
+
+{% block content %}
+<div class="box">
+    <div class="box-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-xs-12 col-lg-7">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#tab_service" data-toggle="tab" aria-expanded="true">Услуги</a></li>
+                            <li class=""><a href="#tab_serviceunit" data-toggle="tab" aria-expanded="false">Единицы измерения</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane clearfix active" id="tab_service">
+                                    {{ services_formset.management_form }}
+                                    {% for utility_service_form in services_formset %}
+                                        {% for hidden in utility_service_form.hidden_fields %}
+                                            {{ hidden }}
+                                        {% endfor %}
+                                        
+                                            <div class="row cell_container">
+                                                <div class="col-xs-12 col-sm-7">
+                                                    <div class="form-group">
+                                                        <strong>{{ utility_service_form.title.label }}</strong>
+                                                        {{ utility_service_form.title }}                                                    
+                                                    </div>
+                                                    {{ utility_service_form.shown_in_counters }}
+                                                    <strong>{{ utility_service_form.shown_in_counters.label }}</strong>
+                                                    <p>{{utility_service_form.DELETE}}</p>
+                                                </div>
+
+                                                <div class="col-xs-12 col-sm-5">
+                                                    <strong>{{ utility_service_form.unit_of_measure.label }}</strong>
+                                                    <div class="input-group">
+                                                        {{ utility_service_form.unit_of_measure }}        
+                                                        <span class="input-group-btn" id="delete_button">
+                                                            <button type="button" class="btn btn-default form-row-remove-btn">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>                
+                                                        </span>
+                                                    </div>
+                                                </div>        
+                                            </div>
+                                        
+                                    {% endfor %}
+
+                                    <div id="empty_form_container">
+                                        <div class="row cell_container">
+                                            <div class="col-xs-12 col-sm-7">
+                                                <div class="form-group">
+                                                    <strong>{{ services_formset.empty_form.title.label }}</strong>
+                                                    {{ services_formset.empty_form.title }}                                                    
+                                                </div>
+                                                {{ services_formset.empty_form.shown_in_counters }}
+                                                <strong>{{ services_formset.empty_form.shown_in_counters.label }}</strong>
+                                                <p>{{services_formset.empty_form.DELETE}}</p>
+                                            </div>
+
+                                            <div class="col-xs-12 col-sm-5">
+                                                <strong>{{ services_formset.empty_form.unit_of_measure.label }}</strong>
+                                                <div class="input-group">
+                                                    {{ services_formset.empty_form.unit_of_measure }}        
+                                                    <span class="input-group-btn" id="delete_button">
+                                                        <button type="button" class="btn btn-default form-row-remove-btn">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>                
+                                                    </span>
+                                                </div>
+                                            </div>        
+                                        </div>
+                                    </div>
+
+
+
+                                <button type="button" class="btn btn-default btn-hover-change pull-left form-row-add-service-btn" id='add'>Добавить</button>
+                            </div>
+                            <div class="tab-pane clearfix" id="tab_serviceunit">
+
+            {% comment %} --------------------------------------------------------------------- {% endcomment %}
+                                
+            {% comment %} ------------------------------- formset ------------------------------- {% endcomment %}
+                                {{ measures_units_formset.management_form }}
+                                {% for unit_form in measures_units_formset %}
+                                    {% for hidden in unit_form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+                                    <div class="unit_cell_container">
+                                        <p>
+                                            <strong>{{ unit_form.title.label }}</strong>
+                                            <div class="input-group">
+                                                {{ unit_form.title }}
+                                                <span class="input-group-btn" id="delete_button">
+                                                    <button type="button" class="btn btn-default form-row-remove-btn" no-delete-msg="Эта ед.изм. используется в услуге. Удаление невозможно.">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>                
+                                                </span>
+                                            </div>
+                                            {{ unit_form.DELETE }}
+                                        </p>
+                                    </div>
+                                {% endfor %}
+                                <div id="empty_form_container">
+                                    <div class="unit_cell_container">
+                                        <p>
+                                            <strong>{{ measures_units_formset.empty_form.title.label }}</strong>
+                                            <div class="input-group">
+                                                {{ measures_units_formset.empty_form.title }}
+                                                <span class="input-group-btn" id="delete_button">
+                                                    <button type="button" class="btn btn-default form-row-remove-btn" no-delete-msg="Эта ед.изм. используется в услуге. Удаление невозможно.">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>                
+                                                </span>
+                                            </div>
+                                            {{ measures_units_formset.empty_form.DELETE }}
+                                        </p>
+                                    </div>
+                                </div>
+
+            {% comment %} ----------------------------------------------------------------------- {% endcomment %}
+                                <button type="button" class="btn btn-default btn-hover-change pull-left form-row-add-serviceunit-btn" id="add">Добавить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 text-center">
+                    <div class="form-group">
+                        <a href="/admin/service/index" class="btn btn-default">Отменить</a>
+                        <button type="submit" class="btn btn-success">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </form>    
+    </div>
+</div>
+
+
+
+
+<script>
+    $(document).ready(function () {
+
+
+        $("div[id='empty_form_container']").hide()
+
+
+        $("div[id^='tab']").on('click', "button[id^='add']", function(){
+            current_form_tab = $(this).parent()
+            form_index = $(current_form_tab).find("input[id$='TOTAL_FORMS']").val()
+            var new_form = $(current_form_tab).find('#empty_form_container').html().replace(/__prefix__/g, form_index);
+            $(new_form).insertBefore($(this));
+            $(current_form_tab).find("input[id$='TOTAL_FORMS']").val(parseInt(form_index) + 1);
+            
+            if($(current_form_tab).attr('id') === 'tab-floors'){
+                new_form_number = parseInt(form_index) + 1
+                search_task = "id_floor_formset-" + form_index + "-title"
+                current_field = $("#" + search_task).val('Этаж ' + new_form_number)
+            } else if($(current_form_tab).attr('id') === 'tab-sections') {
+                new_form_number = parseInt(form_index) + 1
+                search_task = "id_section_formset-" + form_index + "-title"
+                current_field = $("#" + search_task).val('Секция ' + new_form_number)
+
+            } else if($(current_form_tab).attr('id') === 'tab-responsibilities') {
+            }    
+        })
+
+       
+
+        $("div[id^='tab']").on('click', "*[id='delete_button']", function(){
+            //console.log($(this).closest("*[class$='cell_container']").find("input[id$='-DELETE']"))
+            $(this).closest("*[class$='cell_container']").find("input[id$='-DELETE']").prop('checked', true)
+            $(this).closest("*[class$='cell_container']").hide()
+        })
+
+        $("input[id$='-DELETE']").hide()
+
+    });
+</script>
+{% endblock content %}
