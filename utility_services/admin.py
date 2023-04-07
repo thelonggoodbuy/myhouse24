@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import UnitOfMeasure, UtilityService
+from .models import UnitOfMeasure, UtilityService, Tariff, TariffCell
 
 
 
@@ -15,3 +15,14 @@ class UserAdmin(admin.ModelAdmin):
 class UserAdmin(admin.ModelAdmin):
     list_display = ('title', 'unit_of_measure')
     list_filter = ('title', 'unit_of_measure')
+
+# ----------------------------------------------------------------------------------
+@admin.register(Tariff)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('title', 'updated_datetime')
+    list_filter = ('title', 'updated_datetime')
+
+@admin.register(TariffCell)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('tariff', 'number', 'updated_datetime', 'utility_service')
+    list_filter = ('tariff', 'number', 'updated_datetime', 'utility_service')

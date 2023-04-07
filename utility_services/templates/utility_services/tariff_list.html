@@ -1,0 +1,141 @@
+{% extends "layout/base_crm.html" %}
+
+{% block additionaly_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+{% endblock additionaly_css %}
+
+{% block additionaly_js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+{% endblock additionaly_js %}
+
+{% block title %}
+    <title> тарифы </title>
+{% endblock title %}
+{% block content-header %}
+    <h1>Тарифы</h1>
+{% endblock %}
+
+{% block content %}
+<div id="myDialog">
+    Content of the modal dialog box.
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div class="pull-right margin-bottom">
+            <a class="btn btn-success" href="{% url 'utility_services:tariff_create' %}">добавить тариф</a>
+        </div>
+    </div>
+</div>
+<div class="box">
+    <div class="box-header with-border">
+    {% comment %} <h3 class="box-title"></h3> {% endcomment %}
+    </div>
+        <div class="box-body">
+            <table class="table table-bordered table-hover table-striped linkedRow" id="tariff_table" style="width:100%">
+            <thead>
+                <tr>
+                    <th>название тарифа</th>
+                    <th>описание тарифа</th>
+                    <th>дата редактирования</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                
+            </tbody>
+            </table>
+    </div>
+</div>
+
+
+
+
+<script>
+    $(document).ready(function () { 
+
+        var table = $('#tariff_table').DataTable({
+  
+            "dom": "<<t>p>",
+            "processing": true,
+            "serverSide": true,
+            "pageLength": 50,
+            "ordering": true,
+            "ajax": {
+                "type": "GET",
+                "url": "{% url 'utility_services:tariff_list' %}",
+                "dataSrc": "data",
+                "dataType": "json",
+            },
+            "columns": [
+                {"data": "title", "name": "title", "width": "20%"},
+                {"data": "description", "name": "description", "width": "40%"},
+                {"data": "updated_datetime", "name": "updated_datetime", "width": "20%"},
+                {"data": "", "width": "10%", render: function ( data, type, row, meta ) 
+                                        { prerendered_last_cell = "<div id='buttons_interaction'>\
+                                                    <div class='col=12'>\
+                                                        <a class='btn btn-default btn-sm' title='Копировать' data-toggle='tooltip' id='copy_button'>\
+                                                            <i class='fa fa-clone'></i>\
+                                                        </a>\
+                                                        <a class='btn btn-default btn-sm' title='Редактировать' data-toggle='tooltip' id='edite_button'>\
+                                                            <i class='fa fa-pencil'></i>\
+                                                        </a>\
+                                                        <a class='btn btn-default btn-sm' title='Удалить' data-toggle='tooltip' id='delete_button'>\
+                                                            <i class='fa fa-trash'></i>\
+                                                        </a>\
+                                                        </div>\
+                                                    </div>";
+                                            
+                                            return prerendered_last_cell
+                                        }
+                },
+                ],
+            "columnDefs": [
+                {'orderable': true, targets: 0},
+                {'orderable': false, targets: 1},
+                {'orderable': false, targets: 2},
+                {'orderable': false, targets: 3},
+            ],
+
+            "rowId": 'id',
+            
+        });
+
+
+
+    table.on('click', '#edite_button', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        var basic_url = "{% url 'utility_services:tariff_edite' %}"
+        document.location.href = basic_url + row_number;
+    })
+
+    table.on('click', '#copy_button', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        var basic_url = "{% url 'utility_services:tariff_clone' %}"
+        document.location.href = basic_url + row_number;
+    })
+
+    $("#myDialog").dialog({
+        autoOpen  : false,
+        modal     : true,
+        title     : "avadamedia.myhoise24",
+        buttons   : {
+                    'удалить тариф' : function() {
+                        var textValue = $('#myTextBox').val();
+                        var basic_url = "{% url 'utility_services:tariff_delete' %}"
+                        var row_number = $(this).data('row_number')
+                        document.location.href = basic_url + '/' + row_number;
+                    },
+                    'отмена' : function() {
+                        $(this).dialog('close');
+                    }
+                    }
+    });
+
+    table.on('click', '#delete_button', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        $("#myDialog").text(`Удалить тариф?`).data('row_number', row_number).dialog("open");
+    })
+
+    });
+</script>
+{% endblock content %}

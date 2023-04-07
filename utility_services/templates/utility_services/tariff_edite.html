@@ -1,0 +1,207 @@
+
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+
+{% block additionaly_css %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.css }} 
+    {% endfor %}
+{% endblock additionaly_css %}
+
+
+
+{% block additionaly_js %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.js }}
+    {% endfor %}
+{% endblock additionaly_js %}
+
+
+{% block title %}
+    {% if object.title %}
+        <title> Тариф: {{ object.title }} </title>
+    {% elif form.instance.title %}
+        <title> Копия тарифа: {{ form.instance.title }} </title>
+    {% endif %}
+{% endblock title %}
+
+{% block content-header %}
+    {% if object.title %}
+        <h1>Тариф: {{ object.title }}</h1>
+    {% elif form.instance.title %}
+        <h1> Копия тарифа: {{ form.instance.title }} </h1>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="box">
+    <div class="box-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-xs-12 col-lg-7">
+
+                    <div class="form-group">
+                        <label class="control-label">{{ form.title.label}}</label>
+                        {{ form.title }}
+                        <div class="help-block"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label">{{ form.description.label }}</label>
+                        {{ form.description }}
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-lg-7">
+                    <div id="form-tariffservice-rows">
+            {{ tariff_cell_formset.management_form }}
+            {% for tariff_cell_form in tariff_cell_formset %}
+                {% for hidden in tariff_cell_form.hidden_fields %}
+                    {{ hidden }}
+                {% endfor %}
+                <div class="row data_row">
+                    <div class="col-xs-6 col-md-4">
+                        <div class="form-group">
+                            <strong>{{ tariff_cell_form.utility_service.label }}</strong>
+                            {{ tariff_cell_form.utility_service }}
+                        </div>
+                    </div>
+                    <div class="col-xs-6 col-md-3">
+                        <div class="form-group">
+                            <strong>{{ tariff_cell_form.cost_per_unit.label }}</strong>
+                            {{ tariff_cell_form.cost_per_unit }}
+                        </div>
+                    </div>
+                    <div class="col-xs-6 col-md-2">
+                        <div class="form-group">
+                            <strong>{{ tariff_cell_form.curency.label }}</strong>
+                            {{ tariff_cell_form.curency }}
+                        </div>
+                    </div>
+                        <div class="col-xs-6 col-md-3">
+                            <div class="form-group">
+                                <label>Ед. изм.</label>
+                                <div class="input-group">
+                                    <select class="form-control" disabled="">
+                                        <option value="" id="measure_units">{{ tariff_cell_form.instance.utility_service.unit_of_measure }}</option>
+                                    </select>                
+                                    <span class="input-group-btn" id="delete_button">
+                                        <button type="button" class="btn btn-default form-row-remove-btn"><i class="fa fa-trash"></i></button>                
+                                    </span>
+                                </div>
+                            </div>
+                            {{ tariff_cell_form.DELETE }}
+                        </div>
+                    </div>         
+            {% endfor %}
+                <div id="empty_form_container">
+                    <div class="row data_row">
+                        <div class="col-xs-6 col-md-4">
+                            <div class="form-group">
+                                <strong>{{ tariff_cell_formset.empty_form.utility_service.label }}</strong>
+                                {{ tariff_cell_formset.empty_form.utility_service }}
+                            </div>
+                        </div>
+                        <div class="col-xs-6 col-md-3">
+                            <div class="form-group">
+                                <strong>{{ tariff_cell_formset.empty_form.cost_per_unit.label }}</strong>
+                                {{ tariff_cell_formset.empty_form.cost_per_unit }}
+                            </div>
+                        </div>
+                        <div class="col-xs-6 col-md-2">
+                            <div class="form-group">
+                                <strong>{{ tariff_cell_formset.empty_form.curency.label }}</strong>
+                                {{ tariff_cell_formset.empty_form.curency }}
+                            </div>
+                        </div>
+                            <div class="col-xs-6 col-md-3">
+                                <div class="form-group">
+                                    <label>Ед. изм.</label>
+                                    <div class="input-group">
+                                        <select class="form-control" disabled="">
+                                            <option value="" id="measure_units" >---------</option>
+                                        </select>                
+                                        <span class="input-group-btn" id="delete_button">
+                                            <button type="button" class="btn btn-default form-row-remove-btn"><i class="fa fa-trash"></i></button>                
+                                        </span>
+                                    </div>
+                                </div>
+                                {{ tariff_cell_formset.empty_form.DELETE }}
+                            </div>
+                        </div>         
+                </div>        
+
+                    <button type="button" class="btn btn-default" id="add_service">Добавить услугу</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 col-lg-7 text-right">
+                    <div class="form-group">
+                        <a class="btn btn-default" href="#">Отменить</a>
+                        <button type="submit" class="btn btn-success">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>    
+</div>
+<script>
+    $(document).ready(function () {
+
+
+        $("div[id='empty_form_container']").hide()
+
+
+        $(".box-body").on('click', "button[id^='add']", function(){
+            current_form_tab = $(this).parent()
+            form_index = $(current_form_tab).find("input[id$='TOTAL_FORMS']").val()
+            var new_form = $(current_form_tab).find('#empty_form_container').html().replace(/__prefix__/g, form_index);
+            $(new_form).insertBefore($(this));
+            $(current_form_tab).find("input[id$='TOTAL_FORMS']").val(parseInt(form_index) + 1);
+            
+            
+        })
+
+
+        $(".box-body").on('change', '#utility_service', function(){
+            var choosen_utility_service = $(this).find(":selected").attr('value')
+            var measure_unit_field = $(this).parent().parent().parent().find('#measure_units')
+            
+
+            if(choosen_utility_service){
+                $.ajax({
+                    url: "{% url 'utility_services:tariff_edite' %}",
+                    data: {
+                        'choosen_utility_service': choosen_utility_service
+                    },
+
+                    success:function(data){
+                        console.log(data)
+                        $(measure_unit_field).empty()
+                        $(measure_unit_field).text(`${data['unit_measure']}`)
+                    }
+                })
+            }
+
+        })
+       
+        
+        
+        console.log($("*[id='measure_units']:empty").closest("*[class$='data_row']").find('#utility_service').trigger('change'))
+
+
+
+        $(".box-body").on('click', "*[id='delete_button']", function(){
+            $(this).closest('.row').find("input[id$='-DELETE']").prop('checked', true)
+            console.log($(this).closest("*[class$='data_row']"))
+            $(this).closest("*[class$='data_row']").hide()
+        })
+
+    $("input[type='checkbox']").hide()
+
+    });
+</script>
+{% endblock content %}

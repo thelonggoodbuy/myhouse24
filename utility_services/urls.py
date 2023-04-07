@@ -1,7 +1,8 @@
 from django.urls import path
 
 
-from .views import UtilityAndMeasuresUnitsEditeList
+from .views import UtilityAndMeasuresUnitsEditeList,\
+                     TariffListView, TariffEditeView, TariffCreateView, TariffDeleteView, TariffCopyView
 
 
 app_name='utility_services'
@@ -9,4 +10,13 @@ app_name='utility_services'
 
 urlpatterns = [
     path('report_view/', UtilityAndMeasuresUnitsEditeList.as_view(), name='report_view'),
+    # tariff logic
+    path('tariff_list/', TariffListView.as_view(), name="tariff_list"),
+    path('tariff_edite/', TariffEditeView.as_view(), name="tariff_edite"),
+    path('tariff_edite/<int:pk>', TariffEditeView.as_view(), name="tariff_edite"),
+    path('tariff_create/', TariffCreateView.as_view(), name="tariff_create"),
+    path('tariff_delete', TariffDeleteView.as_view(), name="tariff_delete"),
+    path('tariff_delete/<int:pk>', TariffDeleteView.as_view(), name="tariff_delete"),
+    path('tariff_clone/', TariffCopyView.as_view(), name="tariff_clone"),
+    path('tariff_clone/<int:pk>', TariffCopyView.as_view(), name="tariff_clone"),
     ]

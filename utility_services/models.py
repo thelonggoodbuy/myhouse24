@@ -7,18 +7,27 @@ from appartments.models import Appartment
 class Tariff(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
-    updated_datetime = models.DateTimeField()
-    appartments = models.ManyToManyField(Appartment, verbose_name='квартиры', related_name='tariff')
+    updated_datetime = models.DateTimeField(blank=True, null=True)
+    appartments = models.ManyToManyField(Appartment, verbose_name='квартиры', related_name='tariff', blank=True, null=True)
+
+    def __str__(self):
+        return self.title
 
 
 class TariffCell(models.Model):
-    tariff = models.ForeignKey(Tariff, on_delete=models.SET_NULL, blank=True, null=True)
-    number = models.SmallIntegerField()
-    description = models.TextField()
-    updated_datetime = models.DateTimeField()
+    tariff = models.ForeignKey(Tariff, on_delete=models.CASCADE, blank=True, null=True)
+    number = models.SmallIntegerField(blank=True, null=True)
+    # description = models.TextField()
+    updated_datetime = models.DateTimeField(blank=True, null=True)
     utility_service = models.ForeignKey('UtilityService', on_delete=models.SET_NULL, blank=True, null=True)
     cost_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
-    curency = models.CharField(max_length=200)
+    curency = models.CharField(max_length=200, default='грн',)
+
+    def __str__(self):
+        if self.tariff != None:
+            return f"Ячейка тарифа {self.id}: тариф {self.tariff.title}"
+        else:
+            return f"Ячейка тарифа {self.id}: тариф не обозначен"
 
 
 class UtilityService(models.Model):
@@ -27,6 +36,8 @@ class UtilityService(models.Model):
     appartment = models.ForeignKey(Appartment, on_delete=models.SET_NULL, blank=True, null=True)
     shown_in_counters = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.title
 
 
 

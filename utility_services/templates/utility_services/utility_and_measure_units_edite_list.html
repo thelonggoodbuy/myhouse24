@@ -114,17 +114,17 @@
                                     {% endfor %}
                                     <div class="unit_cell_container">
                                         <p>
-                                            <strong>{{ unit_form.title.label }}</strong>
-                                            <div class="input-group">
-                                                {{ unit_form.title }}
-                                                <span class="input-group-btn" id="delete_button">
-                                                    <button type="button" class="btn btn-default form-row-remove-btn" no-delete-msg="Эта ед.изм. используется в услуге. Удаление невозможно.">
-                                                        <i class="fa fa-trash"></i>
-                                                    </button>                
-                                                </span>
-                                            </div>
-                                            {{ unit_form.DELETE }}
-                                        </p>
+                                        <strong>{{ unit_form.title.label }}</strong>
+                                        <div class="input-group">
+                                            {{ unit_form.title }}
+                                            <span class="input-group-btn" id="delete_button">
+                                                <button type="button" class="btn btn-default form-row-remove-btn" no-delete-msg="Эта ед.изм. используется в услуге. Удаление невозможно.">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>                
+                                            </span>
+                                        </div>
+                                        {{ unit_form.DELETE }}
+                                    </p>
                                     </div>
                                 {% endfor %}
                                 <div id="empty_form_container">

@@ -424,16 +424,12 @@ class AppartmentEditeView(UpdateView):
     def form_invalid(self, main_form, personal_account_form):
         if main_form.errors:
             for field, error in main_form.errors.items():
-                print(field)
-                print(error)
                 error_text = f"{''.join(error)}"
-                print(f'{field}: {error}')
                 messages.error(self.request, error_text)
 
         if personal_account_form.errors:
             for field, error in personal_account_form.errors.items():
                 error_text = f"{''.join(error)}"
-                print(f'{field}: {error}')
                 messages.error(self.request, error_text)
         success_url = self.success_url
         return HttpResponseRedirect(success_url)
@@ -451,8 +447,6 @@ class PersonalAccountsListView(TemplateView):
 
        # datatables serverside logic
         if self.request.is_ajax() and self.request.method == 'GET' and request.GET.get('draw'):
-            print('-----------------------------FILTERINT------------------------------------------------------------------')
-            print(self.request)
             account_data_get_request = request.GET
 
             #search logic 
