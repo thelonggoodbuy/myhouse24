@@ -59,18 +59,13 @@
                             {{ main_form.owner_user }}
                             <div class="help-block"></div>
                         </div>
-                        {% comment %} <div class="form-group">
-                            <label>{{ main_form.tariff.label }}</label>
-                            {{ main_form.tariff }}
-                            <div class="help-block"></div>
-                        </div> {% endcomment %}
                     </div>
 
                     <div class="col-xs-12 col-md-6">
                         <div class="form-group">
-                            <label>{{ form.personal_account.label }}</label>
-                            {{ personal_account_form.number }}
-                            {% comment %} {{ personal_account_form.personal_account_choice }} {% endcomment %}
+                            <label>{{ main_form.personal_account_unbound.label }}</label>
+                            {{ main_form.personal_account_unbound }}
+                            <select id="account_utility_input" class="form-control"></select>
                             <div class="help-block"></div>
                         </div>
                     </div>
@@ -87,16 +82,12 @@
 
                     $('#appartments_change_table').on('change', '#house_dropdown', function(){
                         
-                        //console.log($(this).val())
                         var house_id = $(this).val()
                         $.ajax({
                             url: "{% url 'appartments:appartment_edite' %}",
                             dataType: "json",
                             data: {"house_id": house_id},
                             success: (data) =>{
-                                //console.log(data)
-                                //console.log($("select[name$='floor']"))
-                                //console.log($("select[name$='sections']"))
 
                                 // floors
                                 var floors = data['floors']
@@ -147,21 +138,89 @@
                     //console.log($("select[name$='sections']").find("option:selected").val())
                     //------------------------------------------------------------------------------
 
-                    $('#personal_account_number').select2({
+                    $.ajax({
+                        url: "{% url 'appartments:appartment_edite' %}",
+                            dataType: "json",
+                            data: {"issue_marker": 'initialization_sections_and_floors',
+                                    "current_house": $('#house_dropdown').val()},
+                            success: (data) =>{
+                                for (floor_number of data['extra_floors_list'])
+                                    {
+                                        $("#floor_field > *[value=" + floor_number + "]").hide()
+                                    }
+                                    
+                                for (section_number of data['extra_sections_list'])
+                                    {
+                                        $("#section_field > *[value=" + section_number + "]").hide()
+                                    }
+
+
+                                            }
+                    })
+                    
+
+                    
+                    $('#owner_field').select2({
                         ajax: {
                             url: "{% url 'appartments:appartment_edite' %}",
                             dataType: 'json',
                             data: function(params){
-                                var query = {
-                                    search: params.term,
-                                    type: 'public',
-                                    issue_marker: 'personal_account'
-                                }
+                                if(params.term != undefined && params.term != undefined){
+                                    var query = {
+                                        search: params.term,
+                                        type: 'public',
+                                        issue_marker: 'owner_marker'
+                                    }
+                                    return query;
+                                } else {
+                                    var query = {
+                                        search: params.term,
+                                        type: 'public',
+                                        issue_marker: 'all_owners_marker'
+                                    }
+                                    return query;
+                                }  
                             }
                         }
                     })
-                
 
+                    $('#account_utility_input').select2({
+                        placeholder: "Или выберите из списка",
+                        ajax: {
+                            url: "{% url 'appartments:appartment_edite' %}",
+                            dataType: 'json',
+                            data: function(params){
+                                if(params.term != undefined && params.term != ""){
+                                    var query = {
+                                        search: params.term,
+                                        type: 'public',
+                                        issue_marker: 'account_marker'
+                                    }
+                                    console.log(query)
+                                    return query;
+                                } else {
+                                    var query = {
+                                        search: params.term,
+                                        type: 'public',
+                                        issue_marker: 'all_accounts_marker'
+                                    }
+                                    return query;
+                                }  
+                            }
+                        }
+                    })
+
+                    $(document).on('change', '#account_utility_input', function(){
+                        var choosen_option = $(this).find('option:selected')
+                        if (choosen_option.val()){
+                            console.log(choosen_option.val())
+                            console.log(choosen_option.html())
+                            $('#account_input').val(choosen_option.html())
+
+                            $('#account_utility_input').select2('val', '0')
+                            //$('#account_unformed_input').select2()
+                        }
+                    })
 
 //                    $("#user_change_data_form").validate({
 //                        rules: {

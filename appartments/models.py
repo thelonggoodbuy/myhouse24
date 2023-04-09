@@ -50,7 +50,13 @@ class Appartment(models.Model):
 
     def __str__(self):
         return f'{ self.house }: {self.sections}: {self.floor}: {self.number}'
+    
+    def get_model_fields(model):
+        return model._meta.fields
 
+    @property
+    def get_account_number(self):
+         return self.personal_account.number
 
 class PersonalAccount(models.Model):
     PERSONAL_ACCOUNT_STATUS = (

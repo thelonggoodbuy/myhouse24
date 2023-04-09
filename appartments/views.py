@@ -351,13 +351,43 @@ class AppartmentEditeView(UpdateView):
     
 
     def get(self, request, *args, **kwargs):
+        # select 2 filtering owners
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'owner_marker':
+            if self.request.GET.get('search'):
+                search_data = self.request.GET.get('search')
+                owners_data = list(User.objects.filter(full_name__icontains=search_data).values('id', 'full_name'))
+                for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
+                data = {'results': owners_data}
+                return JsonResponse(data)
 
-        # users search using Select2
-        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'personal_account':
+        # select 2 all owners data
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'all_owners_marker':
+            owners_data = list(User.objects.all().values('id', 'full_name'))
+            for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
+            data = {'results': owners_data}
+            return JsonResponse(data)
+        
 
-            print(self.request.GET.get('issue_marker'))
-            print(self.request.GET)
-            data = {'results': 'test data'}
+
+        # select 2 filtering accounts
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'account_marker':
+            if self.request.GET.get('search'):
+                print('-------SEARCHING-----------')
+                search_data = self.request.GET.get('search')
+                print(f'search data: {search_data}')
+
+                accounts_data = list(PersonalAccount.objects.filter(Q(number__icontains=search_data) or Q(appartment_account__isnull=True))\
+                                                                    .values('id', 'number'))
+                print(accounts_data)
+                for account_dict in accounts_data: account_dict['text'] = account_dict.pop('number')
+                data = {'results': accounts_data}
+                return JsonResponse(data)
+
+        # select 2 all accounts data
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'all_accounts_marker':
+            accounts_data = list(PersonalAccount.objects.filter(appartment_account__isnull=True).values('id', 'number'))
+            for account_dict in accounts_data: account_dict['text'] = account_dict.pop('number')
+            data = {'results': accounts_data}
             return JsonResponse(data)
 
 
@@ -368,69 +398,122 @@ class AppartmentEditeView(UpdateView):
             floors = list(Floor.objects.only('id', 'title').filter(house=house).values('id', 'title'))
             data = {'sections': sections,
                     'floors': floors}
-            return JsonResponse(data)            
+            return JsonResponse(data)
+        
+        if self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'initialization_sections_and_floors':
+            extra_floors = Floor.objects.exclude(house__id = self.request.GET.get('current_house')).values('id')
+            extra_floors_list = []
+            for dict in extra_floors: extra_floors_list.append(dict['id'])
+            extra_sections = Section.objects.exclude(house__id = self.request.GET.get('current_house')).values('id')
+            extra_sections_list = []
+            for dict in extra_sections: extra_sections_list.append(dict['id'])
+            
+            data = {'extra_floors_list': extra_floors_list,
+                    'extra_sections_list': extra_sections_list}
+            return JsonResponse(data)
+        
         else:
-            self.object = self.get_object()
             return super().get(request, *args, **kwargs)
         
 
     def post(self, *args, **kwargs):
         main_form = AppartmentEditeForm(self.request.POST, instance=self.get_object(), prefix='main_form')
-        personal_account_form = AppartmentPersonalAccountEditeForm(self.request.POST, instance=self.get_object().personal_account, prefix='personal_account_form')
-        if (main_form.is_valid() and personal_account_form.is_valid()):
-            return self.form_valid(main_form, personal_account_form)
+        if (main_form.is_valid()):
+            return self.form_valid(main_form)
         else: 
-            return self.form_invalid(main_form, personal_account_form)
+            return self.form_invalid(main_form)
 
+        # main_form = AppartmentEditeForm(self.request.POST, instance=self.get_object(), prefix='main_form')
+        # personal_account_form = AppartmentPersonalAccountEditeForm(self.request.POST, instance=self.get_object().personal_account, prefix='personal_account_form')
+        # if (main_form.is_valid() and personal_account_form.is_valid()):
+        #     return self.form_valid(main_form, personal_account_form)
+        # else: 
+        #     return self.form_invalid(main_form, personal_account_form)
+
+    
+
+    # def get_object(self):
+    #     pk = self.kwargs.get(self.pk_url_kwarg)
+    #     return self.model.objects.select_related('personal_account', 'house', 'sections', 'floor', 'owner_user').get(id=pk)
 
     def get_object(self):
         pk = self.kwargs.get(self.pk_url_kwarg)
-        return self.model.objects.select_related('personal_account', 'house', 'sections', 'floor', 'owner_user').get(id=pk)
-
+        return self.model.objects.select_related('house', 'sections', 'floor').get(id=pk)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['main_form'] = AppartmentEditeForm(instance=self.get_object(), prefix='main_form')
-        context['personal_account_form'] = AppartmentPersonalAccountEditeForm(instance=self.get_object().personal_account, prefix='personal_account_form')
+        context['main_form'] = AppartmentEditeForm(instance=self.object, prefix='main_form')
         return context
 
 
-    def form_valid(self, main_form, personal_account_form):
-        
-        appartment = main_form.save(commit=False)
-        change_account_indicator = personal_account_form.changed_data
+    def form_valid(self, main_form):
 
-        if 'number' in change_account_indicator \
-                    and personal_account_form.cleaned_data['number'] != '':
-            appartment.personal_account = None
-            personal_account_form.save(commit=False)
-            new_account = PersonalAccount(number = personal_account_form.cleaned_data['number'], status='active', balance=0)
-            new_account.save()
-            appartment.personal_account = new_account
+        main_form.save()
+        # appartment = main_form.save(commit=False)
+        # change_account_indicator = personal_account_form.changed_data
 
-        elif 'number' in change_account_indicator \
-                     and personal_account_form.cleaned_data['number'] == '':
+        # if 'number' in change_account_indicator \
+        #             and personal_account_form.cleaned_data['number'] != '':
+        #     appartment.personal_account = None
+        #     personal_account_form.save(commit=False)
+        #     new_account = PersonalAccount(number = personal_account_form.cleaned_data['number'], status='active', balance=0)
+        #     new_account.save()
+        #     appartment.personal_account = new_account
+
+        # elif 'number' in change_account_indicator \
+        #              and personal_account_form.cleaned_data['number'] == '':
             
-            appartment.personal_account = None
+        #     appartment.personal_account = None
             
-        else:
-            appartment.personal_account = personal_account_form.instance
-        appartment.save()
+        # else:
+
+        # personal_account.save()
+        # appartment.personal_account = personal_account_form.instance
+        # appartment.save(commit=True)
         messages.success(self.request, 'Квартира обновлена')
+        # print('------TEST-------------TEST-------------TEST-------------TEST-------------')
+        # print(self.request)
+        # print('------TEST-------------TEST-------------TEST-------------TEST-------------')
         success_url = self.success_url
         return HttpResponseRedirect(success_url)
 
 
-    def form_invalid(self, main_form, personal_account_form):
+    # def form_valid(self, main_form, personal_account_form):
+        
+    #     appartment = main_form.save(commit=False)
+    #     change_account_indicator = personal_account_form.changed_data
+
+    #     if 'number' in change_account_indicator \
+    #                 and personal_account_form.cleaned_data['number'] != '':
+    #         appartment.personal_account = None
+    #         personal_account_form.save(commit=False)
+    #         new_account = PersonalAccount(number = personal_account_form.cleaned_data['number'], status='active', balance=0)
+    #         new_account.save()
+    #         appartment.personal_account = new_account
+
+    #     elif 'number' in change_account_indicator \
+    #                  and personal_account_form.cleaned_data['number'] == '':
+            
+    #         appartment.personal_account = None
+            
+    #     else:
+    #         appartment.personal_account = personal_account_form.instance
+    #     appartment.save()
+    #     messages.success(self.request, 'Квартира обновлена')
+    #     success_url = self.success_url
+    #     return HttpResponseRedirect(success_url)
+
+    def form_invalid(self, main_form):
         if main_form.errors:
             for field, error in main_form.errors.items():
-                error_text = f"{''.join(error)}"
+                
+                error_text = f"{''.join(field).join(error)}"
                 messages.error(self.request, error_text)
 
-        if personal_account_form.errors:
-            for field, error in personal_account_form.errors.items():
-                error_text = f"{''.join(error)}"
-                messages.error(self.request, error_text)
+        # if personal_account_form.errors:
+        #     for field, error in personal_account_form.errors.items():
+        #         error_text = f"{''.join(error)}"
+        #         messages.error(self.request, error_text)
         success_url = self.success_url
         return HttpResponseRedirect(success_url)
     

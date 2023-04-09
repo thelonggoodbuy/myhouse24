@@ -113,6 +113,18 @@ class AppartmentEditeForm(forms.ModelForm):
         self.fields['owner_user'].queryset = User.objects.all()
         self.fields['sections'].queryset = Section.objects.select_related('house').all()
         self.fields['floor'].queryset =  Floor.objects.select_related('house').all()
+
+        # self.fields['sections'].queryset = Section.objects.select_related('house').filter(house=self.instance.house)
+        # self.fields['floor'].queryset =  Floor.objects.select_related('house').filter(house=self.instance.house)
+
+        if self.instance.personal_account:
+            self.fields['personal_account_unbound'].initial = self.instance.personal_account.number
+            self.initial_personal_account = self.instance.personal_account.number
+        elif self.instance.personal_account == None:
+            self.fields['personal_account_unbound'].initial = None
+            self.initial_personal_account = None
+
+        
     
 
     number = forms.CharField(required=False, label="Номер квартиры",
@@ -128,18 +140,54 @@ class AppartmentEditeForm(forms.ModelForm):
                                                           'id': 'house_dropdown'}))
     
     sections = forms.ModelChoiceField(required=False, label="Секция", queryset=None,
-                               widget=forms.Select(attrs={'class':'form-control'}))
+                               widget=forms.Select(attrs={'class':'form-control', 'id': 'section_field'}))
     
     floor = forms.ModelChoiceField(required=False, label="Этаж", queryset=None,
-                               widget=forms.Select(attrs={'class':'form-control'}))
+                               widget=forms.Select(attrs={'class':'form-control', 'id': 'floor_field'}))
     
     owner_user = forms.ModelChoiceField(required=False, label="Владелец квартиры", queryset=None,
                                widget=forms.Select(attrs={'class':'form-control', 'id': 'owner_field'}))
     
+    personal_account_unbound = forms.CharField(required=False, label="Лицевой счет",
+                               widget=forms.TextInput(attrs={'class':'form-control', 'id': 'account_input'}))
+
+    
+    def save(self, commit=True):
+        current_form = super(AppartmentEditeForm, self).save(commit=False)
+        current_form_cleaned = super(AppartmentEditeForm, self).clean()
+        print(current_form_cleaned['personal_account_unbound'])
+
+        if self.initial_personal_account and current_form_cleaned['personal_account_unbound'] == self.initial_personal_account:
+            print('option 1')
+            current_form.save(update_fields=["number", "area", "house", "sections", "floor",\
+                                            "owner_user"])
+            
+        elif self.initial_personal_account == None and current_form_cleaned['personal_account_unbound'] == '':
+            print('option 2')
+            current_form.save(update_fields=["number", "area", "house", "sections", "floor",\
+                                            "owner_user"])
+
+        else:
+            print('option 3')
+            try:
+                choosen_account = PersonalAccount.objects.get(number=current_form_cleaned['personal_account_unbound'])
+            except ObjectDoesNotExist:
+                choosen_account = PersonalAccount(number=current_form_cleaned['personal_account_unbound'],\
+                                                       status='active',
+                                                       balance = 00.00)
+                choosen_account.save()
+
+            current_form.personal_account = choosen_account
+            current_form.save(update_fields=["number", "area", "house", "sections", "floor",\
+                                                "owner_user", "personal_account"])
+
+        return current_form
+    
+
     class Meta:
         model = Appartment
         fields = ("number", "area", "house", "sections", "floor",\
-                  "owner_user")
+                  "owner_user", "personal_account")
     
   
 
