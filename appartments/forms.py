@@ -2,6 +2,8 @@ from django import forms
 from .models import House, HouseAdditionalImage, Section, Floor, PersonalAccount
 from users.models import User, Role
 from .models import Appartment
+from utility_services.models import Tariff
+
 from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.template.loader import render_to_string
@@ -113,6 +115,7 @@ class AppartmentEditeForm(forms.ModelForm):
         self.fields['owner_user'].queryset = User.objects.all()
         self.fields['sections'].queryset = Section.objects.select_related('house').all()
         self.fields['floor'].queryset =  Floor.objects.select_related('house').all()
+        # self.fields['tariff'].queryset = Tariff.objects.all()
 
         # self.fields['sections'].queryset = Section.objects.select_related('house').filter(house=self.instance.house)
         # self.fields['floor'].queryset =  Floor.objects.select_related('house').filter(house=self.instance.house)
@@ -150,6 +153,7 @@ class AppartmentEditeForm(forms.ModelForm):
     
     personal_account_unbound = forms.CharField(required=False, label="Лицевой счет",
                                widget=forms.TextInput(attrs={'class':'form-control', 'id': 'account_input'}))
+    
 
     
     def save(self, commit=True):
@@ -158,28 +162,31 @@ class AppartmentEditeForm(forms.ModelForm):
         print(current_form_cleaned['personal_account_unbound'])
 
         if self.initial_personal_account and current_form_cleaned['personal_account_unbound'] == self.initial_personal_account:
-            print('option 1')
-            current_form.save(update_fields=["number", "area", "house", "sections", "floor",\
-                                            "owner_user"])
+            if commit:
+                print('option 1')
+                current_form.save(update_fields=["number", "area", "house", "sections", "floor",\
+                                                "owner_user"])
             
         elif self.initial_personal_account == None and current_form_cleaned['personal_account_unbound'] == '':
-            print('option 2')
-            current_form.save(update_fields=["number", "area", "house", "sections", "floor",\
-                                            "owner_user"])
+            if commit:
+                print('option 2')
+                current_form.save(update_fields=["number", "area", "house", "sections", "floor",\
+                                                "owner_user"])
 
         else:
             print('option 3')
-            try:
-                choosen_account = PersonalAccount.objects.get(number=current_form_cleaned['personal_account_unbound'])
-            except ObjectDoesNotExist:
-                choosen_account = PersonalAccount(number=current_form_cleaned['personal_account_unbound'],\
-                                                       status='active',
-                                                       balance = 00.00)
-                choosen_account.save()
+            if commit:
+                try:
+                    choosen_account = PersonalAccount.objects.get(number=current_form_cleaned['personal_account_unbound'])
+                except ObjectDoesNotExist:
+                    choosen_account = PersonalAccount(number=current_form_cleaned['personal_account_unbound'],\
+                                                        status='active',
+                                                        balance = 00.00)
+                    choosen_account.save()
 
-            current_form.personal_account = choosen_account
-            current_form.save(update_fields=["number", "area", "house", "sections", "floor",\
-                                                "owner_user", "personal_account"])
+                current_form.personal_account = choosen_account
+                current_form.save(update_fields=["number", "area", "house", "sections", "floor",\
+                                                    "owner_user", "personal_account"])
 
         return current_form
     
@@ -191,18 +198,31 @@ class AppartmentEditeForm(forms.ModelForm):
     
   
 
-class AppartmentPersonalAccountEditeForm(forms.ModelForm):
+class AppartmentTariffForm(forms.ModelForm):
+    # def __init__(self, *args, **kwargs):
+    #     super(AppartmentEditeForm, self).__init__(*args, **kwargs)
+    #     self.fields['title'].queryset = Tariff.objects.all()
+
+        # if self.instance.personal_account:
+        #     self.fields['personal_account_unbound'].initial = self.instance.personal_account.number
+        #     self.initial_personal_account = self.instance.personal_account.number
 
 
-    number = forms.CharField(required=False, label="Лицевой счет",
-                               widget=forms.TextInput(attrs={'class':'form-control',
-                                                             'id': 'personal_account_number'}))
+    title = forms.ModelChoiceField(required=False, label="Тариф", queryset=Tariff.objects.all(),
+                               widget=forms.Select(attrs={'class':'form-control', 'id': 'appartment_tariff'}))
     
+    # title = forms.CharField(required=False, label="Тариф",
+    #                            widget=forms.TextInput(attrs={'class':'form-control', 'id': 'appartment_tariff'}))
     class Meta:
-        model = PersonalAccount
-        fields = ('number',)
+        model = Tariff
+        fields = ('title',)
 
-
+AppartmentTariffForset = forms.modelformset_factory(model=Tariff, 
+                                                            form=AppartmentTariffForm, 
+                                                            can_delete=False, 
+                                                            extra=0, 
+                                                            min_num=1, 
+                                                            max_num=1)
 
 class OwnerUpdateForm(forms.ModelForm):
 

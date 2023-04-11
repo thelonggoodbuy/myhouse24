@@ -9,9 +9,11 @@ from django.views.generic.edit import DeleteView, FormView, UpdateView, CreateVi
 from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponseRedirect, JsonResponse
+from django.db.models import F, Q, OuterRef, Subquery, CharField, Value, Count, Sum, DecimalField
 
 
-from .models import UnitOfMeasure, UtilityService, Tariff, TariffCell
+from .models import UnitOfMeasure, UtilityService, Tariff, TariffCell, Counter
+from appartments.models import House, Section
 from .forms import HouseEditeFormSet, UtilityServiceEditeFormSet, TariffMainForm, TariffCellFormSet, CreateTariffCellFormSet, TariffCellForm
 
 # --------------------------------------------------------------------------------------
@@ -261,4 +263,221 @@ class TariffCopyView(TariffCreateView):
                                                         extra=len(initial_list_of_dictionary), 
                                                         )
         context['tariff_cell_formset'] = CopyTariffCellFormSet(initial = initial_list_of_dictionary, prefix="tariff_cell")
+        return context
+    
+
+# ------------------------------------------------------------------------
+# -----------------------------COUNTER-CRUD-------------------------------
+# ------------------------------------------------------------------------
+class CounterListView(TemplateView):
+    template_name = "utility_services/counter_list.html"
+
+    def get(self, request, *args, **kwargs):
+
+        Q_list = []
+
+        # get sections and floors data from dropboxes
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('choosen_house') != None:
+            house_data = House.objects.get(title=self.request.GET.get('choosen_house'))
+            section_data = list(house_data.sections.values('id', 'title'))
+            data = {'section_data': section_data}
+            return JsonResponse(data)
+        
+        if request.GET.get('columns[0][search][value]'):
+            if request.GET.get('columns[0][search][value]') != 'all_houses':
+                Q_list.append(Q(appartment__house__id=request.GET.get('columns[0][search][value]')))
+
+
+        if request.GET.get('columns[1][search][value]'):
+            if request.GET.get('columns[1][search][value]') != 'empty_sect':
+                choosed_section = Section.objects.get(id=request.GET.get('columns[1][search][value]'))
+                Q_list.append(Q(appartment__sections=choosed_section))
+
+
+        if request.GET.get('columns[2][search][value]'):
+            if request.GET.get('columns[2][search][value]'):
+                number = request.GET.get('columns[2][search][value]')
+                Q_list.append(Q(appartment__number__icontains=number))
+
+
+        if request.GET.get('columns[3][search][value]'):
+            if request.GET.get('columns[3][search][value]'):
+                title = request.GET.get('columns[3][search][value]')
+                Q_list.append(Q(title__icontains=title))
+
+
+        # datatables serverside logic
+        if self.request.is_ajax() and self.request.method == 'GET':
+            counter_get_request = request.GET
+
+
+            # initial data
+            draw = int(counter_get_request.get("draw"))
+            start = int(counter_get_request.get("start"))
+            length = int(counter_get_request.get("length"))
+
+    #         # order logic
+    #         order_column_task = 'number'
+    #         if appartments_data_get_request.get('order[0][column]'):
+    #             number_column = appartments_data_get_request.get('order[0][column]')
+    #             order_column_task = appartments_data_get_request.get(f'columns[{number_column}][name]')
+    #             if appartments_data_get_request.get('order[0][dir]') == 'desc':
+    #                 order_column_task = f"-{order_column_task}"
+
+            # raw_data = Tariff.objects.all()
+            raw_data = Counter.objects.filter(*Q_list)\
+                                .only('appartment__house__title',\
+                                        'appartment__sections__title',\
+                                        'appartment__number',\
+                                        'title',\
+                                        'appartment__sections',\
+                                        'counter_reading__date',\
+                                        'unit_of_measure__title')\
+                                .order_by()\
+                                .values('appartment__house__title',\
+                                        'appartment__sections__title',\
+                                        'appartment__number',\
+                                        'title',\
+                                        'counter_reading__date',\
+                                        'unit_of_measure__title',\
+                                        'appartment_id',)
+
+            data = list(raw_data)
+
+    #         # paginator here
+            paginator = Paginator(data, length)
+            page_number = start / length + 1
+            try:
+                obj = paginator.page(page_number).object_list
+            except PageNotAnInteger:
+                obj = paginator(1).object_list
+            except EmptyPage:
+                obj = paginator.page(1).object_list
+
+            total = len(data)
+            records_filter = total
+
+
+            response = {
+                'data': obj,
+                'draw': draw,
+                'recordsTotal:': total,
+                'recordsFiltered': records_filter,
+            }
+            return JsonResponse(response, safe=False)
+    
+        else:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['houses'] = House.objects.all()
+        return context
+    
+
+class CounterReadingsPerAppartmentListView(TemplateView):
+    template_name = "utility_services/counter_readings_per_appartment_list.html"
+
+    # def get(self, request, *args, **kwargs):
+
+    #     Q_list = []
+
+    #     # get sections and floors data from dropboxes
+    #     if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('choosen_house') != None:
+    #         house_data = House.objects.get(title=self.request.GET.get('choosen_house'))
+    #         section_data = list(house_data.sections.values('id', 'title'))
+    #         data = {'section_data': section_data}
+    #         return JsonResponse(data)
+        
+    #     if request.GET.get('columns[0][search][value]'):
+    #         if request.GET.get('columns[0][search][value]') != 'all_houses':
+    #             Q_list.append(Q(appartment__house__id=request.GET.get('columns[0][search][value]')))
+
+
+    #     if request.GET.get('columns[1][search][value]'):
+    #         if request.GET.get('columns[1][search][value]') != 'empty_sect':
+    #             choosed_section = Section.objects.get(id=request.GET.get('columns[1][search][value]'))
+    #             Q_list.append(Q(appartment__sections=choosed_section))
+
+
+    #     if request.GET.get('columns[2][search][value]'):
+    #         if request.GET.get('columns[2][search][value]'):
+    #             number = request.GET.get('columns[2][search][value]')
+    #             Q_list.append(Q(appartment__number__icontains=number))
+
+
+    #     if request.GET.get('columns[3][search][value]'):
+    #         if request.GET.get('columns[3][search][value]'):
+    #             title = request.GET.get('columns[3][search][value]')
+    #             Q_list.append(Q(title__icontains=title))
+
+
+    #     # datatables serverside logic
+    #     if self.request.is_ajax() and self.request.method == 'GET':
+    #         counter_get_request = request.GET
+
+
+    #         # initial data
+    #         draw = int(counter_get_request.get("draw"))
+    #         start = int(counter_get_request.get("start"))
+    #         length = int(counter_get_request.get("length"))
+
+    # #         # order logic
+    # #         order_column_task = 'number'
+    # #         if appartments_data_get_request.get('order[0][column]'):
+    # #             number_column = appartments_data_get_request.get('order[0][column]')
+    # #             order_column_task = appartments_data_get_request.get(f'columns[{number_column}][name]')
+    # #             if appartments_data_get_request.get('order[0][dir]') == 'desc':
+    # #                 order_column_task = f"-{order_column_task}"
+
+    #         # raw_data = Tariff.objects.all()
+    #         raw_data = Counter.objects.filter(*Q_list)\
+    #                             .only('appartment__house__title',\
+    #                                     'appartment__sections__title',\
+    #                                     'appartment__number',\
+    #                                     'title',\
+    #                                     'appartment__sections',\
+    #                                     'counter_reading__date',\
+    #                                     'unit_of_measure__title')\
+    #                             .order_by()\
+    #                             .values('appartment__house__title',\
+    #                                     'appartment__sections__title',\
+    #                                     'appartment__number',\
+    #                                     'title',\
+    #                                     'counter_reading__date',\
+    #                                     'unit_of_measure__title')
+
+    #         data = list(raw_data)
+
+    # #         # paginator here
+    #         paginator = Paginator(data, length)
+    #         page_number = start / length + 1
+    #         try:
+    #             obj = paginator.page(page_number).object_list
+    #         except PageNotAnInteger:
+    #             obj = paginator(1).object_list
+    #         except EmptyPage:
+    #             obj = paginator.page(1).object_list
+
+    #         total = len(data)
+    #         records_filter = total
+
+
+    #         response = {
+    #             'data': obj,
+    #             'draw': draw,
+    #             'recordsTotal:': total,
+    #             'recordsFiltered': records_filter,
+    #         }
+    #         return JsonResponse(response, safe=False)
+    
+    #     else:
+    #         context = self.get_context_data(**kwargs)
+    #         return self.render_to_response(context)
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['houses'] = House.objects.all()
+        # context['appartment'] = self.get_objects()
         return context

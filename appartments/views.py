@@ -1,6 +1,7 @@
 from copy import deepcopy
 import operator
 from functools import reduce
+from django import forms
 
 
 from django.db import models
@@ -24,11 +25,13 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import ImproperlyConfigured
 
 
+
 from .models import House, HouseAdditionalImage, Section, Appartment, Floor, PersonalAccount
 from users.models import User
+from utility_services.models import Tariff
 
 from .forms import HouseEditeForm, HouseEditeFormSetImage, SectionEditeFormSet, FloorEditeFormSet, ResponsibilitiesEditeFormset,\
-                    AppartmentEditeForm, AppartmentPersonalAccountEditeForm, OwnerUpdateForm
+                    AppartmentEditeForm, OwnerUpdateForm, AppartmentTariffForm, AppartmentTariffForset
 
 
 # view for testing role using
@@ -418,10 +421,12 @@ class AppartmentEditeView(UpdateView):
 
     def post(self, *args, **kwargs):
         main_form = AppartmentEditeForm(self.request.POST, instance=self.get_object(), prefix='main_form')
-        if (main_form.is_valid()):
-            return self.form_valid(main_form)
+        appartment_tariff_formset = AppartmentTariffForset(self.request.POST, queryset=Tariff.objects.filter(appartments=self.get_object()), prefix='appartment_tariff_form')
+
+        if (main_form.is_valid() and appartment_tariff_formset.is_valid()):
+            return self.form_valid(main_form, appartment_tariff_formset)
         else: 
-            return self.form_invalid(main_form)
+            return self.form_invalid(main_form, appartment_tariff_formset)
 
         # main_form = AppartmentEditeForm(self.request.POST, instance=self.get_object(), prefix='main_form')
         # personal_account_form = AppartmentPersonalAccountEditeForm(self.request.POST, instance=self.get_object().personal_account, prefix='personal_account_form')
@@ -440,40 +445,31 @@ class AppartmentEditeView(UpdateView):
         pk = self.kwargs.get(self.pk_url_kwarg)
         return self.model.objects.select_related('house', 'sections', 'floor').get(id=pk)
 
+
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['appartment_tariff_formset'] = AppartmentTariffForset(queryset=Tariff.objects.filter(appartments=self.get_object()), prefix='appartment_tariff_form')
         context['main_form'] = AppartmentEditeForm(instance=self.object, prefix='main_form')
         return context
 
 
-    def form_valid(self, main_form):
+    def form_valid(self, main_form, appartment_tariff_formset):
 
-        main_form.save()
-        # appartment = main_form.save(commit=False)
-        # change_account_indicator = personal_account_form.changed_data
+        appartment = main_form.save(commit=False)
+        for appartment_tariff_form in appartment_tariff_formset:
+            tariff = appartment_tariff_form.save(commit=False)
+            tariff.appartment = None
+            tariff.appartment = appartment
+            tariff.save()
+            # tariff.add(appartment_tariff_form)
+            # appartment_tariff_form.save()
+            # appartment.add(appartment_tariff_form)
 
-        # if 'number' in change_account_indicator \
-        #             and personal_account_form.cleaned_data['number'] != '':
-        #     appartment.personal_account = None
-        #     personal_account_form.save(commit=False)
-        #     new_account = PersonalAccount(number = personal_account_form.cleaned_data['number'], status='active', balance=0)
-        #     new_account.save()
-        #     appartment.personal_account = new_account
 
-        # elif 'number' in change_account_indicator \
-        #              and personal_account_form.cleaned_data['number'] == '':
-            
-        #     appartment.personal_account = None
-            
-        # else:
 
-        # personal_account.save()
-        # appartment.personal_account = personal_account_form.instance
-        # appartment.save(commit=True)
+        appartment.save()
         messages.success(self.request, 'Квартира обновлена')
-        # print('------TEST-------------TEST-------------TEST-------------TEST-------------')
-        # print(self.request)
-        # print('------TEST-------------TEST-------------TEST-------------TEST-------------')
         success_url = self.success_url
         return HttpResponseRedirect(success_url)
 
@@ -503,17 +499,19 @@ class AppartmentEditeView(UpdateView):
     #     success_url = self.success_url
     #     return HttpResponseRedirect(success_url)
 
-    def form_invalid(self, main_form):
+    def form_invalid(self, main_form, appartment_tariff_formset):
         if main_form.errors:
             for field, error in main_form.errors.items():
                 
                 error_text = f"{''.join(field).join(error)}"
                 messages.error(self.request, error_text)
 
-        # if personal_account_form.errors:
-        #     for field, error in personal_account_form.errors.items():
-        #         error_text = f"{''.join(error)}"
-        #         messages.error(self.request, error_text)
+        for tariff_form in appartment_tariff_formset:
+            if tariff_form.errors:
+                for field, error in tariff_form.errors.items():
+                    error_text = f"{''.join(error)}"
+                    print(f"{field}: {error}")
+                    messages.error(self.request, error_text)
         success_url = self.success_url
         return HttpResponseRedirect(success_url)
     
@@ -868,3 +866,5 @@ class CreteNewUser(CreateView):
                 error_text = f"{''.join(error)}"
                 messages.error(self.request, error_text)
         return self.render_to_response(self.get_context_data(form=form))
+
+

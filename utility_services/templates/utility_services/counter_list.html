@@ -63,40 +63,21 @@
                         </div>
                         <div id="w0" class="grid-view">
                             <div class="box-body table-responsive no-padding">
-                                <table class="table table-bordered table-hover table-striped linkedRow" id="owners_list_table">
+                                <table class="table table-bordered table-hover table-striped linkedRow" id="tariff_list_table">
                                     <thead>
                                         <tr id="order_links">
-                                            <th sort-index="0" id="ID">ID</th>
-                                            <th sort-index="1" id="full_name">ФИО</th>
-                                            <th sort-index="2" id="phone">Телефон</th>
-                                            <th sort-index="3" id="email">Email</th>
-                                            <th sort-index="4" id="house">Дом</th>
-                                            <th sort-index="5" id="appartment">квартира(ы)</th>
-                                            <th sort-index="6" id="added">Добавлен</th>
-                                            <th sort-index="7" id="status">Статус</th>
-                                            <th sort-index="8" id="debt">долг</th>
+                                            <th sort-index="0" id="house">Дом</th>
+                                            <th sort-index="1" id="section">Секция</th>
+                                            <th sort-index="2" id="№_appartment">№ квартиры</th>
+                                            <th sort-index="3" id="counter">Счетчик</th>
+                                            <th sort-index="4" id="current_readings">Текущие показания</th>
+                                            <th sort-index="5" id="unit_of_measure">Ед. изм.</th>
                                             <th>&nbsp;</th>
                                         </tr>
                                         <tr class="filters">
 
                                             <td>
-                                                <input colnumb="0" type="text" class="form-control" placeholder="" id="ID">
-                                            </td>
-
-                                            <td>
-                                                <input colnumb="1" type="text" class="form-control" placeholder="" id="full_name">
-                                            </td>
-
-                                            <td>
-                                                <input colnumb="2" type="text" class="form-control" placeholder="" id="phone">
-                                            </td>
-
-                                            <td>
-                                                <input colnumb="3" type="text" class="form-control" placeholder="" id="email">
-                                            </td>
-
-                                            <td>
-                                                <select colnumb="4" class="form-control" placeholder="" id="choose_house">
+                                                <select colnumb="0" class="form-control" placeholder="" id="choose_house">
                                                     <option id="all_houses"></option>
                                                     {% for house in houses %} 
                                                         <option id="{{ house.id }}">{{ house.title }}</option>
@@ -105,29 +86,24 @@
                                             </td>
 
                                             <td>
-                                                <input colnumb="5" type="text" class="form-control" placeholder="" id="appartment">
-                                            </td>
-
-                                            <td>
-                                                <input colnumb="6" type="text" class="form-control datepicker_added" placeholder="" id="added">
-                                            </td>
-
-                                            <td>
-                                                <select colnumb="7" class="form-control" id="choose_status">
-                                                    <option id="all_status"></option>
-                                                    <option id="active">активен</option>
-                                                    <option id="new">новый</option>
-                                                    <option id="disable">отключен</option>
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <select colnumb="8" id="choose_balance" class="form-control">
-                                                    <option id="all_balance">ВСЕ</option>
-                                                    <option id="debt">ДА</option>
-                                                  
+                                                <select colnumb="1" id="choose_section" class="form-control" placeholder="выберите дом">
+                                                    <option>выберите дом</option>
                                                 </select>
                                             </td>
 
+                                            <td>
+                                                <input colnumb="2" type="text" class="form-control" placeholder="" id="№_appartment">
+                                            </td>
+
+                                            <td>
+                                                <input colnumb="3" type="text" class="form-control" placeholder="" id="counter">
+                                            </td>
+                                            <td>
+                                                &nbsp;
+                                            </td>
+                                            <td>
+                                                &nbsp;
+                                            </td>
                                             <td>
                                                 &nbsp;
                                             </td>
@@ -169,7 +145,7 @@ $(document).ready(function () {
       };
 
 
-        var table = $('#owners_list_table').DataTable({
+        var table = $('#tariff_list_table').DataTable({
             "initComplete": function(){
 
                 //logic for input search element
@@ -207,14 +183,14 @@ $(document).ready(function () {
             "scrollX": true,
             "ajax": {
                 "type": "GET",
-                "url": "{% url 'appartments:owner_list' %}",
+                "url": "{% url 'utility_services:counter_list' %}",
                 "dataSrc": "data",
                 "dataType": "json",
             },
             "columns": [
-                {"data": "id", "name": "id", "width": "50pt"},
-                {"data": "full_name", "name": "full_name", "width": "200pt"},
-                {"data": "phone", "name": "phone", "width": "100pt", render: function (data, type, row, meta) 
+                {"data": "appartment__house__title", "name": "appartment__house__title", "width": "650pt"},
+                {"data": "appartment__sections__title", "name": "appartment__sections__title", "width": "550pt"},
+                {"data": "appartment__number", "name": "appartment__number", "width": "100pt", render: function (data, type, row, meta) 
                                                                                         {if (data == null)
                                                                                             {return '(не задано)'
                                                                                         } else {
@@ -222,74 +198,37 @@ $(document).ready(function () {
                     }
                 }
                 },
-                {"data": "email", "name": "email", "width": "100pt", render: function (data, type, row, meta)
+                {"data": "title", "name": "title", "width": "300pt", render: function (data, type, row, meta)
                                                                                         {if (data == null)
                                                                                             {return '(не задано)'
                                                                                         } else {
                                                                                             return data}
                                                                                         }
                 },
-                {"data": "house_in_owning", "name": "house_in_owning", "width": "100pt", render: function (data, type, row, meta)
-                                                                                        {if (data == null)
-                                                                                            {return '(не задано)'
-                                                                                        } else {
-                                                                                            houses_html = ''
-                                                                                            for (house of data){
-                                                                                                houses_html += `<p><a href="#">${house}</a></p>`
-                                                                                            }
-                                                                                            return houses_html}
-                                                                                        }
+                {"data": "counter_reading__date", "name": "counter_reading__date", "width": "75pt", render: function (data, type, row, meta)
+                                                                                                                            {if (data == null)
+                                                                                                                                {return '(не задано)'
+                                                                                                                            } else {
+                                                                                                                                return data}
+                                                                                                                            }
                 },
                 
-                {"data": "appartments_in_owning", "name": "appartments_in_owning", "width": "100pt", render: function (data, type, row, meta) 
-                                                                                        {if (data == null)
-                                                                                            {return '(не задано)'
-                                                                                        } else {
-                                                                                            owning_html = ''
-                                                                                            for (owning of data)
-                                                                                            {
-                                                                                                var owning_arr = owning.match(/\[(.*?)\]/g)
-                                                                                                var id = owning_arr[0].replace(/[\[\]']+/g, '');
-                                                                                                var house = owning_arr[1].replace(/[\[\]']+/g, '');
-                                                                                                var number = owning_arr[2].replace(/[\[\]']+/g, '');
-                                                                                                owning_html += `<p><a href="#" id=${id}>${house}, ${number}</a></p>`
-                                                                                            }
-                                                                                            return owning_html}
-                    }
-                },
-                {"data": "created_at", "name": "created_at", "width": "100pt", render: function (data, type, row, meta) 
+
+                {"data": "unit_of_measure__title", "name": "unit_of_measure__title", "width": "75pt", render: function (data, type, row, meta) 
                                                                                         {if (data == null)
                                                                                             {return '(нет счета)'
                                                                                         } else {
                                                                                             return data}
                     }
                 },
-                {"data": "status", "name": "status", "width": "100pt", render: function (data, type, row, meta) 
-                                                                                        {if (data == null)
-                                                                                            {return '(нет счета)'
-                                                                                        } else {
-                                                                                            return data}
-                    }
-                },
-                {"data": "current_balance", "name": "current_balance",
-                                                    "width": "100pt", render: function (data, type, row, meta) 
-                                                                                        {if (data == null)
-                                                                                            {return '(нет счета)'
-                                                                                        } else {
-                                                                                            return data}
-                    }
-                },
-                {"data": "", "width": "200pt", render: function ( data, type, row, meta ) 
+                {"data": "", "width": "125pt", render: function ( data, type, row, meta ) 
                                         { prerendered_last_cell = "<div id='buttons_interaction'>\
                                                     <div class='col=12'>\
-                                                        <a class='btn btn-default btn-sm' href='#' title='Отправить сообщение' data-toggle='tooltip'>\
-                                                            <i class='fa fa-envelope'></i>\
+                                                        <a class='btn btn-default btn-sm' href='#' title='Снять новое показание счетчика' data-toggle='tooltip'>\
+                                                            <i class='fa fa-dashboard'></i>\
                                                         </a>\
-                                                        <a class='btn btn-default btn-sm' title='Удалить' data-toggle='tooltip' id='delete_button'>\
-                                                            <i class='fa fa-trash'></i>\
-                                                        </a>\
-                                                        <a class='btn btn-default btn-sm' title='Редактировать' data-toggle='tooltip' id='edite_button'>\
-                                                            <i class='fa fa-pencil'></i>\
+                                                        <a class='btn btn-default btn-sm' href='#' title='Открыть историю показаний для счетчика' data-toggle='tooltip' id='delete_button'>\
+                                                            <i class='fa fa-eye'></i>\
                                                         </a>\
                                                         </div>\
                                                     </div>";
@@ -307,7 +246,11 @@ $(document).ready(function () {
 //                {'orderable': false, targets: 5},
 //                {'orderable': false, targets: 6},
 //            ],
-            "rowId": 'id',
+            "rowId": 'appartment_id',
+            "createdRow": function( row, data, dataIndex ) {
+                $('td:eq(4)', row).css({'background-color':'#DFD5'})
+                $('td:eq(5)', row).css({'background-color':'#DFD5'})
+              }
             
         });
 
@@ -334,7 +277,7 @@ $(document).ready(function () {
         var choosen_house = $(this).find('option:selected').val()
         if(choosen_house){
             $.ajax({
-                url: "{% url 'appartments:personal_accounts_list' %}",
+                url: "{% url 'utility_services:counter_list' %}",
                 type: "GET",
                 data: {
                     'choosen_house': choosen_house,
@@ -342,7 +285,13 @@ $(document).ready(function () {
                 dataType: "json",
                 success: (data) => {
 
-                    var sections_arr = data["sections"]
+                    console.log(data)
+
+                    var sections_arr = data["section_data"]
+
+                    console.log(data)
+
+                    
                     var additional_section_html = "<option id='empty_sect'></option>"
                     for (section of sections_arr){
                         additional_section_html +=`<option id=${section["id"]}>${section["title"]}</option>`
@@ -357,38 +306,12 @@ $(document).ready(function () {
             }
     })
 
-    
-
-    //options data for owners
-    $('#choose_owner').select2({
-        ajax: {
-            url: "{% url 'appartments:personal_accounts_list' %}",
-            dataType: 'json',
-            data: function(params){
-                if(params.term != undefined && params.term != undefined){
-                    var query = {
-                        search: params.term,
-                        type: 'public',
-                        issue_marker: 'owners'
-                    }
-                    return query;
-                } else {
-                    var query = {
-                        search: params.term,
-                        type: 'public',
-                        issue_marker: 'all_owners'
-                    }
-                    return query;
-                }  
-            }
-        }
-    })
 
     
-    $("input[class$='datepicker_added']").datepicker({
-        format: "dd.mm.yyyy",
-        language: 'ru'
-    })
+//    $("input[class$='datepicker_added']").datepicker({
+//        format: "dd.mm.yyyy",
+//        language: 'ru'
+//    })
 
     //change row coursor
 //    table.on('mouseover', "a[id^='order-link']", function(){
@@ -404,54 +327,54 @@ $(document).ready(function () {
 
 
     //cleaning searh filters
-    $('.box-header').on('click', '#clear_filters', function () {
-        $("*[colnumb]").val('').change()
-    } ); 
+//    $('.box-header').on('click', '#clear_filters', function () {
+//        $("*[colnumb]").val('').change()
+//    } ); 
 
 
     //reversion logic for row except links to send inviting, deleting and editing
-    table.on('click', 'tbody > tr > td', function () {
-        if(
-            $(this).find("div").attr("id") != "buttons_interaction"
-            )
-        {
-            var basic_url = "{% url 'appartments:owner_detail' %}"
-            var url_index = table.row(this).id().toString();
-            document.location.href = basic_url + url_index;
-        }
-    } );
+//    table.on('click', 'tbody > tr > td', function () {
+//        if(
+//            $(this).find("div").attr("id") != "buttons_interaction"
+//            )
+//        {
+//            var basic_url = "{% url 'appartments:owner_detail' %}"
+//            var url_index = table.row(this).id().toString();
+//            document.location.href = basic_url + url_index;
+//        }
+//    } );
 
 
     // delete and confirm display lofic
-    $("#myDialog").dialog({
-        autoOpen  : false,
-        modal     : true,
-        title     : "avadamedia.myhoise24",
-        buttons   : {
-                    'удалить квартиру' : function() {
-                        var textValue = $('#myTextBox').val();
-                        var basic_url = "{% url 'appartments:owner_delete' %}"
-                        var row_number = $(this).data('row_number')
-                        document.location.href = basic_url + row_number;
-                    },
-                    'отмена' : function() {
-                        $(this).dialog('close');
-                    }
-                    }
-    });
+//    $("#myDialog").dialog({
+//        autoOpen  : false,
+//        modal     : true,
+//        title     : "avadamedia.myhoise24",
+//        buttons   : {
+//                    'удалить квартиру' : function() {
+//                        var textValue = $('#myTextBox').val();
+//                        var basic_url = "{% url 'appartments:owner_delete' %}"
+//                        var row_number = $(this).data('row_number')
+//                        document.location.href = basic_url + row_number;
+//                    },
+//                    'отмена' : function() {
+//                        $(this).dialog('close');
+//                    }
+//                    }
+//    });
 
 
-    table.on('click', '#delete_button', function(){
-        var row_number = $(this).closest('tr').attr('id')
-        $("#myDialog").text(`Удалить квартиру с id ${row_number}?`).data('row_number', row_number).dialog("open");
-    })
+//    table.on('click', '#delete_button', function(){
+//        var row_number = $(this).closest('tr').attr('id')
+//        $("#myDialog").text(`Удалить квартиру с id ${row_number}?`).data('row_number', row_number).dialog("open");
+//    })
 
 
-    table.on('click', '#edite_button', function(){
-        var row_number = $(this).closest('tr').attr('id')
-        var basic_url = "{% url 'appartments:owner_edite' %}"
-        document.location.href = basic_url + row_number;
-    })
+//    table.on('click', '#edite_button', function(){
+//        var row_number = $(this).closest('tr').attr('id')
+//        var basic_url = "{% url 'appartments:owner_edite' %}"
+//        document.location.href = basic_url + row_number;
+//    })
 
 
     });
