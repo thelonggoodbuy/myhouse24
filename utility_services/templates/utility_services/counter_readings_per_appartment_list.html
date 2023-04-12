@@ -2,17 +2,20 @@
 
 {% block additionaly_css %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 {% endblock additionaly_css %}
 
 {% block additionaly_js %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 {% endblock additionaly_js %}
 
 {% block title %}
-    <title> Показание счетчиков для квартиры </title>
+    <title> cчетчики {{ appartment.house.title }}, {{ appartment.number }} </title>
 {% endblock title %}
 {% block content-header %}
-    <h1>Показание счетчиков для квартиры</h1>
+    <h1>cчетчики {{ appartment.house.title }}, {{ appartment.number }}</h1>
 {% endblock %}
 
 {% block content %}
@@ -21,124 +24,424 @@
     {% for house in houses %}
         {{ house }}
     {% endfor %}
+
+    <p>{{ appartment }}</p>
 </div>
-{% comment %} <div class="row">
-    <div class="col-xs-12">
-        <div class="pull-right margin-bottom">
-            <a class="btn btn-success" href="{% url 'utility_services:tariff_create' %}">добавить тариф</a>
+
+<section class="content">
+
+    <div id="myDialog">
+        Content of the modal dialog box.
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="btn-group pull-right margin-bottom">
+                <button type="button" class="btn btn-success">
+                    Добавить показания
+                </button>
+                
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title"></h3>
+                    <div class="box-tools">
+                        <button class="btn btn-default btn-sm" id="clear_filters">
+                            <span class="hidden-xs">Очистить</span><i class="fa fa-eraser visible-xs" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="w0" class="grid-view">
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table table-bordered table-hover table-striped linkedRow" id="tariff_list_table">
+                            <thead>
+                                <tr id="order_links">
+                                    <th sort-index="0" id="id">id</th>
+                                    <th sort-index="1" id="choose_status">Статус</th>
+                                    <th sort-index="2" id="date">Дата</th>
+                                    <th sort-index="3" id="month">Месяц</th>
+                                    <th sort-index="4" id="house">Дом</th>
+                                    <th sort-index="5" id="section">Секция</th>
+                                    <th sort-index="6" id="appartment">№ квартиры</th>
+                                    <th sort-index="7" id="counter">счетчик</th>
+                                    <th sort-index="8" id="counter_readings">показания</th>
+                                    <th sort-index="9" id="unit_of_measure">Ед. Изм.</th>
+                                    <th>&nbsp;</th>
+                                </tr>
+                                <tr class="filters">
+                                    <td>
+                                        <input colnumb="0" type="text" class="form-control" placeholder="" id="id">
+                                    </td>
+                                    <td>
+                                        <select colnumb="1" class="form-control" id="choose_status">
+                                            <option id="all_status"></option>
+                                            <option id="zero">Нулевое</option>
+                                            <option id="new">Новое</option>
+                                            <option id="taken_into_account">Учтено</option>
+                                            <option id="taken_into_account_and_paid">Учтено и оплачено</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input colnumb="2" type="text" class="form-control" placeholder="" id="date">
+                                    </td>
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                    <td>
+                                        <select colnumb="4" class="form-control" placeholder="" id="choose_house">
+                                            <option id="all_houses"></option>
+                                            {% for house in houses %} 
+                                                <option id="{{ house.id }}">{{ house.title }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select colnumb="5" id="choose_section" class="form-control" placeholder="выберите дом">
+                                            <option>выберите дом</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input colnumb="6" type="text" class="form-control" placeholder="" id="number">
+                                    </td>
+                                    <td>
+                                        <select colnumb="7" class="form-control" placeholder="" id="counter">
+                                            <option id="all_counter"></option>
+                                            {% for counter in counters %}
+                                                <option id="{{ counter.id }}">{{ counter.title }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                            </thead>
+                            
+                            <tbody></tbody>
+                        </table>
+                    </div>
+            </div>            
         </div>
     </div>
 </div>
-<div class="box">
-    <div class="box-header with-border">
-    </div>
-        <div class="box-body">
-            <table class="table table-bordered table-hover table-striped linkedRow" id="tariff_table" style="width:100%">
-            <thead>
-                <tr>
-                    <th>название тарифа</th>
-                    <th>описание тарифа</th>
-                    <th>дата редактирования</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                
-            </tbody>
-            </table>
-    </div>
-</div>
-
+</section>
 
 
 
 <script>
-    $(document).ready(function () { 
 
-        var table = $('#tariff_table').DataTable({
-  
-            "dom": "<<t>p>",
-            "processing": true,
-            "serverSide": true,
-            "pageLength": 50,
-            "ordering": true,
-            "ajax": {
-                "type": "GET",
-                "url": "{% url 'utility_services:tariff_list' %}",
-                "dataSrc": "data",
-                "dataType": "json",
-            },
-            "columns": [
-                {"data": "title", "name": "title", "width": "20%"},
-                {"data": "description", "name": "description", "width": "40%"},
-                {"data": "updated_datetime", "name": "updated_datetime", "width": "20%"},
-                {"data": "", "width": "10%", render: function ( data, type, row, meta ) 
-                                        { prerendered_last_cell = "<div id='buttons_interaction'>\
-                                                    <div class='col=12'>\
-                                                        <a class='btn btn-default btn-sm' title='Копировать' data-toggle='tooltip' id='copy_button'>\
-                                                            <i class='fa fa-clone'></i>\
-                                                        </a>\
-                                                        <a class='btn btn-default btn-sm' title='Редактировать' data-toggle='tooltip' id='edite_button'>\
-                                                            <i class='fa fa-pencil'></i>\
-                                                        </a>\
-                                                        <a class='btn btn-default btn-sm' title='Удалить' data-toggle='tooltip' id='delete_button'>\
-                                                            <i class='fa fa-trash'></i>\
-                                                        </a>\
-                                                        </div>\
-                                                    </div>";
-                                            
-                                            return prerendered_last_cell
-                                        }
-                },
-                ],
-            "columnDefs": [
-                {'orderable': true, targets: 0},
-                {'orderable': false, targets: 1},
-                {'orderable': false, targets: 2},
-                {'orderable': false, targets: 3},
-            ],
 
-            "rowId": 'id',
+$(document).ready(function () {
+
+
+
+function getCookie(name) {
+let cookieValue = null;
+if (document.cookie && document.cookie !== "") {
+  const cookies = document.cookie.split(";");
+  for (let i = 0; i < cookies.length; i++) {
+    const cookie = cookies[i].trim();
+    if (cookie.substring(0, name.length + 1) === (name + "=")) {
+      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+      break;
+    }
+  }
+}
+return cookieValue;
+};
+
+
+var table = $('#tariff_list_table').DataTable({
+    "initComplete": function(){
+
+        //logic for input search element
+        $('.filters input').on('keyup change clear', function(){
+                                    var numb = $(this).attr("colnumb")
+                                    table.columns(numb).search(this.value).draw();
+        })
+
+        
+        //logic for select element            
+        $('.filters select').on('change', function(){
+            var choosen_numb = $(this).attr("colnumb")
+            var choosen_option = $(this).find(":selected").attr('id')
+            table.columns(choosen_numb).search(choosen_option).draw();
+        })
+
+
+    },
+
+    "rowCallback": function(row, data){
+        if (data.status === "Учтено" || data.status === "Учтено и оплачено") {
+            $('td:eq(1)', row).wrapInner("<small class='label label-success my-3'></small>");
+        } else if (data.status === "Новое") {
+            $('td:eq(1)', row).wrapInner("<small class='label label-warning'></small>");
+        } else if (data.status === "Нулевое") {
+            $('td:eq(1)', row).wrapInner("<small class='label label-primary'></small>");
+        }
+    },
+
+    "dom": "<<t>p>",
+    "processing": true,
+    "serverSide": true,
+    "pageLength": 5,
+    "ordering": false,
+    "scrollX": true,
+    "ajax": {
+        "type": "GET",
+        "url": "{% url 'utility_services:counter_readings_per_appartment_list_view' %}",
+        "dataSrc": "data",
+        "dataType": "json",
+    },
+    "columns": [
+        {"data": "id", "name": "id", "width": "150pt"},
+        {"data": "status", "name": "status", "width": "150pt"},
+        {"data": "date", "name": "appartment__number", "width": "100pt", render: function (data, type, row, meta) 
+                                                                                {if (data == null)
+                                                                                    {return '(не задано)'
+                                                                                } else {
+                                                                                    return data
+            }
+        }
+        },
+        {"data": "date_with_month_year", "name": "date_with_month_year", "width": "150pt", render: function (data, type, row, meta)
+                                                                                {if (data == null)
+                                                                                    {return '(не задано)'
+                                                                                } else {
+                                                                                    return data}
+                                                                                }
+        },
+        {"data": "counter__appartment__house__title", "name": "counter__appartment__house__title", "width": "150pt", render: function (data, type, row, meta)
+                                                                                                                    {if (data == null)
+                                                                                                                        {return '(не задано)'
+                                                                                                                    } else {
+                                                                                                                        return data}
+                                                                                                                    }
+        },
+        
+
+        {"data": "counter__appartment__sections__title", "name": "counter__appartment__sections__title", "width": "150pt", render: function (data, type, row, meta) 
+                                                                                {if (data == null)
+                                                                                    {return '(нет счета)'
+                                                                                } else {
+                                                                                    return data}
+            }
+        },
+        {"data": "counter__appartment__number", "name": "counter__appartment__number", "width": "150pt", render: function (data, type, row, meta) 
+                                                                                                            {if (data == null)
+                                                                                                                {return '(нет счета)'
+                                                                                                            } else {
+                                                                                                                        return data}
+                                                                                                                }
+        },
+        {"data": "counter__title", "name": "counter__title", "width": "150pt", render: function (data, type, row, meta) 
+                                                                                    {if (data == null)
+                                                                                        {return '(нет счета)'
+                                                                                    } else {
+                                                                                        return data}
+                                                                                        }
+        },
+        {"data": "readings", "name": "readings", "width": "150pt", render: function (data, type, row, meta) 
+                                                                                    {if (data == null)
+                                                                                        {return '(нет счета)'
+                                                                                    } else {
+                                                                                        return data}
+                                                                                        }
+                                                                                    },
+        {"data": "counter__unit_of_measure__title", "name": "counter__unit_of_measure__title", "width": "150pt", render: function (data, type, row, meta) 
+                                                                                                                                {if (data == null)
+                                                                                                                                    {return '(нет счета)'
+                                                                                                                                } else {
+                                                                                                                                    return data}
+                                                                                                                                    }
+                                                                                                                                },
+        {"data": "", "width": "150pt", render: function ( data, type, row, meta ) 
+                                { prerendered_last_cell = "<div id='buttons_interaction'>\
+                                            <div class='col=12'>\
+                                                <a class='btn btn-default btn-sm' href='#' title='Снять новое показание счетчика' data-toggle='tooltip'>\
+                                                    <i class='fa fa-dashboard'></i>\
+                                                </a>\
+                                                <a class='btn btn-default btn-sm' href='#' title='Открыть историю показаний для счетчика' data-toggle='tooltip' id='delete_button'>\
+                                                    <i class='fa fa-eye'></i>\
+                                                </a>\
+                                                </div>\
+                                            </div>";
+                                    
+                                    return prerendered_last_cell
+                                }
+        },
+        ],
+//            "columnDefs": [
+//                {'orderable': false, targets: 0},
+//                {'orderable': false, targets: 1},
+//                {'orderable': false, targets: 2},
+//                {'orderable': false, targets: 3},
+//                {'orderable': false, targets: 4},
+//                {'orderable': false, targets: 5},
+//                {'orderable': false, targets: 6},
+//            ],
+    "rowId": 'id',
+    "createdRow": function( row, data, dataIndex ) {
+        $('td:eq(8)', row).css({'background-color':'#DFD5'})
+        $('td:eq(9)', row).css({'background-color':'#DFD5'})
+      }
+    
+});
+
+
+//    var click_counter = 0
+//    $("a[id^='order-link']").on('click', function(){
+//        var col_numb = parseInt($(this).attr('id').replace('order-link_', ''))
+//        if (click_counter % 2 == 0){
+//            table.order([col_numb, 'asc']).draw();
+//            //console.log(table)
+//        } else {
+//            table.order([col_numb, 'desc']).draw();
+//        }
+//        click_counter++
+//    })
+
+//$('#choose_house')
+
+
+//------------------------------------------------------------------------
+
+// options data for all dropbox exclude owners
+$('#choose_house').on('change', function(){
+var choosen_house = $(this).find('option:selected').val()
+if(choosen_house){
+    $.ajax({
+        url: "{% url 'utility_services:counter_list' %}",
+        type: "GET",
+        data: {
+            'choosen_house': choosen_house,
+        },
+        dataType: "json",
+        success: (data) => {
+
+            console.log(data)
+
+            var sections_arr = data["section_data"]
+
+            console.log(data)
+
             
-        });
+            var additional_section_html = "<option id='empty_sect'></option>"
+            for (section of sections_arr){
+                additional_section_html +=`<option id=${section["id"]}>${section["title"]}</option>`
+            }
+            $('#choose_section').not("option[value='']").empty().append(additional_section_html);
+        }
+        })
+    } else {
+        $('#choose_section').empty().append("<option id='empty_sect'>Выберите дом</option>");
+        $('#choose_section').trigger('change')
+
+    }
+})
 
 
 
-    table.on('click', '#edite_button', function(){
-        var row_number = $(this).closest('tr').attr('id')
-        var basic_url = "{% url 'utility_services:tariff_edite' %}"
-        document.location.href = basic_url + row_number;
+    $("input[id='date']").daterangepicker({
+        timePicker: true,
+        startDate: moment().startOf("hour"),
+        endDate: moment().startOf("hour").add(32, "hour"),
+        locale:{
+            "format": "DD.MM.YYYY",
+            "language": 'ru',
+            "applyLabel": "Принять",
+            "cancelLabel": "Отмена",
+            "fromLabel": "от",
+            "toLabel": "до",
+            "customRangeLabel": "Диапазон",
+            "daysOfWeek": [ "Вск", "Пнд", "Втр", "Срд", "Чтв", "Птн", "Сбт"],
+            "monthNames": ["Январь", "Февраль", "Март", "Апрель",
+                            "Май", "Июнь", "Июль", "Август",
+                            "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+            "firstDay": 1
+        }
+        
+
     })
 
-    table.on('click', '#copy_button', function(){
-        var row_number = $(this).closest('tr').attr('id')
-        var basic_url = "{% url 'utility_services:tariff_clone' %}"
-        document.location.href = basic_url + row_number;
-    })
+//change row coursor
+//    table.on('mouseover', "a[id^='order-link']", function(){
+//        $(this).css('cursor','pointer')
+//        }
+//    )
 
-    $("#myDialog").dialog({
-        autoOpen  : false,
-        modal     : true,
-        title     : "avadamedia.myhoise24",
-        buttons   : {
-                    'удалить тариф' : function() {
-                        var textValue = $('#myTextBox').val();
-                        var basic_url = "{% url 'utility_services:tariff_delete' %}"
-                        var row_number = $(this).data('row_number')
-                        document.location.href = basic_url + '/' + row_number;
-                    },
-                    'отмена' : function() {
-                        $(this).dialog('close');
-                    }
-                    }
-    });
+//    table.on('mouseout', "a[id^='order-link']", function(){
+//        $(this).css('cursor','auto');
+//        }
+//    )
 
-    table.on('click', '#delete_button', function(){
-        var row_number = $(this).closest('tr').attr('id')
-        $("#myDialog").text(`Удалить тариф?`).data('row_number', row_number).dialog("open");
-    })
 
-    });
+
+//cleaning searh filters
+//    $('.box-header').on('click', '#clear_filters', function () {
+//        $("*[colnumb]").val('').change()
+//    } ); 
+
+
+//reversion logic for row except links to send inviting, deleting and editing
+table.on('click', 'tbody > tr > td', function () {
+if(
+    $(this).find("div").attr("id") != "buttons_interaction"
+    )
+{
+    var basic_url = "{% url 'utility_services:counter_readings_per_appartment_list_view' %}"
+    var url_index = table.row(this).id().toString();
+    document.location.href = basic_url + url_index;
+}
+} );
+
+
+// delete and confirm display lofic
+//    $("#myDialog").dialog({
+//        autoOpen  : false,
+//        modal     : true,
+//        title     : "avadamedia.myhoise24",
+//        buttons   : {
+//                    'удалить квартиру' : function() {
+//                        var textValue = $('#myTextBox').val();
+//                        var basic_url = "{% url 'appartments:owner_delete' %}"
+//                        var row_number = $(this).data('row_number')
+//                        document.location.href = basic_url + row_number;
+//                    },
+//                    'отмена' : function() {
+//                        $(this).dialog('close');
+//                    }
+//                    }
+//    });
+
+
+//    table.on('click', '#delete_button', function(){
+//        var row_number = $(this).closest('tr').attr('id')
+//        $("#myDialog").text(`Удалить квартиру с id ${row_number}?`).data('row_number', row_number).dialog("open");
+//    })
+
+
+//    table.on('click', '#edite_button', function(){
+//        var row_number = $(this).closest('tr').attr('id')
+//        var basic_url = "{% url 'appartments:owner_edite' %}"
+//        document.location.href = basic_url + row_number;
+//    })
+
+
+});
+
+
+
+
 </script>
-{% endcomment %}
+
 {% endblock content %} 

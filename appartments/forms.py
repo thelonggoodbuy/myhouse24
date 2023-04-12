@@ -198,21 +198,20 @@ class AppartmentEditeForm(forms.ModelForm):
     
   
 
+# class AppartmentTariffForm(forms.Form):
+#     title = forms.ChoiceField(required=False, label="Тариф", queryset=Tariff.objects.all().values('title',),
+#                                widget=forms.Select(attrs={'class':'form-control'}))
+
+# AppartmentTariffForset = forms.formset_factory(form=AppartmentTariffForm, 
+#                                                 extra=0, 
+#                                                 min_num=1, 
+#                                                 max_num=1)
+
+
 class AppartmentTariffForm(forms.ModelForm):
-    # def __init__(self, *args, **kwargs):
-    #     super(AppartmentEditeForm, self).__init__(*args, **kwargs)
-    #     self.fields['title'].queryset = Tariff.objects.all()
+    title = forms.ModelMultipleChoiceField(required=False, label="Тариф", queryset=Tariff.objects.all(),
+                               widget=forms.Select(attrs={'class':'form-control'}))
 
-        # if self.instance.personal_account:
-        #     self.fields['personal_account_unbound'].initial = self.instance.personal_account.number
-        #     self.initial_personal_account = self.instance.personal_account.number
-
-
-    title = forms.ModelChoiceField(required=False, label="Тариф", queryset=Tariff.objects.all(),
-                               widget=forms.Select(attrs={'class':'form-control', 'id': 'appartment_tariff'}))
-    
-    # title = forms.CharField(required=False, label="Тариф",
-    #                            widget=forms.TextInput(attrs={'class':'form-control', 'id': 'appartment_tariff'}))
     class Meta:
         model = Tariff
         fields = ('title',)
@@ -223,6 +222,8 @@ AppartmentTariffForset = forms.modelformset_factory(model=Tariff,
                                                             extra=0, 
                                                             min_num=1, 
                                                             max_num=1)
+
+
 
 class OwnerUpdateForm(forms.ModelForm):
 

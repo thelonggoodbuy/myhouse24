@@ -1,7 +1,7 @@
 from django.db import models
 from users.models import User
 
- 
+# from utility_services.models import Tariff
 
 
 

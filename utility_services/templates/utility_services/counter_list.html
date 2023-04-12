@@ -2,11 +2,11 @@
 {% load static %}
 
 {% block title %}
-    <title> Владельцы квартир</title>
+    <title>Счетчики</title>
 {% endblock title %}
 
 {% block content-header %}
-    <h1>Владельцы квартир</h1>
+    <h1>Счетчики</h1>
 {% endblock %}
 
 {% block additionaly_css %}
@@ -24,18 +24,10 @@
 
 
 {% block content %}
-{% comment %} <style>
-    div.dataTables_wrapper {
-        width: 800px;
-        margin: 0 auto;
-    }
-</style> {% endcomment %}
+
+
 
         <section class="content">
-
-            <div id="myDialog">
-                Content of the modal dialog box.
-            </div>
             <div class="row">
                 <div class="col-xs-12">
                     <div class="btn-group pull-right margin-bottom">
@@ -333,16 +325,16 @@ $(document).ready(function () {
 
 
     //reversion logic for row except links to send inviting, deleting and editing
-//    table.on('click', 'tbody > tr > td', function () {
-//        if(
-//            $(this).find("div").attr("id") != "buttons_interaction"
-//            )
-//        {
-//            var basic_url = "{% url 'appartments:owner_detail' %}"
-//            var url_index = table.row(this).id().toString();
-//            document.location.href = basic_url + url_index;
-//        }
-//    } );
+    table.on('click', 'tbody > tr > td', function () {
+        if(
+            $(this).find("div").attr("id") != "buttons_interaction"
+            )
+        {
+            var basic_url = "{% url 'utility_services:counter_readings_per_appartment_list_view' %}"
+            var url_index = table.row(this).id().toString();
+            document.location.href = basic_url + url_index;
+        }
+    } );
 
 
     // delete and confirm display lofic

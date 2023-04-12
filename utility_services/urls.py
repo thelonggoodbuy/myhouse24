@@ -23,6 +23,6 @@ urlpatterns = [
 
     path('counter_list/', CounterListView.as_view(), name="counter_list"),
 
-    path('counter_readings_per_appartment_list_view', CounterReadingsPerAppartmentListView.as_view(), name="counter_readings_per_appartment_list_view"),
+    path('counter_readings_per_appartment_list_view/', CounterReadingsPerAppartmentListView.as_view(), name="counter_readings_per_appartment_list_view"),
     path('counter_readings_per_appartment_list_view/<int:pk>', CounterReadingsPerAppartmentListView.as_view(), name="counter_readings_per_appartment_list_view"),
     ]

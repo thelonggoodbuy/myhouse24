@@ -1,382 +1,264 @@
 {% extends "layout/base_crm.html" %}
-{% load static %}
+{% load static  %}
 
 {% block title %}
-    <title> список квартир </title>
+    <title> пользователь </title>
 {% endblock title %}
 
+{% block content-header %}
+    <h1>Пользовать</h1>
+{% endblock %}
+
 {% block additionaly_css %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
     <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2/dist/css/select2.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2-theme-bootstrap4/dist/select2-bootstrap.min.css' %}">
 {% endblock additionaly_css %}
 
 {% block additionaly_js %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
     <script src="{% static 'appartments/plugins/select2/dist/js/select2.min.js' %}"></script>
 {% endblock additionaly_js %}
 
 
-
 {% block content %}
+<section class="content">                
+    <div class="box">
+        <div class="box-body">
+            <form method="post" id="appartments_change_table">
 
+                {% csrf_token %}
 
-        <section class="content">
+                <div class="row">
 
-            <div id="myDialog">
-                Content of the modal dialog box.
-            </div>
+                    <div class="col-xs-12 col-md-6">
+                        <div class="form-group">
+                            <label>{{ main_form.number.label }}</label>
+                            {{ main_form.number }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ main_form.area.label }}</label>
+                            {{ main_form.area }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ main_form.house.label }}</label>
+                            {{ main_form.house }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ main_form.sections.label }}</label>
+                            {{ main_form.sections }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ main_form.floor.label }}</label>
+                            {{ main_form.floor }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>{{ main_form.owner_user.label }}</label>
+                            {{ main_form.owner_user }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            {{ appartment_tariff_formset.management_form }}
+                            {% for appartment_tariff_form in appartment_tariff_formset %}
+                                {% for hidden in appartment_tariff_form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+                                <label>{{ appartment_tariff_form.title.label }}</label>
+                                {{ appartment_tariff_form.title }}
+                            {% endfor %}
+                        </div>
+                    </div>
 
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="pull-right margin-bottom">
-                        <a class="btn btn-success" href="#">добавить квартиру</a>
+                    <div class="col-xs-12 col-md-6">
+                        <div class="form-group">
+                            <label>{{ main_form.personal_account_unbound.label }}</label>
+                            {{ main_form.personal_account_unbound }}
+                            <select id="account_utility_input" class="form-control"></select>
+                            <div class="help-block"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="box">
-                        <div class="box-header with-border">
-                            <h3 class="box-title"></h3>
-                            <div class="box-tools">
-                                <button class="btn btn-default btn-sm" id="clear_filters">
-                                    <span class="hidden-xs">Очистить</span><i class="fa fa-eraser visible-xs" aria-hidden="true"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div id="w0" class="grid-view">
-                            <div class="box-body table-responsive no-padding">
-                                <table class="table table-bordered table-hover table-striped linkedRow" id="appartments_list_table">
-                                    <thead>
-                                        <tr id="order_links">
-                                            <th sort-index="0" id="№_appartment"><a id="order-link_0">№ квартиры</a></th>
-                                            <th sort-index="1" id="house"><a id="order-link_1">Дом</a></th>
-                                            <th sort-index="2" id="section"><a id="order-link_2">Секция</a></th>
-                                            <th sort-index="3" id="floor"><a id="order-link_3">Этаж</a></th>
-                                            <th sort-index="4" id="owner"><a id="order-link_4">Владелец</a></th>
-                                            <th sort-index="5" id="balance"><a id="order-link_5">Остаток(грн)</a></th>
-                                            <th>&nbsp;</th>
-                                        </tr>
-                                        <tr class="filters">
-                                            <td><input colnumb="0" type="text" class="form-control" placeholder="" id="search_№_appartment"></td>
-                                            <td>
-                                                <select colnumb="1" class="form-control" placeholder="" id="choose_house">
-                                                    <option id="all_houses"></option>
-                                                    {% for house in houses %} 
-                                                        <option id="{{ house.id }}">{{ house.title }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <select colnumb="2" id="choose_section" class="form-control" placeholder="выберите дом">
-                                                    <option>выберите дом</option>
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <select colnumb="3" id="choose_floor" class="form-control" placeholder="выберите дом">
-                                                    <option value="">выберите дом</option>
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <select colnumb="4" id="choose_owner" class="form-control" placeholder="">
-                                                    <option value=""></option>
-                                                </select>                                            
-                                            </td>
-                                            <td><select colnumb="5" id="debt" class="form-control">
-                                                    <option id="all_balance"></option>
-                                                    <option id="debt">есть долг</option>
-                                                    <option id="no_debt">нет долга</option>
-                                                </select>
-                                            </td>
-                                            <td>&nbsp;</td>
-                                        </tr>
-                                    </thead>
-                                    
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                    </div>            
+                <div class="row">
+                    <div class="col-xs-12 text-right">
+                        <a href="{% url 'users:admin_settings_users_list' %}" class="btn btn-default">Отменить</a>
+                        <button type="submit" class="btn btn-success">Сохранить</button>
+                    </div>
                 </div>
-            </div>
-        </div>
-        </section>
+            </form>
+            <script>
+                $(document).ready(function () {
+
+                    $('#appartments_change_table').on('change', '#house_dropdown', function(){
+                        
+                        var house_id = $(this).val()
+                        $.ajax({
+                            url: "{% url 'appartments:appartment_edite' %}",
+                            dataType: "json",
+                            data: {"house_id": house_id},
+                            success: (data) =>{
+
+                                // floors
+                                var floors = data['floors']
+                                var additional_floor_html = "<option id='empty_floor'></option>"
+                                for (floor of floors){
+                                    additional_floor_html +=`<option value=${floor["id"]}>${floor["title"]}</option>`
+                                }
+                                $("select[name$='floor']").not("option[value='']").empty().append(additional_floor_html)
+
+                                // sections
+                                var sections = data['sections']
+                                var additional_sections_html = "<option id='empty_section'></option>"
+                                for (section of sections){
+                                    additional_sections_html +=`<option value=${section["id"]}>${section["title"]}</option>`
+                                }
+                                $("select[name$='sections']").not("option[value='']").empty().append(additional_sections_html)
+                                
+                            }
+                        })
+                    })
+
+
+                    //------------------------------------------------------------------------------
+                    //current_floor_val = $("select[name$='floor']").find("option:selected").val()
+                    //current_sections_val = $("select[name$='sections']").find("option:selected").val()
+                    //$('#house_dropdown').trigger("change")
+
+
+                    //$("select[name$='floor']").val(`${current_floor_val}`).change();
+
+                    //$("#id_main_form-sections").val("4").change();
+
+                    //console.log($(`select[name$='floor'] > option[value='${current_floor_val}']`))
+
+                    //$("select[name$='floor'] > option[value="+ current_floor_val +"]").prop('selected', true)
+
+                    //$(`select[name$='sections'] > option[value=${current_sections_val}]`).attr('selected','selected');
+
+
+                    //console.log($(`select[name$='floor'] > option[value=${current_floor_val}]`))
+                    //console.log($(`select[name$='sections'] > option[value=${current_sections_val}]`))
 
 
 
-<script>
-
-$(document).ready(function () {
 
 
+                    //console.log($("select[name$='floor']").find("option:selected").val())
+                    //console.log($("select[name$='sections']").find("option:selected").val())
+                    //------------------------------------------------------------------------------
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== "") {
-          const cookies = document.cookie.split(";");
-          for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + "=")) {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-              break;
-            }
-          }
-        }
-        return cookieValue;
-      };
-
-
-        var table = $('#appartments_list_table').DataTable({
-            "initComplete": function(){
-
-                //logic for input search element
-                $('.filters input').on('keyup change clear', function(){
-                                            var numb = $(this).attr("colnumb")
-                                            table.columns(numb).search(this.value).draw();
-                })
-
-                
-                //logic for select element            
-                $('.filters select').on('change', function(){
-                    //console.log('-----------------------------------------------')
-                    var choosen_numb = $(this).attr("colnumb")
-                    var choosen_option = $(this).find(":selected").attr('id')
-                    table.columns(choosen_numb).search(choosen_option).draw();
-                })
+                    $.ajax({
+                        url: "{% url 'appartments:appartment_edite' %}",
+                            dataType: "json",
+                            data: {"issue_marker": 'initialization_sections_and_floors',
+                                    "current_house": $('#house_dropdown').val()},
+                            success: (data) =>{
+                                for (floor_number of data['extra_floors_list'])
+                                    {
+                                        $("#floor_field > *[value=" + floor_number + "]").hide()
+                                    }
+                                    
+                                for (section_number of data['extra_sections_list'])
+                                    {
+                                        $("#section_field > *[value=" + section_number + "]").hide()
+                                    }
 
 
-                //logic for select element from Select2
-                $('#choose_owner').on('change', function(){
-                    console.log('I choose owner!!!!!')
-                    var choosen_numb = $(this).attr("colnumb")
-                    var choosen_option = $(this).select2('data')[0]['id']
-                    console.log(choosen_numb)
-
-                    table.columns(choosen_numb).search(choosen_option).draw();
-                })
-
-            },
-
-            
-
-            "dom": "<<t>p>",
-            "processing": true,
-            "serverSide": true,
-            "pageLength": 5,
-            "ordering": true,
-            "ajax": {
-                "type": "GET",
-                "url": "{% url 'appartments:appartments_list' %}",
-                "dataSrc": "data",
-                "dataType": "json",
-            },
-            "columns": [
-                {"data": "number", "name": "number", "width": "5%"},
-                {"data": "house__title", "name": "house", "width": "15%"},
-                {"data": "sections__title", "name": "sections", "width": "15%"},
-                {"data": "floor__title", "name": "floor", "width": "15%"},
-                {"data": "owner_user__full_name", "name": "owner_user", "width": "25%", render: function (data, type, row, meta) 
-                                                                                        {if (data == null)
-                                                                                            {return '(не задано)'
-                                                                                        } else {
-                                                                                            return data}
-                    }
-                },
-                {"data": "personal_account__balance", "name": "personal_account__balance", "width": "15%", render: function (data, type, row, meta) 
-                                                                                                            {if (data == null)
-                                                                                                                {return '(нет счета)'
-                                                                                                            } else {
-                                                                                                                return data}
-                    }
-                },
-                {"data": "is_superuser", render: function ( data, type, row, meta ) 
-                                        { prerendered_last_cell = "<div id='buttons_interaction'>\
-                                                    <div class='col=12'>\
-                                                        <a class='btn btn-default btn-sm' title='Удалить' data-toggle='tooltip' id='delete_button'>\
-                                                            <i class='fa fa-trash'></i>\
-                                                        </a>\
-                                                        <a class='btn btn-default btn-sm' title='Редактировать' data-toggle='tooltip' id='edite_button'>\
-                                                            <i class='fa fa-pencil'></i>\
-                                                        </a>\
-                                                        </div>\
-                                                    </div>";
-                                            
-                                            return prerendered_last_cell
-                                        }
-                },
-                ],
-            "columnDefs": [
-                {'orderable': false, targets: 0},
-                {'orderable': false, targets: 1},
-                {'orderable': false, targets: 2},
-                {'orderable': false, targets: 3},
-                {'orderable': false, targets: 4},
-                {'orderable': false, targets: 5},
-                {'orderable': false, targets: 6},
-            ],
-            "rowId": 'id',
-            
-        });
-
-        //{ targets: 10, render: function (data, type, row, meta) {return (data == null) ? "" : data + "ct";} },
-
-    //------------------------------------------------------------------------------
-
-
-    var click_counter = 0
-    $("a[id^='order-link']").on('click', function(){
-        var col_numb = parseInt($(this).attr('id').replace('order-link_', ''))
-        if (click_counter % 2 == 0){
-            table.order([col_numb, 'asc']).draw();
-            //console.log(table)
-        } else {
-            table.order([col_numb, 'desc']).draw();
-        }
-        click_counter++
-    })
-
-    //$('#choose_house')
-
-
-//------------------------------------------------------------------------
-
-    // options data for all dropbox exclude owners
-    $('#choose_house').on('change', function(){
-        var choosen_house = $(this).find('option:selected').val()
-        console.log(choosen_house)
-        if(choosen_house){
-            $.ajax({
-                url: "{% url 'appartments:appartments_list' %}",
-                type: "GET",
-                data: {
-                    'choosen_house': choosen_house,
-                },
-                dataType: "json",
-                success: (data) => {               
-    
-                    var sections_arr = data["section_data"]
-                    var additional_section_html = "<option id='empty_sect'></option>"
-                    for (section of sections_arr){
-                        additional_section_html +=`<option id=${section["id"]}>${section["title"]}</option>`
-                    }
-                    $('#choose_section').not("option[value='']").empty().append(additional_section_html);
-    
-    
-                    var floor_arr = data["floors_data"]
-                    var additional_floor_html = "<option id='empty_floor'></option>"
-                    for(floor of floor_arr){
-                        additional_floor_html +=`<option id=${floor["id"]}>${floor["title"]}</option>`
-                    }
-                    $('#choose_floor').not("option[value='']").empty().append(additional_floor_html);
+                                            }
+                    })
                     
-                }
-                })
-            } else {
-                $('#choose_section').empty().append("<option id='empty_sect'>Выберите дом</option>");
-                $('#choose_floor').empty().append("<option id='empty_floor'>Выберите дом</option>");
 
-            }
+                    
+                    $('#owner_field').select2({
+                        ajax: {
+                            url: "{% url 'appartments:appartment_edite' %}",
+                            dataType: 'json',
+                            data: function(params){
+                                if(params.term != undefined && params.term != undefined){
+                                    var query = {
+                                        search: params.term,
+                                        type: 'public',
+                                        issue_marker: 'owner_marker'
+                                    }
+                                    return query;
+                                } else {
+                                    var query = {
+                                        search: params.term,
+                                        type: 'public',
+                                        issue_marker: 'all_owners_marker'
+                                    }
+                                    return query;
+                                }  
+                            }
+                        }
+                    })
 
+                    $('#account_utility_input').select2({
+                        placeholder: "Или выберите из списка",
+                        ajax: {
+                            url: "{% url 'appartments:appartment_edite' %}",
+                            dataType: 'json',
+                            data: function(params){
+                                if(params.term != undefined && params.term != ""){
+                                    var query = {
+                                        search: params.term,
+                                        type: 'public',
+                                        issue_marker: 'account_marker'
+                                    }
+                                    console.log(query)
+                                    return query;
+                                } else {
+                                    var query = {
+                                        search: params.term,
+                                        type: 'public',
+                                        issue_marker: 'all_accounts_marker'
+                                    }
+                                    return query;
+                                }  
+                            }
+                        }
+                    })
 
-    })
+                    $(document).on('change', '#account_utility_input', function(){
+                        var choosen_option = $(this).find('option:selected')
+                        if (choosen_option.val()){
+                            console.log(choosen_option.val())
+                            console.log(choosen_option.html())
+                            $('#account_input').val(choosen_option.html())
 
+                            $('#account_utility_input').select2('val', '0')
+                            //$('#account_unformed_input').select2()
+                        }
+                    })
 
-    //options data for owners
-    $('#choose_owner').select2({
-        theme: "bootstrap",
-        ajax: {
-            url: "{% url 'appartments:appartments_list' %}",
-            dataType: 'json',
-            data: function(params){
-                if(params.term != undefined && params.term != undefined){
-                    var query = {
-                        search: params.term,
-                        type: 'public',
-                        issue_marker: 'owners'
-                    }
-                    return query;
-                } else {
-                    var query = {
-                        search: params.term,
-                        type: 'public',
-                        issue_marker: 'all_owners'
-                    }
-                    return query;
-                }  
-            }
-        }
-    })
-
-    
-    //change row coursor
-    table.on('mouseover', "a[id^='order-link']", function(){
-        $(this).css('cursor','pointer')
-        }
-    )
-    
-    table.on('mouseout', "a[id^='order-link']", function(){
-        $(this).css('cursor','auto');
-        }
-    )
-
-
-
-        //cleaning searh filters
-    $('.box-header').on('click', '#clear_filters', function () {
-        $("*[colnumb]").val('').change()
-    } ); 
-
-
-        //reversion logic for row except links to send inviting, deleting and editing
-    table.on('click', 'tbody > tr > td', function () {
-        if(
-            $(this).find("div").attr("id") != "buttons_interaction"
-            )
-        {
-            var basic_url = "{% url 'appartments:appartment_detail' %}"
-            var url_index = table.row(this).id().toString();
-            document.location.href = basic_url + url_index;
-        }
-    } );
-
-
-    // delete and confirm display lofic
-    $("#myDialog").dialog({
-        autoOpen  : false,
-        modal     : true,
-        title     : "avadamedia.myhoise24",
-        buttons   : {
-                    'удалить квартиру' : function() {
-                        var textValue = $('#myTextBox').val();
-                        var basic_url = "{% url 'appartments:appartment_delete' %}"
-                        var row_number = $(this).data('row_number')
-                        document.location.href = basic_url + row_number;
-                    },
-                    'отмена' : function() {
-                        $(this).dialog('close');
-                    }
-                    }
-    });
-
-
-    table.on('click', '#delete_button', function(){
-        var row_number = $(this).closest('tr').attr('id')
-        $("#myDialog").text(`Удалить квартиру с id ${row_number}?`).data('row_number', row_number).dialog("open");
-    })
-
-
-    table.on('click', '#edite_button', function(){
-        var row_number = $(this).closest('tr').attr('id')
-        var basic_url = "{% url 'appartments:appartment_edite' %}"
-        document.location.href = basic_url + row_number;
-    })
-
-
-    });
-
-
-
-    
-</script>
+//                    $("#user_change_data_form").validate({
+//                        rules: {
+//                          field: {
+//                            required: true,
+//                            email: true
+//                          }
+//                        },
+//                        messages:{
+//                            email: {
+//                                required: "Это поле обязательно для заполнения",
+//                                email: "Значение «Email (логин)» не является правильным email адресом",
+//                            }
+//                        },
+//                        validClass: "success",
+//                        highlight: function(element, errorClass, validClass) {
+//                            $(element).closest('.form-group').addClass("has-error").removeClass("has-success");
+//                      
+//                          },
+//                        unhighlight: function(element, errorClass, validClass) {
+//                            $(element).closest('.form-group').addClass("has-success").removeClass("has-error");
+//                      
+//                          },
+//
+//                });
+                });
+            </script>
+        </div>
+    </div>
+</section>
 {% endblock content %}
