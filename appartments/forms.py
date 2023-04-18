@@ -115,7 +115,7 @@ class AppartmentEditeForm(forms.ModelForm):
         self.fields['owner_user'].queryset = User.objects.all()
         self.fields['sections'].queryset = Section.objects.select_related('house').all()
         self.fields['floor'].queryset =  Floor.objects.select_related('house').all()
-        # self.fields['tariff'].queryset = Tariff.objects.all()
+        self.fields['tariff'].queryset = Tariff.objects.all()
 
         # self.fields['sections'].queryset = Section.objects.select_related('house').filter(house=self.instance.house)
         # self.fields['floor'].queryset =  Floor.objects.select_related('house').filter(house=self.instance.house)
@@ -151,6 +151,9 @@ class AppartmentEditeForm(forms.ModelForm):
     owner_user = forms.ModelChoiceField(required=False, label="Владелец квартиры", queryset=None,
                                widget=forms.Select(attrs={'class':'form-control', 'id': 'owner_field'}))
     
+    tariff = forms.ModelChoiceField(required=False, label="Тариф", queryset=None,
+                               widget=forms.Select(attrs={'class':'form-control', 'id': 'tariff_field'}))
+    
     personal_account_unbound = forms.CharField(required=False, label="Лицевой счет",
                                widget=forms.TextInput(attrs={'class':'form-control', 'id': 'account_input'}))
     
@@ -165,13 +168,13 @@ class AppartmentEditeForm(forms.ModelForm):
             if commit:
                 print('option 1')
                 current_form.save(update_fields=["number", "area", "house", "sections", "floor",\
-                                                "owner_user"])
+                                                "tariff", "owner_user"])
             
         elif self.initial_personal_account == None and current_form_cleaned['personal_account_unbound'] == '':
             if commit:
                 print('option 2')
                 current_form.save(update_fields=["number", "area", "house", "sections", "floor",\
-                                                "owner_user"])
+                                                "tariff", "owner_user"])
 
         else:
             print('option 3')
@@ -186,7 +189,7 @@ class AppartmentEditeForm(forms.ModelForm):
 
                 current_form.personal_account = choosen_account
                 current_form.save(update_fields=["number", "area", "house", "sections", "floor",\
-                                                    "owner_user", "personal_account"])
+                                                "tariff", "owner_user", "personal_account"])
 
         return current_form
     
@@ -194,19 +197,8 @@ class AppartmentEditeForm(forms.ModelForm):
     class Meta:
         model = Appartment
         fields = ("number", "area", "house", "sections", "floor",\
-                  "owner_user", "personal_account")
+                  "owner_user", "personal_account", "tariff")
     
-  
-
-# class AppartmentTariffForm(forms.Form):
-#     title = forms.ChoiceField(required=False, label="Тариф", queryset=Tariff.objects.all().values('title',),
-#                                widget=forms.Select(attrs={'class':'form-control'}))
-
-# AppartmentTariffForset = forms.formset_factory(form=AppartmentTariffForm, 
-#                                                 extra=0, 
-#                                                 min_num=1, 
-#                                                 max_num=1)
-
 
 class AppartmentTariffForm(forms.ModelForm):
     title = forms.ModelMultipleChoiceField(required=False, label="Тариф", queryset=Tariff.objects.all(),

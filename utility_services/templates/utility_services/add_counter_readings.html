@@ -1,0 +1,306 @@
+
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+
+{% block additionaly_css %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.css }} 
+    {% endfor %}
+
+    <style>
+
+        .column-center {
+            margin-top: 5pt;
+        }
+        
+    </style>
+
+{% endblock additionaly_css %}
+
+
+
+{% block additionaly_js %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.js }}
+    {% endfor %}
+{% endblock additionaly_js %}
+
+
+{% block title %}
+    <title> Новое показание </title>
+
+{% endblock title %}
+
+{% block content-header %}
+    
+    <h1>Новое показание</h1>
+    
+{% endblock %}
+
+{% block content %}
+
+<form method="post" enctype="multipart/form-data">
+<div class="row">
+    <div class="col-xs-12 col-md-8 col-lg-7">
+        <div class="box-body">
+            <div class="row">
+                <div class="col-xs-5">
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            №
+                        </div>
+                        {{ form.number }}
+                    </div>
+                </div>
+
+                <div class="col-xs-1 column-center">
+                    <strong><span>от</span></strong>
+                </div>
+                <div class="col-xs-5">
+                    
+                    <div class="input-group">
+                        <span class="input-group-addon" title="Выбрать дату">
+                            <i class="glyphicon glyphicon-calendar"></i>
+                        </span>
+                        {% comment %} <input type="text" class="form-control" value="14.04.2023"> {% endcomment %}
+                        {{ form.date }}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="box">
+    <div class="box-body">
+            {% csrf_token %}
+
+            <div class="row">
+                <div class="col-xs-6 col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">{{ form.house.label}}</label>
+                        {{ form.house }}
+                        <div class="help-block"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label">{{ form.section.label }}</label>
+                        {{ form.section }}
+                        <div class="help-block"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">{{ form.appartment.label }}</label>
+                        {{ form.appartment }}
+                        <div class="help-block"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">{{ form.counter.label }}</label>
+                        {{ form.counter }}
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-xs-6 col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">{{ form.status.label}}</label>
+                        {{ form.status }}
+                        <div class="help-block"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label">{{ form.readings.label }}</label>
+                        {{ form.readings }}
+                        <div class="help-block"></div>
+                    </div>
+
+                    </div>
+                </div>
+            </div>
+            
+            
+            <div class="row">
+                <div class="col-xs-11 text-right">
+                    <div class="form-group">
+                        <a class="btn btn-default" href="#">Отменить</a>
+                        <button type="submit" class="btn btn-success">Сохранить</button>
+                        <a class="btn btn-success" href="#">Сохранить и добавить новые показания</a>
+                    </div>
+                </div>
+            </div>
+            
+
+        
+    </div>
+</div>
+
+</form>
+
+
+{{ counter_number|json_script:'counter_number'}}
+
+{% if current_counter %}
+    {{ current_counter|json_script:'current_counter'}}
+{% endif %}
+
+
+<script>
+    $(document).ready(function () {
+
+    $("#appartment_field").not("option[value='']").empty()
+    $("#counter_field").not("option[value='']").empty().append("<option value='empty_counter'>Выберите квартиру</option>")
+
+
+    
+    
+
+
+
+    $("#house_field").on('change', function(){
+
+        var house_number = $(this).find(":selected").val()
+
+        
+
+        if (house_number){
+            $.ajax({
+                dataType: "json",
+                url: "{% url 'utility_services:add_counter_readings' %}",
+                data: {"ajax_indicator": "get_certain_house",
+                        "current_house_number": house_number},
+                success: (data) => {
+
+                    var sections = data['sections']
+                    var additional_sections_html = "<option value='empty_section'>Выберите секцию</option>"
+                    for (section of sections){
+                        additional_sections_html +=`<option value=${section["id"]}>${section["title"]}</option>`
+                    }
+                    $("#section_field").not("option[value='']").empty().append(additional_sections_html)
+
+                    var appartments = data['appartments']
+                    var additional_appartment_html = "<option value='empty_appartment'>Выберите квартиру</option>"
+                    for (appartment of appartments){
+                        additional_appartment_html +=`<option value=${appartment["id"]}>${appartment["number"]}</option>`
+                    }
+                    $("#appartment_field").not("option[value='']").empty().append(additional_appartment_html)
+                    
+                }
+            })
+        } else {
+            $("#section_field").not("option[value='']").empty().append("<option value='empty_section'>Выберите секцию</option>")
+            $("#appartment_field").not("option[value='']").empty().append("<option value='empty_appartment'>Выберите квартиру</option>")
+
+            $("#counter_field").not("option[value='']").empty().append("<option value='empty_counter'>Выберите квартиру</option>")
+        }
+
+        $("#section_field").on('change', function(){
+
+            var section_number = $(this).find(":selected").val()
+            
+            if (section_number != 'empty_appartment'){
+                
+                $.ajax({
+                    dataType: "json",
+                    url: "{% url 'utility_services:add_counter_readings' %}",
+                    data: {"ajax_indicator": "get_appartments_per_sections",
+                            "current_sections_number": section_number},
+                    success: (data) => {
+
+                        var appartments = data['appartments']
+                        var additional_appartment_html = "<option value='empty_appartment'>Выберите квартиру</option>"
+                        for (appartment of appartments){
+                            additional_appartment_html +=`<option value=${appartment["id"]}>${appartment["number"]}</option>`
+                        }
+                        $("#appartment_field").not("option[value='']").empty().append(additional_appartment_html)
+                        
+                    }
+                })
+
+            }
+        })
+
+
+        $("#appartment_field").on('change', function(){
+            var appartment_number = $(this).find(":selected").val()
+
+            $.ajax({
+                dataType: "json",
+                url: "{% url 'utility_services:add_counter_readings' %}",
+                data: {"ajax_indicator": "get_counter_per_appartment",
+                        "appartment": appartment_number},
+                success: (data) => {
+
+                    //console.log(data)
+                    var additional_counter_html = "<option value='empty_counter'>Выберите счетчик</option>"
+
+                if(data['counters'])
+                    console.log(data['counters'])
+                    {for (counter of data['counters']){
+                            //console.log(counter)
+                            additional_counter_html +=`<option value=${counter["id"]}>${counter["title"]}</option>`  
+                        }
+                    }
+                    $("#counter_field").not("option[value='']").empty().append(additional_counter_html)
+
+                }
+            })
+
+        })
+
+
+
+
+
+
+
+
+        
+        
+    })
+        
+
+
+        // initialization data from current counter if
+    // 
+    try {
+        var current_counter = JSON.parse(document.getElementById('current_counter').textContent)
+        var counter_number = JSON.parse(document.getElementById('counter_number').textContent)
+
+
+        choosen_house_val = current_counter[0]['appartment__house__id']
+        choosen_section_val = current_counter[0]['appartment__sections__id']
+        choosen_appartment_val = current_counter[0]['appartment__id']
+        id = current_counter[0]['id']
+        console.log('----------------------')
+        console.log('Current counter:')
+        console.log(current_counter)
+        console.log(`Counter number: ${counter_number}`)
+        //console.log(counter_id)
+            
+        console.log('----------------------')
+
+        $("#house_field").val(choosen_house_val).change();
+
+        setTimeout(() => {
+            $("#section_field").val(choosen_section_val).change();
+          }, 1000);
+
+        setTimeout(() => {
+            $("#appartment_field").val(choosen_appartment_val).change();
+          }, 2000);
+
+        setTimeout(() => {
+            $("#counter_field").val(id).change();
+          }, 3000);
+
+        //setTimeout(() => {
+        //    $("#counter_field").val(choosen_appartment_val).change();
+        //  }, 2000);
+
+        } catch (e){console.log(e)};
+
+
+    });
+</script>
+{% endblock content %}

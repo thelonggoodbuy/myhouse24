@@ -1,6 +1,9 @@
 from django import forms
-from .models import UnitOfMeasure, UtilityService, Tariff, TariffCell
+from .models import UnitOfMeasure, UtilityService, Tariff, TariffCell, CounterReadings, Counter
+from appartments.models import House
 
+from django.db.models import Max
+import datetime
 
 
 
@@ -79,10 +82,7 @@ class TariffCellForm(forms.ModelForm):
                              widget=forms.TextInput(attrs={'class': 'form-control',
                                                             'placeholder': 'грн',
                                                             'disabled': ''}))
-    # measure_unit = forms.ChoiceField(label='Ед. изм.', required=False, choices=['None', ],
-    #                                  widget=forms.Select(attrs={'class':'form-control',
-    #                                                             'id': 'measure_unit',
-    #                                                             'disabled': ''}))
+
 
     class Meta:
         model = TariffCell
@@ -100,3 +100,64 @@ CreateTariffCellFormSet = forms.inlineformset_factory(Tariff, TariffCell,
                                                         can_delete=True, 
                                                         extra=0, 
                                                         )
+
+
+
+class AddCounterReadingsForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(AddCounterReadingsForm, self).__init__(*args, **kwargs)
+        new_number = CounterReadings.objects.aggregate(Max('number'))['number__max'] + 1
+        
+        self.fields['number'].initial = new_number
+
+        # counter усложняет запросы. они начали дублироваться.
+        self.fields['counter'].queryset = Counter.objects.all()
+        # ---------------------------------------------------
+        self.fields['house'].queryset = House.objects.all()
+        self.fields['status'].choices = CounterReadings.status.field.choices
+
+    EMPTY_SECTION_CHOICES = [('', 'Выберите дом')]
+    EMPTY_APPARTMENT_CHOICES = [('', 'Выберите дом')]
+
+
+    house = forms.ModelChoiceField(label='Дом', required=False, queryset=None, empty_label='Выберите дом',
+                             widget=forms.Select(attrs={'class': 'form-control',
+                                                        'id': 'house_field'}))
+    
+    section = forms.ChoiceField(label='Секция', required=False, choices = EMPTY_SECTION_CHOICES,
+                             widget=forms.Select(attrs={'class': 'form-control',
+                                                        'id': 'section_field'}))
+    
+    appartment = forms.ChoiceField(label='Квартира', required=False, choices = EMPTY_APPARTMENT_CHOICES,
+                             widget=forms.Select(attrs={'class': 'form-control',
+                                                        'id': 'appartment_field'}))
+    
+    counter = forms.ModelChoiceField(label='Счетчик', required=False, queryset=None,
+                             widget=forms.Select(attrs={'class': 'form-control',
+                                                        'id': 'counter_field'}))
+    
+    status = forms.ChoiceField(label='Статус', required=False,
+                             widget=forms.Select(attrs={'class': 'form-control'}))
+    
+    readings = forms.CharField(label='Показания счетчика', required=False,
+                             widget=forms.TextInput(attrs={'class': 'form-control'}))
+    
+    number = forms.CharField(label='Номер показаний счетчика', required=False,
+                            widget=forms.TextInput(attrs={'class': 'form-control',
+                                                          'id': 'counter_readings_number'}))
+    
+    readings = forms.DecimalField(label='показания счетчика', required=False, decimal_places=2,
+                                widget=forms.NumberInput(attrs={'class': 'form-control',
+                                                          'id': 'counter_readings'}))
+
+    date = forms.DateField(label='дата показаний', initial=datetime.date.today,
+                                widget=forms.DateInput(attrs={'class': 'form-control'}))
+    class Meta:
+        model = CounterReadings
+        fields = ['status', 'readings', 'number', 'counter', 'date']
+
+
+    def save(self, commit=True):
+        # do something with self.cleaned_data['temp_id']
+        print('-------------------------------------------------------------------------------')
+        return super(AddCounterReadingsForm, self).save(commit=commit)

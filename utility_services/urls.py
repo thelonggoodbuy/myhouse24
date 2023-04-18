@@ -3,7 +3,7 @@ from django.urls import path
 
 from .views import UtilityAndMeasuresUnitsEditeList,\
                      TariffListView, TariffEditeView, TariffCreateView, TariffDeleteView, TariffCopyView,\
-                     CounterListView, CounterReadingsPerAppartmentListView
+                     CounterListView, CounterReadingsPerAppartmentListView, AddCounterReadingsView, AddCounterReadingsPerCounterView
 
 
 app_name='utility_services'
@@ -25,4 +25,8 @@ urlpatterns = [
 
     path('counter_readings_per_appartment_list_view/', CounterReadingsPerAppartmentListView.as_view(), name="counter_readings_per_appartment_list_view"),
     path('counter_readings_per_appartment_list_view/<int:pk>', CounterReadingsPerAppartmentListView.as_view(), name="counter_readings_per_appartment_list_view"),
+    path('add_counter_readings/', AddCounterReadingsView.as_view(), name="add_counter_readings"),
+
+    path('add_counter_readings_per_conter/', AddCounterReadingsPerCounterView.as_view(), name="add_counter_readings_per_counter"),
+    path('add_counter_readings_per_conter/<int:pk>', AddCounterReadingsPerCounterView.as_view(), name="add_counter_readings_per_counter"),
     ]

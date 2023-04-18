@@ -30,15 +30,12 @@
         <section class="content">
             <div class="row">
                 <div class="col-xs-12">
-                    <div class="btn-group pull-right margin-bottom">
-                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Выберите действие <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a href="{% url 'appartments:owner_create' %}">Добавить владельца квартиры</a></li>
-                            <li><a href="#">Отправить сообщение должникам</a></li>
-                            <li><a href="#">Отправить приглашение</a></li>
-                        </ul>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div class="pull-right margin-bottom">
+                                <a class="btn btn-success" href="{% url 'utility_services:add_counter_readings' %}">Добавить показания</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -112,7 +109,7 @@
         </div>
         </section>
 
-
+        {{ counter_number|json_script:'counter_number'}}
 
 <script>
 
@@ -135,6 +132,8 @@ $(document).ready(function () {
         }
         return cookieValue;
       };
+
+
 
 
         var table = $('#tariff_list_table').DataTable({
@@ -170,7 +169,7 @@ $(document).ready(function () {
             "dom": "<<t>p>",
             "processing": true,
             "serverSide": true,
-            "pageLength": 5,
+            "pageLength": 50,
             "ordering": false,
             "scrollX": true,
             "ajax": {
@@ -197,7 +196,7 @@ $(document).ready(function () {
                                                                                             return data}
                                                                                         }
                 },
-                {"data": "counter_reading__date", "name": "counter_reading__date", "width": "75pt", render: function (data, type, row, meta)
+                {"data": "last_readings", "name": "last_readings", "width": "75pt", render: function (data, type, row, meta)
                                                                                                                             {if (data == null)
                                                                                                                                 {return '(не задано)'
                                                                                                                             } else {
@@ -216,7 +215,7 @@ $(document).ready(function () {
                 {"data": "", "width": "125pt", render: function ( data, type, row, meta ) 
                                         { prerendered_last_cell = "<div id='buttons_interaction'>\
                                                     <div class='col=12'>\
-                                                        <a class='btn btn-default btn-sm' href='#' title='Снять новое показание счетчика' data-toggle='tooltip'>\
+                                                        <a class='btn btn-default btn-sm' id='add_counter_readings' href='#' title='Снять новое показание счетчика' data-toggle='tooltip'>\
                                                             <i class='fa fa-dashboard'></i>\
                                                         </a>\
                                                         <a class='btn btn-default btn-sm' href='#' title='Открыть историю показаний для счетчика' data-toggle='tooltip' id='delete_button'>\
@@ -238,7 +237,7 @@ $(document).ready(function () {
 //                {'orderable': false, targets: 5},
 //                {'orderable': false, targets: 6},
 //            ],
-            "rowId": 'appartment_id',
+            "rowId": 'id',
             "createdRow": function( row, data, dataIndex ) {
                 $('td:eq(4)', row).css({'background-color':'#DFD5'})
                 $('td:eq(5)', row).css({'background-color':'#DFD5'})
@@ -362,11 +361,11 @@ $(document).ready(function () {
 //    })
 
 
-//    table.on('click', '#edite_button', function(){
-//        var row_number = $(this).closest('tr').attr('id')
-//        var basic_url = "{% url 'appartments:owner_edite' %}"
-//        document.location.href = basic_url + row_number;
-//    })
+    table.on('click', '#add_counter_readings', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        var basic_url = "{% url 'utility_services:add_counter_readings_per_counter' %}"
+        document.location.href = basic_url + row_number;
+    })
 
 
     });

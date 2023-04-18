@@ -59,7 +59,7 @@
                             {{ main_form.owner_user }}
                             <div class="help-block"></div>
                         </div>
-                        <div class="form-group">
+                        {% comment %} <div class="form-group">
                             {{ appartment_tariff_formset.management_form }}
                             {% for appartment_tariff_form in appartment_tariff_formset %}
                                 {% for hidden in appartment_tariff_form.hidden_fields %}
@@ -68,7 +68,14 @@
                                 <label>{{ appartment_tariff_form.title.label }}</label>
                                 {{ appartment_tariff_form.title }}
                             {% endfor %}
+                        </div> {% endcomment %}
+
+                        <div class="form-group">
+                            <label>{{ main_form.tariff.label }}</label>
+                            {{ main_form.tariff }}
+                            <div class="help-block"></div>
                         </div>
+
                     </div>
 
                     <div class="col-xs-12 col-md-6">

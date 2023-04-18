@@ -421,30 +421,17 @@ class AppartmentEditeView(UpdateView):
 
     def post(self, *args, **kwargs):
         main_form = AppartmentEditeForm(self.request.POST, instance=self.get_object(), prefix='main_form')
-        appartment_tariff_formset = AppartmentTariffForset(self.request.POST, queryset=Tariff.objects.filter(appartments=self.get_object()), prefix='appartment_tariff_form')
+        # appartment_tariff_formset = AppartmentTariffForset(self.request.POST, queryset=Tariff.objects.filter(appartments=self.get_object()), prefix='appartment_tariff_form')
 
-        if (main_form.is_valid() and appartment_tariff_formset.is_valid()):
-            return self.form_valid(main_form, appartment_tariff_formset)
+        # if (main_form.is_valid() and appartment_tariff_formset.is_valid()):
+        #     return self.form_valid(main_form, appartment_tariff_formset)
+        # else: 
+        #     return self.form_invalid(main_form, appartment_tariff_formset)
+
+        if (main_form.is_valid()):
+            return self.form_valid(main_form)
         else: 
-            return self.form_invalid(main_form, appartment_tariff_formset)
-
-        # if (main_form.is_valid()):
-        #     return self.form_valid(main_form)
-        # else: 
-        #     return self.form_invalid(main_form)
-
-        # main_form = AppartmentEditeForm(self.request.POST, instance=self.get_object(), prefix='main_form')
-        # personal_account_form = AppartmentPersonalAccountEditeForm(self.request.POST, instance=self.get_object().personal_account, prefix='personal_account_form')
-        # if (main_form.is_valid() and personal_account_form.is_valid()):
-        #     return self.form_valid(main_form, personal_account_form)
-        # else: 
-        #     return self.form_invalid(main_form, personal_account_form)
-
-    
-
-    # def get_object(self):
-    #     pk = self.kwargs.get(self.pk_url_kwarg)
-    #     return self.model.objects.select_related('personal_account', 'house', 'sections', 'floor', 'owner_user').get(id=pk)
+            return self.form_invalid(main_form)
 
     def get_object(self):
         pk = self.kwargs.get(self.pk_url_kwarg)
@@ -454,30 +441,13 @@ class AppartmentEditeView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['appartment_tariff_formset'] = AppartmentTariffForset(queryset =self.object.tariff.all(),  prefix='appartment_tariff_form')
         context['main_form'] = AppartmentEditeForm(instance=self.object, prefix='main_form')
         return context
 
 
-    # def form_valid(self, main_form, appartment_tariff_formset):
-    def form_valid(self, main_form, appartment_tariff_formset):
 
-        # appartment = main_form.save(commit=False)
-        # for appartment_tariff_form in appartment_tariff_formset:
-        #     tariff = appartment_tariff_form.save(commit=False)
-        #     tariff.appartment = None
-        #     tariff.appartment = appartment
-        #     tariff.save()
-            # tariff.add(appartment_tariff_form)
-            # appartment_tariff_form.save()
-            # appartment.add(appartment_tariff_form)
-
-
-
-        # appartment.save()
-
+    def form_valid(self, main_form):
         main_form.save()
-
         messages.success(self.request, 'Квартира обновлена')
         success_url = self.success_url
         return HttpResponseRedirect(success_url)
@@ -508,19 +478,19 @@ class AppartmentEditeView(UpdateView):
     #     success_url = self.success_url
     #     return HttpResponseRedirect(success_url)
 
-    def form_invalid(self, main_form, appartment_tariff_formset):
+    def form_invalid(self, main_form):
         if main_form.errors:
             for field, error in main_form.errors.items():
                 
                 error_text = f"{''.join(field).join(error)}"
                 messages.error(self.request, error_text)
 
-        for tariff_form in appartment_tariff_formset:
-            if tariff_form.errors:
-                for field, error in tariff_form.errors.items():
-                    error_text = f"{''.join(error)}"
-                    print(f"{field}: {error}")
-                    messages.error(self.request, error_text)
+        # for tariff_form in appartment_tariff_formset:
+        #     if tariff_form.errors:
+        #         for field, error in tariff_form.errors.items():
+        #             error_text = f"{''.join(error)}"
+        #             print(f"{field}: {error}")
+                    # messages.error(self.request, error_text)
         success_url = self.success_url
         return HttpResponseRedirect(success_url)
     

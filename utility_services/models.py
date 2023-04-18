@@ -8,7 +8,7 @@ class Tariff(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     updated_datetime = models.DateTimeField(blank=True, null=True)
-    appartments = models.ManyToManyField(Appartment, verbose_name='квартиры', related_name='tariff', related_query_name="tariff_query", blank=True, null=True)
+    # appartments = models.ManyToManyField(Appartment, verbose_name='квартиры', related_name='tariff', blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -17,7 +17,6 @@ class Tariff(models.Model):
 class TariffCell(models.Model):
     tariff = models.ForeignKey(Tariff, on_delete=models.CASCADE, blank=True, null=True)
     number = models.SmallIntegerField(blank=True, null=True)
-    # description = models.TextField()
     updated_datetime = models.DateTimeField(blank=True, null=True)
     utility_service = models.ForeignKey('UtilityService', on_delete=models.SET_NULL, blank=True, null=True)
     cost_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
@@ -67,8 +66,10 @@ class CounterReadings(models.Model):
     status = models.CharField(max_length=200, choices=COUNTER_READINGS_STATUS)
     date = models.DateField()
     readings = models.DecimalField(max_digits=10, decimal_places=2)
+    number = models.PositiveIntegerField(blank=True, null=True, unique=True)
 
     @classmethod
     def get_verbose_status_dict(cls):
         status_verbose_dict = dict((status, verbose_status) for status, verbose_status in cls.COUNTER_READINGS_STATUS)
         return status_verbose_dict
+    

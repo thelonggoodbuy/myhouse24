@@ -10,7 +10,7 @@ class House(models.Model):
     title = models.CharField(max_length=500, verbose_name='Название дома')
     address = models.CharField(max_length=500, verbose_name='Адресс')
     main_image = models.ImageField(verbose_name='Изображения', upload_to='galery/', blank=True, null=True)
-    responsibilities = models.ManyToManyField(User, verbose_name='Обязанности', related_name='responsibilities')
+    responsibilities = models.ManyToManyField('users.User', verbose_name='Обязанности', related_name='responsibilities')
 
     def __str__(self):
         return self.title
@@ -46,6 +46,7 @@ class Appartment(models.Model):
     sections = models.ForeignKey(Section, on_delete=models.CASCADE)
     floor = models.ForeignKey(Floor, on_delete=models.CASCADE)
     owner_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="owning")
+    tariff = models.ForeignKey('utility_services.Tariff', on_delete=models.SET_NULL, verbose_name='тариф', related_name='appartment_tariff', blank=True, null=True)
     # balance = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
