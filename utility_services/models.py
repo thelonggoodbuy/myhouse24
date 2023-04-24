@@ -18,7 +18,7 @@ class TariffCell(models.Model):
     tariff = models.ForeignKey(Tariff, on_delete=models.CASCADE, blank=True, null=True)
     number = models.SmallIntegerField(blank=True, null=True)
     updated_datetime = models.DateTimeField(blank=True, null=True)
-    utility_service = models.ForeignKey('UtilityService', on_delete=models.SET_NULL, blank=True, null=True)
+    utility_service = models.ForeignKey('UtilityService', on_delete=models.SET_NULL, blank=True, null=True, related_name='utility_service_tariff_cell')
     cost_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
     curency = models.CharField(max_length=200, default='грн',)
 
@@ -34,6 +34,7 @@ class UtilityService(models.Model):
     unit_of_measure = models.ForeignKey('UnitOfMeasure', on_delete=models.SET_NULL, blank=True, null=True)
     appartment = models.ForeignKey(Appartment, on_delete=models.SET_NULL, blank=True, null=True)
     shown_in_counters = models.BooleanField(default=False)
+    # is_counter = models.ForeignKey('Counter', on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return self.title

@@ -1,0 +1,544 @@
+
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+
+{% block additionaly_css %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.css }} 
+    {% endfor %}
+
+    <style>
+
+        .column-center {
+            margin-top: 5pt;
+        }
+        
+    </style>
+
+{% endblock additionaly_css %}
+
+
+
+{% block additionaly_js %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.js }}
+    {% endfor %}
+{% endblock additionaly_js %}
+
+
+{% block title %}
+    <title> Новая квитанция </title>
+
+{% endblock title %}
+
+{% block content-header %}
+    
+    <h1>Новая квитанция</h1>
+    
+{% endblock %}
+
+{% block content %}
+
+<form method="post" enctype="multipart/form-data">
+<div class="row">
+    <div class="col-xs-12 col-md-8 col-lg-7">
+        <div class="box-body">
+            <div class="row">
+                <div class="col-xs-5">
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            №
+                        </div>
+                        {{ main_form.number }}
+                    </div>
+                </div>
+
+                <div class="col-xs-1 column-center">
+                    <strong><span>от</span></strong>
+                </div>
+                <div class="col-xs-5">
+                    
+                    <div class="input-group">
+                        <span class="input-group-addon" title="Выбрать дату">
+                            <i class="glyphicon glyphicon-calendar"></i>
+                        </span>
+                        {{ main_form.payment_due }}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="box">
+    <div class="box-body">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-xs-6 col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">{{ utility_form.house.label}}</label>
+                        {{ utility_form.house }}
+                        <div class="help-block"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label">{{ utility_form.section.label }}</label>
+                        {{ utility_form.section }}
+                        <div class="help-block"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">{{ main_form.appartment.label }}</label>
+                        {{ main_form.appartment }}
+                        <div class="help-block"></div>
+                    </div>
+                    {% comment %} <div class="form-group">
+                        <label class="control-label">{{ utility_form.personal_account.label }}</label>
+                        {{ utility_form.personal_account }}
+                        <div class="help-block"></div>
+                    </div> {% endcomment %}
+                </div>
+
+                <div class="col-xs-6 col-md-6">
+                    <div class="form-group">
+                        {{ main_form.payment_was_made }}
+                        <label class="control-label">{{ main_form.payment_was_made.label}}</label>
+                        <div class="help-block"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label">{{ main_form.status.label}}</label>
+                        {{ main_form.status }}
+                        <div class="help-block"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label">{{ main_form.tariff.label }}</label>
+                        {{ main_form.tariff }}
+                        <div class="help-block"></div>
+                    </div>
+
+                    {% comment %} ----------------------- {% endcomment %}
+                    <div class="form-group">
+                        <label class="control-label">{{ main_form.total_sum.label }}</label>
+                        {{ main_form.total_sum }}
+                        <div class="help-block"></div>
+                    </div>
+                    {% comment %} ----------------------- {% endcomment %}
+
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <strong>{{ main_form.from_date.label }}</strong>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </div>
+                                {{ main_form.from_date }}
+                            </div>
+                        </div>
+        
+                        <div class="col-xs-6">
+                            <strong>{{ main_form.to_date.label }}</strong>
+                            <div class="input-group">
+                                <span class="input-group-addon" title="Выбрать дату">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </span>
+                                {{ main_form.to_date }}
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            
+            
+
+            <div class="row">
+                <div class="col-xs-12 col-sm-6">
+                    <div class="form-group">
+                        <label>{{ utility_form.personal_account.label }}</label>
+                        {{ utility_form.personal_account }}                      
+                    </div>
+                    <p>
+                        <b>Владелец:</b> 
+                        <span id="user-fullname">не выбран</span>
+                    </p>
+                    <p>
+                        <b>Телефон:</b> 
+                        <span id="user-phone">не выбран</span>
+                    </p>
+                </div>
+                <div class="col-xs-12 col-sm-6">
+                </div>
+            </div>
+            {% comment %} ----------------------------------- {% endcomment %}
+            <table class="table table-bordered table-hover" id="utility_service_table">
+                <thead>
+                    <tr>
+                        <th style="min-width: 200px;">Услуга</th>
+                        <th style="min-width: 180px;">Расход</th>
+                        <th style="min-width: 120px;">Ед. изм.</th>
+                        <th style="min-width: 180px;">Цена за ед., грн.</th>
+                        <th style="min-width: 180px;">Стоимость, грн.</th>
+                        <th style="width: 40px; min-width: 40px;"></th>
+                    </tr>
+                </thead>
+                {% comment %} ********************************************************************* {% endcomment %}
+                <tbody id="receipt_cell_formset_table">
+                    {{ receipt_cell_formset.management_form }}
+                    {% for receipt_cell_form in receipt_cell_formset %}
+                        {% for hidden in receipt_cell_form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+
+                        <tr class="utility_data_row">
+                            <td>
+                                {{ receipt_cell_form.utility_service }}
+                            </td>
+                            <td>
+                                {{ receipt_cell_form.consumption }}
+                            </td>
+                            <td>
+                                {{ receipt_cell_form.unit_of_measure }}
+                            </td>
+                            <td>
+                                {{ receipt_cell_form.cost_per_unit }}
+                            </td>
+                            <td>
+                                {{ receipt_cell_form.cost }}
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-default btn-sm form-row-remove-btn" title="Удалить услугу">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                                {{ receipt_cell_form.DELETE }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                    {% comment %} <div id="empty_form_container"> {% endcomment %}
+                        <tr id="empty_form_container">
+                            <td>
+                                {{ receipt_cell_formset.empty_form.utility_service }}
+                            </td>
+                            <td>
+                                {{ receipt_cell_formset.empty_form.consumption }}
+                            </td>
+                            <td>
+                                {{ receipt_cell_formset.empty_form.unit_of_measure }}
+                            </td>
+                            <td>
+                                {{ receipt_cell_formset.empty_form.cost_per_unit }}
+                            </td>
+                            <td>
+                                {{ receipt_cell_formset.empty_form.cost }}
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-default btn-sm form-row-remove-btn" title="Удалить услугу">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                                {{ receipt_cell_formset.empty_form.DELETE }}
+                            </td>
+                        </tr>
+                    {% comment %} </div> {% endcomment %}
+                    
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" valing="middle">
+                            <button type="button" class="btn btn-default btn-hover-change" id="add_simple_utility">
+                                Добавить услугу
+                            </button>
+                            <button type="button" class="btn btn-default" id="add_all_utilities_using_tariff">
+                                Установить все услуги согласно тарифу
+                            </button>
+                            <button type="button" class="btn btn-default add-counters" id="add_counters_readings">
+                                Добавить показания счетчиков
+                            </button>
+                        </td>
+                        <td style="min-width: 180px;">
+                            <div class="h4">
+                                Итого: <b><span id="price-total">0.00</span></b> грн
+                            </div>
+                        </td>
+                        <td style="width: 40px; min-width: 40px;"></td>
+                    </tr>
+                </tfoot>
+            </table>
+            {% comment %} ----------------------------------- {% endcomment %}
+            <div class="row">
+                <div class="col-xs-11 text-right">
+                    <div class="form-group">
+                        <a class="btn btn-default" href="#">Отменить</a>
+                        <button type="submit" class="btn btn-success">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        
+    </div>
+</div>
+
+</form>
+
+
+
+<script>
+    $(document).ready(function () {
+
+    $("#appartment_field > option").not("option[value='']").hide()
+
+    $("#house_utility_field").on('change', function(){
+        var house_number = $(this).find(":selected").val()
+        if (house_number){
+            $.ajax({
+                dataType: "json",
+                url: "{% url 'receipts:add_receipt' %}",
+                data: {"ajax_indicator": "get_certain_house",
+                        "current_house_number": house_number},
+                success: (data) => {
+//                    console.log(data)
+                    var sections = data['sections']
+                    var additional_sections_html = "<option value='empty_section'>Выберите секцию</option>"
+                    for (section of sections){
+                        additional_sections_html +=`<option value=${section["id"]}>${section["title"]}</option>`
+                    }
+                    $("#section_utility_field").not("option[value='']").empty().append(additional_sections_html)
+
+                    var appartments = data['appartments']
+                    var additional_appartment_html = "<option value='empty_appartment'>Выберите квартиру</option>"
+                    for (appartment of appartments){
+                        additional_appartment_html +=`<option value=${appartment["id"]}>${appartment["number"]}</option>`
+                    }
+                    $("#appartment_field").not("option[value='']").empty().append(additional_appartment_html)    
+                }
+            })
+        } else {
+            $("#section_utility_field").not("option[value='']").empty().append("<option value='empty_section'>Выберите дом</option>")
+            $("#appartment_field").not("option[value='']").empty().append("<option value='empty_appartment'>Выберите дом</option>")
+            $('#personal_account_utility_field').val('')
+        }
+    })
+
+
+
+        $("#section_utility_field").on('change', function(){
+
+            var section_number = $(this).find(":selected").val()
+            
+            if (section_number != 'empty_section'){
+                
+                $.ajax({
+                    dataType: "json",
+                    url: "{% url 'receipts:add_receipt' %}",
+                    data: {"ajax_indicator": "get_appartments_per_sections",
+                            "current_sections_number": section_number},
+                    success: (data) => {
+
+                        var appartments = data['appartments']
+                        var additional_appartment_html = "<option value='empty_appartment'>Выберите квартиру</option>"
+                        for (appartment of appartments){
+                            additional_appartment_html +=`<option value=${appartment["id"]}>${appartment["number"]}</option>`
+                        }
+                        $("#appartment_field").not("option[value='']").empty().append(additional_appartment_html)
+                        
+                    }
+                })
+
+            } else {
+                $("#house_utility_field").trigger('change')
+                $('#personal_account_utility_field').val('')
+                
+            }
+        })
+
+
+        // personal account filter
+        $("#appartment_field").on('change', function(){
+            var appartment_number = $(this).find(":selected").val()
+
+            $.ajax({
+                dataType: "json",
+                url: "{% url 'receipts:add_receipt' %}",
+                data: {"ajax_indicator": "get_personal_account_per_appartment",
+                        "appartment": appartment_number},
+                success: (data) => {
+
+                    var personal_account_date = data['personal_account'][0]['number']
+                    $('#personal_account_utility_field').val(personal_account_date)
+
+                    var basic_url = "{% url 'appartments:owner_detail' %}"
+                    var additional_url = data['personal_account'][0]['appartment_account__owner_user__id']
+                    var url = basic_url + additional_url
+
+                    console.log(data)
+                    console.log(url)
+
+                    $('#user-fullname').html("").html(`<a href=${url}>${data['personal_account'][0]['appartment_account__owner_user__full_name']}</a>`)
+
+                    $('#user-phone').html("").html(`<a>${data['personal_account'][0]['appartment_account__owner_user__phone']}</a>`)
+                    //--------------------------------------------------------------------------------------
+                }
+            })
+
+        })
+    
+   
+
+
+        //-------------------------------------------------
+
+        $("#empty_form_container").hide()
+
+
+        $("#utility_service_table").on('click', "button[id^='add']", function(){
+            current_form_tab = $(this).closest('table')
+            form_index = $(current_form_tab).find("input[id$='TOTAL_FORMS']").val()
+            var new_html_data = $(current_form_tab).find('#empty_form_container').html().replace(/__prefix__/g, form_index);
+            
+            // add simple utility
+            if($(this).attr('id') == 'add_simple_utility'){
+                var new_form = `<tr class="utility_data_row">${new_html_data}</tr>`
+                $(new_form).insertBefore($(this).parent().parent());
+                $(current_form_tab).find("input[id$='TOTAL_FORMS']").val(parseInt(form_index) + 1);
+
+            // add all utilities using tariff
+            } else if ($(this).attr('id') == 'add_all_utilities_using_tariff'){
+                var choosen_tariff = $('#tariff_field')
+                if(choosen_tariff.val()){
+                    $("tr[class^='utility_data_row']").each(function(){
+                        $(this).find("input[id$='DELETE']").prop('checked', true);
+                        $(this).hide()
+                    })
+
+                    $.ajax({
+                        url: "{% url 'receipts:add_receipt' %}",
+                        data: {
+                            'ajax_indicator': 'add_all_utilities_using_tariff',
+                            'tariff_id': choosen_tariff.val()
+                        },
+                        dataType: 'json',
+                        success:function(data){
+                                
+                            //data['tariff_cell_data']
+
+                            for(var tariff_cell of data['tariff_cell_data']){
+                                $('#add_simple_utility').trigger('click')
+                                var form_index = $(current_form_tab).find("input[id$='TOTAL_FORMS']").val()
+                                var row_number = parseInt(form_index) - 1
+                                $(`select[name$=${row_number}-utility_service]`).find(`option[value=${tariff_cell['utility_service__id']}]`).prop('selected', true)
+                                $(`select[name$=${row_number}-unit_of_measure]`).find(`option[value=${tariff_cell['utility_service__unit_of_measure__id']}]`).prop('selected', true)
+                                $(`input[name$=${row_number}-cost_per_unit]`).val(`${tariff_cell['cost_per_unit']}`)
+                            }
+
+                        }
+                    })
+
+
+                } else {
+                    toastr.warning('Чтобы установить все услуги согласно тарифу, заполните поле тариф')
+                }
+
+            //add by counters readings
+            } else if($(this).attr('id') == 'add_counters_readings'){
+                var appartment_id = $('#appartment_field').val()
+                $("tr[class^='utility_data_row']").each(function(){
+                    $(this).find("input[id$='DELETE']").prop('checked', true);
+                    $(this).hide()
+                })
+
+                if(appartment_id)
+                {
+                console.log('-----APPARTMENT-NUMBER--------')
+                console.log(appartment_id)
+                console.log('------------------------------')
+                $.ajax({
+                    url: "{% url 'receipts:add_receipt' %}",
+                        data: {
+                            'ajax_indicator': 'add_counters_readings_per_appartment',
+                            'appartment_id': appartment_id
+                        },
+                        dataType: 'json',
+                        success:function(data){
+                              
+                            console.log(data)
+
+                            //for(var tariff_cell of data['counter_tariff_cell_data']){
+                            //    $('#add_simple_utility').trigger('click')
+                            //    var form_index = $(current_form_tab).find("input[id$='TOTAL_FORMS']").val()
+                            //    var row_number = parseInt(form_index) - 1
+                            //    $(`select[name$=${row_number}-utility_service]`).find(`option[value=${tariff_cell['utility_service__id']}]`).prop('selected', true)
+                            //    $(`select[name$=${row_number}-unit_of_measure]`).find(`option[value=${tariff_cell['utility_service__unit_of_measure__id']}]`).prop('selected', true)
+                            //    $(`input[name$=${row_number}-cost_per_unit]`).val(`${tariff_cell['cost_per_unit']}`)
+                            //}
+
+                        }
+                })
+                } else {
+                    toastr.warning('Чтобы извлечь данные из счетчиков, необходимо выбрать квартиру')
+                }
+
+
+            }
+
+            
+        })
+
+//            if($(current_form_tab).attr('id') === 'tab-floors'){
+//                new_form_number = parseInt(form_index) + 1
+//                search_task = "id_floor_formset-" + form_index + "-title"
+//                current_field = $("#" + search_task).val('Этаж ' + new_form_number)
+//            } else if($(current_form_tab).attr('id') === 'tab-sections') {
+//                new_form_number = parseInt(form_index) + 1
+//                search_task = "id_section_formset-" + form_index + "-title"
+//                current_field = $("#" + search_task).val('Секция ' + new_form_number)
+
+//            } else if($(current_form_tab).attr('id') === 'tab-responsibilities') {
+//            }    
+//        })
+
+
+//        $("div[id^='tab']").on('change', '#responsible_field', function(){
+//            var choosen_user = $(this).find(":selected").attr('value')
+//            var role_field = $(this).closest(".form-group").parent().next().find('.form-control')
+//            if(choosen_user){
+//                $.ajax({
+//                    url: "{% url 'appartments:house_edit' %}",
+//                    data: {
+//                        'choosen_user': choosen_user
+//                    },
+//                    dataType: 'json',
+//                    success:function(data){
+//                        console.log(data)
+//                        $(role_field).attr('value', data['user_id'])
+//                    }
+//                })
+//                console.log(role_field)
+//            } else {
+//                console.log('empty!!!!!!!!!')
+//                console.log(role_field)
+//                $(role_field).attr('value', '')   
+//            }
+//        })
+       
+
+//        $("div[id^='tab']").on('click', "*[id='delete_button']", function(){
+//            $(this).closest('.form-group').find("input[id$='-DELETE']").prop('checked', true)
+//            $(this).closest('#data_row').hide()
+//        })
+
+//        $("input[type='checkbox']").hide()
+
+        //-----------------------------------------------
+
+    
+
+console.log('TEST TEST TEST')
+
+});
+</script>
+{% endblock content %}

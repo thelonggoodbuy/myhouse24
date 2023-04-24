@@ -12,5 +12,5 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(ReceiptCell)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('receipt',)
+    list_display = ('id', 'receipt')
     list_filter = ('receipt',)

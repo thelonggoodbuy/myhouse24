@@ -421,13 +421,6 @@ class AppartmentEditeView(UpdateView):
 
     def post(self, *args, **kwargs):
         main_form = AppartmentEditeForm(self.request.POST, instance=self.get_object(), prefix='main_form')
-        # appartment_tariff_formset = AppartmentTariffForset(self.request.POST, queryset=Tariff.objects.filter(appartments=self.get_object()), prefix='appartment_tariff_form')
-
-        # if (main_form.is_valid() and appartment_tariff_formset.is_valid()):
-        #     return self.form_valid(main_form, appartment_tariff_formset)
-        # else: 
-        #     return self.form_invalid(main_form, appartment_tariff_formset)
-
         if (main_form.is_valid()):
             return self.form_valid(main_form)
         else: 
@@ -453,31 +446,6 @@ class AppartmentEditeView(UpdateView):
         return HttpResponseRedirect(success_url)
 
 
-    # def form_valid(self, main_form, personal_account_form):
-        
-    #     appartment = main_form.save(commit=False)
-    #     change_account_indicator = personal_account_form.changed_data
-
-    #     if 'number' in change_account_indicator \
-    #                 and personal_account_form.cleaned_data['number'] != '':
-    #         appartment.personal_account = None
-    #         personal_account_form.save(commit=False)
-    #         new_account = PersonalAccount(number = personal_account_form.cleaned_data['number'], status='active', balance=0)
-    #         new_account.save()
-    #         appartment.personal_account = new_account
-
-    #     elif 'number' in change_account_indicator \
-    #                  and personal_account_form.cleaned_data['number'] == '':
-            
-    #         appartment.personal_account = None
-            
-    #     else:
-    #         appartment.personal_account = personal_account_form.instance
-    #     appartment.save()
-    #     messages.success(self.request, 'Квартира обновлена')
-    #     success_url = self.success_url
-    #     return HttpResponseRedirect(success_url)
-
     def form_invalid(self, main_form):
         if main_form.errors:
             for field, error in main_form.errors.items():
@@ -485,12 +453,6 @@ class AppartmentEditeView(UpdateView):
                 error_text = f"{''.join(field).join(error)}"
                 messages.error(self.request, error_text)
 
-        # for tariff_form in appartment_tariff_formset:
-        #     if tariff_form.errors:
-        #         for field, error in tariff_form.errors.items():
-        #             error_text = f"{''.join(error)}"
-        #             print(f"{field}: {error}")
-                    # messages.error(self.request, error_text)
         success_url = self.success_url
         return HttpResponseRedirect(success_url)
     

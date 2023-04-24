@@ -364,7 +364,8 @@ $(document).ready(function () {
     table.on('click', '#add_counter_readings', function(){
         var row_number = $(this).closest('tr').attr('id')
         var basic_url = "{% url 'utility_services:add_counter_readings_per_counter' %}"
-        document.location.href = basic_url + row_number;
+        //document.location.href = basic_url + row_number;
+        window.open(basic_url + row_number);
     })
 
 

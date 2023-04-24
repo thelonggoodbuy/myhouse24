@@ -398,10 +398,6 @@ class CounterReadingsPerAppartmentListView(TemplateView):
 
     def get(self, request, *args, **kwargs):
 
-        # print('----------------------------')
-        # print(self.appartment_id)
-        # print('----------------------------')
-
         Q_list = []
         print(self.__class__.appartment_id)
         Q_list.append(Q(counter__appartment__id=self.__class__.appartment_id))
