@@ -1,9 +1,10 @@
 from django import forms
-from .models import UnitOfMeasure, UtilityService, Tariff, TariffCell, CounterReadings, Counter
-from appartments.models import House
+from .models import UnitOfMeasure, UtilityService, Tariff, TariffCell, CounterReadings
+from appartments.models import House, Appartment
 
 from django.db.models import Max
 import datetime
+import random
 
 
 
@@ -41,6 +42,14 @@ class UtilityServiceEditeForm(forms.ModelForm):
     class Meta:
         model = UtilityService
         fields = ("title", "unit_of_measure", "shown_in_counters")
+
+    # def save(self, commit=True):
+    #     instance = super(UtilityServiceEditeForm, self).save(commit=False)
+    #     print('you changed form!!!')
+    #     if commit:
+    #         instance.save()
+    #     return instance
+    
 
 
 UtilityServiceEditeFormSet = forms.modelformset_factory(model=UtilityService,
@@ -106,18 +115,27 @@ CreateTariffCellFormSet = forms.inlineformset_factory(Tariff, TariffCell,
 class AddCounterReadingsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(AddCounterReadingsForm, self).__init__(*args, **kwargs)
-        new_number = CounterReadings.objects.aggregate(Max('number'))['number__max'] + 1
+        
+        # new_number = CounterReadings.objects.aggregate(Max('number'))['number__max'] + 1
+
+        new_number = random.randint(10000000 , 99999999)
+        while CounterReadings.objects.filter(number=new_number):
+            new_number = random.randint(10000000 , 99999999)
+
+
         
         self.fields['number'].initial = new_number
 
         # counter усложняет запросы. они начали дублироваться.
-        self.fields['counter'].queryset = Counter.objects.all()
+        self.fields['utility_service'].queryset = UtilityService.objects.filter(shown_in_counters=True)
+        # self.fields['utility_service'].queryset = UtilityService.objects.all()
         # ---------------------------------------------------
         self.fields['house'].queryset = House.objects.all()
         self.fields['status'].choices = CounterReadings.status.field.choices
+        self.fields['appartment'].queryset = Appartment.objects.all()
 
     EMPTY_SECTION_CHOICES = [('', 'Выберите дом')]
-    EMPTY_APPARTMENT_CHOICES = [('', 'Выберите дом')]
+    # EMPTY_APPARTMENT_CHOICES = [('', 'Выберите дом')]
 
 
     house = forms.ModelChoiceField(label='Дом', required=False, queryset=None, empty_label='Выберите дом',
@@ -128,11 +146,11 @@ class AddCounterReadingsForm(forms.ModelForm):
                              widget=forms.Select(attrs={'class': 'form-control',
                                                         'id': 'section_field'}))
     
-    appartment = forms.ChoiceField(label='Квартира', required=False, choices = EMPTY_APPARTMENT_CHOICES,
+    appartment = forms.ModelChoiceField(label='Квартира', required=False, queryset=None,
                              widget=forms.Select(attrs={'class': 'form-control',
                                                         'id': 'appartment_field'}))
     
-    counter = forms.ModelChoiceField(label='Счетчик', required=False, queryset=None,
+    utility_service = forms.ModelChoiceField(label='Счетчик', required=False, queryset=None,
                              widget=forms.Select(attrs={'class': 'form-control',
                                                         'id': 'counter_field'}))
     
@@ -154,7 +172,7 @@ class AddCounterReadingsForm(forms.ModelForm):
                                 widget=forms.DateInput(attrs={'class': 'form-control'}))
     class Meta:
         model = CounterReadings
-        fields = ['status', 'readings', 'number', 'counter', 'date']
+        fields = ['status', 'readings', 'number', 'appartment', 'utility_service', 'date']
 
 
     def save(self, commit=True):

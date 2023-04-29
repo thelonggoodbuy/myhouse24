@@ -97,8 +97,8 @@
                         <div class="help-block"></div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label">{{ form.counter.label }}</label>
-                        {{ form.counter }}
+                        <label class="control-label">{{ form.utility_service.label }}</label>
+                        {{ form.utility_service }}
                         <div class="help-block"></div>
                     </div>
                 </div>
@@ -137,19 +137,19 @@
 
 </form>
 
+{% comment %} {% if counter_number %}
+    {{ counter_number|json_script:'counter_number'}}
 
-{{ counter_number|json_script:'counter_number'}}
-
-{% if current_counter %}
-    {{ current_counter|json_script:'current_counter'}}
-{% endif %}
-
+    {% if current_counter %}
+        {{ current_counter|json_script:'current_counter'}}
+    {% endif %}
+{% endif %} {% endcomment %}
 
 <script>
     $(document).ready(function () {
 
     $("#appartment_field").not("option[value='']").empty()
-    $("#counter_field").not("option[value='']").empty().append("<option value='empty_counter'>Выберите квартиру</option>")
+//    $("#counter_field").not("option[value='']").empty().append("<option value='empty_counter'>Выберите квартиру</option>")
 
 
     
@@ -189,9 +189,9 @@
             })
         } else {
             $("#section_field").not("option[value='']").empty().append("<option value='empty_section'>Выберите секцию</option>")
-            $("#appartment_field").not("option[value='']").empty().append("<option value='empty_appartment'>Выберите квартиру</option>")
+            //$("#appartment_field").not("option[value='']").empty().append("<option value='empty_appartment'>Выберите квартиру</option>")
 
-            $("#counter_field").not("option[value='']").empty().append("<option value='empty_counter'>Выберите квартиру</option>")
+//            $("#counter_field").not("option[value='']").empty().append("<option value='empty_counter'>Выберите квартиру</option>")
         }
 
         $("#section_field").on('change', function(){
@@ -221,32 +221,32 @@
         })
 
 
-        $("#appartment_field").on('change', function(){
-            var appartment_number = $(this).find(":selected").val()
+//        $("#appartment_field").on('change', function(){
+//            var appartment_number = $(this).find(":selected").val()
 
-            $.ajax({
-                dataType: "json",
-                url: "{% url 'utility_services:add_counter_readings' %}",
-                data: {"ajax_indicator": "get_counter_per_appartment",
-                        "appartment": appartment_number},
-                success: (data) => {
+//            $.ajax({
+//                dataType: "json",
+//                url: "{% url 'utility_services:add_counter_readings' %}",
+//                data: {"ajax_indicator": "get_counter_per_appartment",
+//                        "appartment": appartment_number},
+//                success: (data) => {
 
                     //console.log(data)
-                    var additional_counter_html = "<option value='empty_counter'>Выберите счетчик</option>"
+//                    var additional_counter_html = "<option value='empty_counter'>Выберите счетчик</option>"
 
-                if(data['counters'])
-                    console.log(data['counters'])
-                    {for (counter of data['counters']){
+//                if(data['counters'])
+//                    console.log(data['counters'])
+//                    {for (counter of data['counters']){
                             //console.log(counter)
-                            additional_counter_html +=`<option value=${counter["id"]}>${counter["title"]}</option>`  
-                        }
-                    }
-                    $("#counter_field").not("option[value='']").empty().append(additional_counter_html)
+//                            additional_counter_html +=`<option value=${counter["id"]}>${counter["title"]}</option>`  
+//                        }
+//                    }
+//                    $("#counter_field").not("option[value='']").empty().append(additional_counter_html)
 
-                }
-            })
+//                }
+//            })
 
-        })
+//        })
 
 
 
@@ -262,43 +262,43 @@
 
 
         // initialization data from current counter if
-    // 
-    try {
-        var current_counter = JSON.parse(document.getElementById('current_counter').textContent)
-        var counter_number = JSON.parse(document.getElementById('counter_number').textContent)
+    
+//    try {
+//        var current_counter = JSON.parse(document.getElementById('current_counter').textContent)
+//        var counter_number = JSON.parse(document.getElementById('counter_number').textContent)
 
 
-        choosen_house_val = current_counter[0]['appartment__house__id']
-        choosen_section_val = current_counter[0]['appartment__sections__id']
-        choosen_appartment_val = current_counter[0]['appartment__id']
-        id = current_counter[0]['id']
-        console.log('----------------------')
-        console.log('Current counter:')
-        console.log(current_counter)
-        console.log(`Counter number: ${counter_number}`)
+//        choosen_house_val = current_counter[0]['appartment__house__id']
+//        choosen_section_val = current_counter[0]['appartment__sections__id']
+//        choosen_appartment_val = current_counter[0]['appartment__id']
+//        id = current_counter[0]['id']
+//        console.log('----------------------')
+//        console.log('Current counter:')
+//        console.log(current_counter)
+//        console.log(`Counter number: ${counter_number}`)
         //console.log(counter_id)
             
-        console.log('----------------------')
+//        console.log('----------------------')
 
-        $("#house_field").val(choosen_house_val).change();
+//        $("#house_field").val(choosen_house_val).change();
 
-        setTimeout(() => {
-            $("#section_field").val(choosen_section_val).change();
-          }, 1000);
+//        setTimeout(() => {
+//            $("#section_field").val(choosen_section_val).change();
+//          }, 1000);
 
-        setTimeout(() => {
-            $("#appartment_field").val(choosen_appartment_val).change();
-          }, 2000);
+//        setTimeout(() => {
+//            $("#appartment_field").val(choosen_appartment_val).change();
+//          }, 2000);
 
-        setTimeout(() => {
-            $("#counter_field").val(id).change();
-          }, 3000);
+//        setTimeout(() => {
+//            $("#counter_field").val(id).change();
+//          }, 3000);
 
         //setTimeout(() => {
         //    $("#counter_field").val(choosen_appartment_val).change();
         //  }, 2000);
 
-        } catch (e){console.log(e)};
+//        } catch (e){console.log(e)};
 
 
     });

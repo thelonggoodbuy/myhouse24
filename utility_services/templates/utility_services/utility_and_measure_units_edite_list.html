@@ -1,463 +1,208 @@
+
 {% extends "layout/base_crm.html" %}
 {% load static %}
 
-{% block title %}
-    <title> Владельцы квартир</title>
-{% endblock title %}
-
-{% block content-header %}
-    <h1>Владельцы квартир</h1>
-{% endblock %}
 
 {% block additionaly_css %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
-    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2/dist/css/select2.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2-theme-bootstrap4/dist/select2-bootstrap.min.css' %}">
+    {% for form in responsibilities_formset %}
+        {{ form.media.css }} 
+    {% endfor %}
 {% endblock additionaly_css %}
 
+
+
 {% block additionaly_js %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-    <script src="{% static 'appartments/plugins/select2/dist/js/select2.min.js' %}"></script>
-    <script src="{% static 'appartments/plugins/bootstrap-datepicker/js/locales/bootstrap-datepicker.ru.js' %}"></script>
+    {% for form in responsibilities_formset %}
+        {{ form.media.js }}
+    {% endfor %}
 {% endblock additionaly_js %}
 
 
+{% block title %}
+    <title> Данные о доме </title>
+{% endblock title %}
+
+{% block content-header %}
+    <h1>{{ object.title }}</h1>
+{% endblock %}
 
 {% block content %}
-{% comment %} <style>
-    div.dataTables_wrapper {
-        width: 800px;
-        margin: 0 auto;
-    }
-</style> {% endcomment %}
-
-        <section class="content">
-
-            <div id="myDialog">
-                Content of the modal dialog box.
-            </div>
+<div class="box">
+    <div class="box-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
             <div class="row">
-                <div class="col-xs-12">
-                    <div class="btn-group pull-right margin-bottom">
-                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Выберите действие <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a href="{% url 'appartments:owner_create' %}">Добавить владельца квартиры</a></li>
-                            <li><a href="#">Отправить сообщение должникам</a></li>
-                            <li><a href="#">Отправить приглашение</a></li>
+                <div class="col-xs-12 col-lg-7">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#tab_service" data-toggle="tab" aria-expanded="true">Услуги</a></li>
+                            <li class=""><a href="#tab_serviceunit" data-toggle="tab" aria-expanded="false">Единицы измерения</a></li>
                         </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane clearfix active" id="tab_service">
+                                    {{ services_formset.management_form }}
+                                    {% for utility_service_form in services_formset %}
+                                        {% for hidden in utility_service_form.hidden_fields %}
+                                            {{ hidden }}
+                                        {% endfor %}
+                                        
+                                            <div class="row cell_container">
+                                                <div class="col-xs-12 col-sm-7">
+                                                    <div class="form-group">
+                                                        <strong>{{ utility_service_form.title.label }}</strong>
+                                                        {{ utility_service_form.title }}                                                    
+                                                    </div>
+                                                    {{ utility_service_form.shown_in_counters }}
+                                                    <strong>{{ utility_service_form.shown_in_counters.label }}</strong>
+                                                    <p>{{utility_service_form.DELETE}}</p>
+                                                </div>
+
+                                                <div class="col-xs-12 col-sm-5">
+                                                    <strong>{{ utility_service_form.unit_of_measure.label }}</strong>
+                                                    <div class="input-group">
+                                                        {{ utility_service_form.unit_of_measure }}        
+                                                        <span class="input-group-btn" id="delete_button">
+                                                            <button type="button" class="btn btn-default form-row-remove-btn">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>                
+                                                        </span>
+                                                    </div>
+                                                </div>        
+                                            </div>
+                                        
+                                    {% endfor %}
+
+                                    <div id="empty_form_container">
+                                        <div class="row cell_container">
+                                            <div class="col-xs-12 col-sm-7">
+                                                <div class="form-group">
+                                                    <strong>{{ services_formset.empty_form.title.label }}</strong>
+                                                    {{ services_formset.empty_form.title }}                                                    
+                                                </div>
+                                                {{ services_formset.empty_form.shown_in_counters }}
+                                                <strong>{{ services_formset.empty_form.shown_in_counters.label }}</strong>
+                                                <p>{{services_formset.empty_form.DELETE}}</p>
+                                            </div>
+
+                                            <div class="col-xs-12 col-sm-5">
+                                                <strong>{{ services_formset.empty_form.unit_of_measure.label }}</strong>
+                                                <div class="input-group">
+                                                    {{ services_formset.empty_form.unit_of_measure }}        
+                                                    <span class="input-group-btn" id="delete_button">
+                                                        <button type="button" class="btn btn-default form-row-remove-btn">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>                
+                                                    </span>
+                                                </div>
+                                            </div>        
+                                        </div>
+                                    </div>
+
+
+
+                                <button type="button" class="btn btn-default btn-hover-change pull-left form-row-add-service-btn" id='add'>Добавить</button>
+                            </div>
+                            <div class="tab-pane clearfix" id="tab_serviceunit">
+
+            {% comment %} --------------------------------------------------------------------- {% endcomment %}
+                                
+            {% comment %} ------------------------------- formset ------------------------------- {% endcomment %}
+                                {{ measures_units_formset.management_form }}
+                                {% for unit_form in measures_units_formset %}
+                                    {% for hidden in unit_form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+                                    <div class="unit_cell_container">
+                                        <p>
+                                            <strong>{{ unit_form.title.label }}</strong>
+                                            <div class="input-group">
+                                                {{ unit_form.title }}
+                                                <span class="input-group-btn" id="delete_button">
+                                                    <button type="button" class="btn btn-default form-row-remove-btn" no-delete-msg="Эта ед.изм. используется в услуге. Удаление невозможно.">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>                
+                                                </span>
+                                            </div>
+                                            {{ unit_form.DELETE }}
+                                        </p>
+                                    </div>
+                                {% endfor %}
+                                <div id="empty_form_container">
+                                    <div class="unit_cell_container">
+                                        <p>
+                                            <strong>{{ measures_units_formset.empty_form.title.label }}</strong>
+                                            <div class="input-group">
+                                                {{ measures_units_formset.empty_form.title }}
+                                                <span class="input-group-btn" id="delete_button">
+                                                    <button type="button" class="btn btn-default form-row-remove-btn" no-delete-msg="Эта ед.изм. используется в услуге. Удаление невозможно.">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>                
+                                                </span>
+                                            </div>
+                                            {{ measures_units_formset.empty_form.DELETE }}
+                                        </p>
+                                    </div>
+                                </div>
+
+            {% comment %} ----------------------------------------------------------------------- {% endcomment %}
+                                <button type="button" class="btn btn-default btn-hover-change pull-left form-row-add-serviceunit-btn" id="add">Добавить</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12">
-                    <div class="box">
-                        <div class="box-header with-border">
-                            <h3 class="box-title"></h3>
-                            <div class="box-tools">
-                                <button class="btn btn-default btn-sm" id="clear_filters">
-                                    <span class="hidden-xs">Очистить</span><i class="fa fa-eraser visible-xs" aria-hidden="true"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div id="w0" class="grid-view">
-                            <div class="box-body table-responsive no-padding">
-                                <table class="table table-bordered table-hover table-striped linkedRow" id="owners_list_table">
-                                    <thead>
-                                        <tr id="order_links">
-                                            <th sort-index="0" id="ID">ID</th>
-                                            <th sort-index="1" id="full_name">ФИО</th>
-                                            <th sort-index="2" id="phone">Телефон</th>
-                                            <th sort-index="3" id="email">Email</th>
-                                            <th sort-index="4" id="house">Дом</th>
-                                            <th sort-index="5" id="appartment">квартира(ы)</th>
-                                            <th sort-index="6" id="added">Добавлен</th>
-                                            <th sort-index="7" id="status">Статус</th>
-                                            <th sort-index="8" id="debt">долг</th>
-                                            <th>&nbsp;</th>
-                                        </tr>
-                                        <tr class="filters">
-
-                                            <td>
-                                                <input colnumb="0" type="text" class="form-control" placeholder="" id="ID">
-                                            </td>
-
-                                            <td>
-                                                <input colnumb="1" type="text" class="form-control" placeholder="" id="full_name">
-                                            </td>
-
-                                            <td>
-                                                <input colnumb="2" type="text" class="form-control" placeholder="" id="phone">
-                                            </td>
-
-                                            <td>
-                                                <input colnumb="3" type="text" class="form-control" placeholder="" id="email">
-                                            </td>
-
-                                            <td>
-                                                <select colnumb="4" class="form-control" placeholder="" id="choose_house">
-                                                    <option id="all_houses"></option>
-                                                    {% for house in houses %} 
-                                                        <option id="{{ house.id }}">{{ house.title }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </td>
-
-                                            <td>
-                                                <input colnumb="5" type="text" class="form-control" placeholder="" id="appartment">
-                                            </td>
-
-                                            <td>
-                                                <input colnumb="6" type="text" class="form-control datepicker_added" placeholder="" id="added">
-                                            </td>
-
-                                            <td>
-                                                <select colnumb="7" class="form-control" id="choose_status">
-                                                    <option id="all_status"></option>
-                                                    <option id="active">активен</option>
-                                                    <option id="new">новый</option>
-                                                    <option id="disable">отключен</option>
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <select colnumb="8" id="choose_balance" class="form-control">
-                                                    <option id="all_balance">ВСЕ</option>
-                                                    <option id="debt">ДА</option>
-                                                  
-                                                </select>
-                                            </td>
-
-                                            <td>
-                                                &nbsp;
-                                            </td>
-
-                                        </tr>
-                                    </thead>
-                                    
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                    </div>            
+                <div class="col-xs-12 text-center">
+                    <div class="form-group">
+                        <a href="/admin/service/index" class="btn btn-default">Отменить</a>
+                        <button type="submit" class="btn btn-success">Сохранить</button>
+                    </div>
                 </div>
             </div>
-        </div>
-        </section>
+        </form>    
+    </div>
+</div>
+
 
 
 
 <script>
+    $(document).ready(function () {
 
 
-$(document).ready(function () {
+        $("div[id='empty_form_container']").hide()
 
 
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== "") {
-          const cookies = document.cookie.split(";");
-          for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + "=")) {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-              break;
-            }
-          }
-        }
-        return cookieValue;
-      };
-
-
-        var table = $('#owners_list_table').DataTable({
-            "initComplete": function(){
-
-                //logic for input search element
-                $('.filters input').on('keyup change clear', function(){
-                                            var numb = $(this).attr("colnumb")
-                                            table.columns(numb).search(this.value).draw();
-                })
-
-                
-                //logic for select element            
-                $('.filters select').on('change', function(){
-                    var choosen_numb = $(this).attr("colnumb")
-                    var choosen_option = $(this).find(":selected").attr('id')
-                    table.columns(choosen_numb).search(choosen_option).draw();
-                })
-
-
-            },
-
-            "rowCallback": function(row, data){
-                if (data.status === "активен") {
-                    $('td:eq(7)', row).wrapInner("<small class='label label-success my-3'></small>");
-                } else if (data.status === "новый") {
-                    $('td:eq(7)', row).wrapInner("<small class='label label-warning'></small>");
-                } else if (data.status === "отключен") {
-                    $('td:eq(7)', row).wrapInner("<small class='label label-danger'></small>");
-                }
-            },
-
-            "dom": "<<t>p>",
-            "processing": true,
-            "serverSide": true,
-            "pageLength": 5,
-            "ordering": false,
-            "scrollX": true,
-            "ajax": {
-                "type": "GET",
-                "url": "{% url 'appartments:owner_list' %}",
-                "dataSrc": "data",
-                "dataType": "json",
-            },
-            "columns": [
-                {"data": "id", "name": "id", "width": "50pt"},
-                {"data": "full_name", "name": "full_name", "width": "200pt"},
-                {"data": "phone", "name": "phone", "width": "100pt", render: function (data, type, row, meta) 
-                                                                                        {if (data == null)
-                                                                                            {return '(не задано)'
-                                                                                        } else {
-                                                                                            return data
-                    }
-                }
-                },
-                {"data": "email", "name": "email", "width": "100pt", render: function (data, type, row, meta)
-                                                                                        {if (data == null)
-                                                                                            {return '(не задано)'
-                                                                                        } else {
-                                                                                            return data}
-                                                                                        }
-                },
-                {"data": "house_in_owning", "name": "house_in_owning", "width": "100pt", render: function (data, type, row, meta)
-                                                                                        {if (data == null)
-                                                                                            {return '(не задано)'
-                                                                                        } else {
-                                                                                            houses_html = ''
-                                                                                            for (house of data){
-                                                                                                houses_html += `<p><a href="#">${house}</a></p>`
-                                                                                            }
-                                                                                            return houses_html}
-                                                                                        }
-                },
-                
-                {"data": "appartments_in_owning", "name": "appartments_in_owning", "width": "100pt", render: function (data, type, row, meta) 
-                                                                                        {if (data == null)
-                                                                                            {return '(не задано)'
-                                                                                        } else {
-                                                                                            owning_html = ''
-                                                                                            for (owning of data)
-                                                                                            {
-                                                                                                var owning_arr = owning.match(/\[(.*?)\]/g)
-                                                                                                var id = owning_arr[0].replace(/[\[\]']+/g, '');
-                                                                                                var house = owning_arr[1].replace(/[\[\]']+/g, '');
-                                                                                                var number = owning_arr[2].replace(/[\[\]']+/g, '');
-                                                                                                owning_html += `<p><a href="#" id=${id}>${house}, ${number}</a></p>`
-                                                                                            }
-                                                                                            return owning_html}
-                    }
-                },
-                {"data": "created_at", "name": "created_at", "width": "100pt", render: function (data, type, row, meta) 
-                                                                                        {if (data == null)
-                                                                                            {return '(нет счета)'
-                                                                                        } else {
-                                                                                            return data}
-                    }
-                },
-                {"data": "status", "name": "status", "width": "100pt", render: function (data, type, row, meta) 
-                                                                                        {if (data == null)
-                                                                                            {return '(нет счета)'
-                                                                                        } else {
-                                                                                            return data}
-                    }
-                },
-                {"data": "current_balance", "name": "current_balance",
-                                                    "width": "100pt", render: function (data, type, row, meta) 
-                                                                                        {if (data == null)
-                                                                                            {return '(нет счета)'
-                                                                                        } else {
-                                                                                            return data}
-                    }
-                },
-                {"data": "", "width": "200pt", render: function ( data, type, row, meta ) 
-                                        { prerendered_last_cell = "<div id='buttons_interaction'>\
-                                                    <div class='col=12'>\
-                                                        <a class='btn btn-default btn-sm' href='#' title='Отправить сообщение' data-toggle='tooltip'>\
-                                                            <i class='fa fa-envelope'></i>\
-                                                        </a>\
-                                                        <a class='btn btn-default btn-sm' title='Удалить' data-toggle='tooltip' id='delete_button'>\
-                                                            <i class='fa fa-trash'></i>\
-                                                        </a>\
-                                                        <a class='btn btn-default btn-sm' title='Редактировать' data-toggle='tooltip' id='edite_button'>\
-                                                            <i class='fa fa-pencil'></i>\
-                                                        </a>\
-                                                        </div>\
-                                                    </div>";
-                                            
-                                            return prerendered_last_cell
-                                        }
-                },
-                ],
-//            "columnDefs": [
-//                {'orderable': false, targets: 0},
-//                {'orderable': false, targets: 1},
-//                {'orderable': false, targets: 2},
-//                {'orderable': false, targets: 3},
-//                {'orderable': false, targets: 4},
-//                {'orderable': false, targets: 5},
-//                {'orderable': false, targets: 6},
-//            ],
-            "rowId": 'id',
+        $("div[id^='tab']").on('click', "button[id^='add']", function(){
+            current_form_tab = $(this).parent()
+            form_index = $(current_form_tab).find("input[id$='TOTAL_FORMS']").val()
+            var new_form = $(current_form_tab).find('#empty_form_container').html().replace(/__prefix__/g, form_index);
+            $(new_form).insertBefore($(this));
+            $(current_form_tab).find("input[id$='TOTAL_FORMS']").val(parseInt(form_index) + 1);
             
-        });
+            if($(current_form_tab).attr('id') === 'tab-floors'){
+                new_form_number = parseInt(form_index) + 1
+                search_task = "id_floor_formset-" + form_index + "-title"
+                current_field = $("#" + search_task).val('Этаж ' + new_form_number)
+            } else if($(current_form_tab).attr('id') === 'tab-sections') {
+                new_form_number = parseInt(form_index) + 1
+                search_task = "id_section_formset-" + form_index + "-title"
+                current_field = $("#" + search_task).val('Секция ' + new_form_number)
 
-        
-//    var click_counter = 0
-//    $("a[id^='order-link']").on('click', function(){
-//        var col_numb = parseInt($(this).attr('id').replace('order-link_', ''))
-//        if (click_counter % 2 == 0){
-//            table.order([col_numb, 'asc']).draw();
-//            //console.log(table)
-//        } else {
-//            table.order([col_numb, 'desc']).draw();
-//        }
-//        click_counter++
-//    })
+            } else if($(current_form_tab).attr('id') === 'tab-responsibilities') {
+            }    
+        })
 
-    //$('#choose_house')
+       
 
+        $("div[id^='tab']").on('click', "*[id='delete_button']", function(){
+            //console.log($(this).closest("*[class$='cell_container']").find("input[id$='-DELETE']"))
+            $(this).closest("*[class$='cell_container']").find("input[id$='-DELETE']").prop('checked', true)
+            $(this).closest("*[class$='cell_container']").hide()
+        })
 
-//------------------------------------------------------------------------
-
-    // options data for all dropbox exclude owners
-    $('#choose_house').on('change', function(){
-        var choosen_house = $(this).find('option:selected').val()
-        if(choosen_house){
-            $.ajax({
-                url: "{% url 'appartments:personal_accounts_list' %}",
-                type: "GET",
-                data: {
-                    'choosen_house': choosen_house,
-                },
-                dataType: "json",
-                success: (data) => {
-
-                    var sections_arr = data["sections"]
-                    var additional_section_html = "<option id='empty_sect'></option>"
-                    for (section of sections_arr){
-                        additional_section_html +=`<option id=${section["id"]}>${section["title"]}</option>`
-                    }
-                    $('#choose_section').not("option[value='']").empty().append(additional_section_html);
-                }
-                })
-            } else {
-                $('#choose_section').empty().append("<option id='empty_sect'>Выберите дом</option>");
-                $('#choose_section').trigger('change')
-
-            }
-    })
-
-    
-
-    //options data for owners
-    $('#choose_owner').select2({
-        ajax: {
-            url: "{% url 'appartments:personal_accounts_list' %}",
-            dataType: 'json',
-            data: function(params){
-                if(params.term != undefined && params.term != undefined){
-                    var query = {
-                        search: params.term,
-                        type: 'public',
-                        issue_marker: 'owners'
-                    }
-                    return query;
-                } else {
-                    var query = {
-                        search: params.term,
-                        type: 'public',
-                        issue_marker: 'all_owners'
-                    }
-                    return query;
-                }  
-            }
-        }
-    })
-
-    
-    $("input[class$='datepicker_added']").datepicker({
-        format: "dd.mm.yyyy",
-        language: 'ru'
-    })
-
-    //change row coursor
-//    table.on('mouseover', "a[id^='order-link']", function(){
-//        $(this).css('cursor','pointer')
-//        }
-//    )
-    
-//    table.on('mouseout', "a[id^='order-link']", function(){
-//        $(this).css('cursor','auto');
-//        }
-//    )
-
-
-
-    //cleaning searh filters
-    $('.box-header').on('click', '#clear_filters', function () {
-        $("*[colnumb]").val('').change()
-    } ); 
-
-
-    //reversion logic for row except links to send inviting, deleting and editing
-    table.on('click', 'tbody > tr > td', function () {
-        if(
-            $(this).find("div").attr("id") != "buttons_interaction"
-            )
-        {
-            var basic_url = "{% url 'appartments:owner_detail' %}"
-            var url_index = table.row(this).id().toString();
-            document.location.href = basic_url + url_index;
-        }
-    } );
-
-
-    // delete and confirm display lofic
-    $("#myDialog").dialog({
-        autoOpen  : false,
-        modal     : true,
-        title     : "avadamedia.myhoise24",
-        buttons   : {
-                    'удалить квартиру' : function() {
-                        var textValue = $('#myTextBox').val();
-                        var basic_url = "{% url 'appartments:owner_delete' %}"
-                        var row_number = $(this).data('row_number')
-                        document.location.href = basic_url + row_number;
-                    },
-                    'отмена' : function() {
-                        $(this).dialog('close');
-                    }
-                    }
-    });
-
-
-    table.on('click', '#delete_button', function(){
-        var row_number = $(this).closest('tr').attr('id')
-        $("#myDialog").text(`Удалить квартиру с id ${row_number}?`).data('row_number', row_number).dialog("open");
-    })
-
-
-    table.on('click', '#edite_button', function(){
-        var row_number = $(this).closest('tr').attr('id')
-        var basic_url = "{% url 'appartments:owner_edite' %}"
-        document.location.href = basic_url + row_number;
-    })
-
+        $("input[id$='-DELETE']").hide()
 
     });
-
-
-
-    
 </script>
 {% endblock content %}

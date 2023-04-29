@@ -32,7 +32,7 @@ class TariffCell(models.Model):
 class UtilityService(models.Model):
     title = models.CharField(max_length=200)
     unit_of_measure = models.ForeignKey('UnitOfMeasure', on_delete=models.SET_NULL, blank=True, null=True)
-    appartment = models.ForeignKey(Appartment, on_delete=models.SET_NULL, blank=True, null=True)
+    # appartment = models.ForeignKey(Appartment, on_delete=models.SET_NULL, blank=True, null=True)
     shown_in_counters = models.BooleanField(default=False)
     # is_counter = models.ForeignKey('Counter', on_delete=models.SET_NULL, blank=True, null=True)
 
@@ -41,13 +41,13 @@ class UtilityService(models.Model):
 
 
 
-class Counter(models.Model):
-    title = models.CharField(max_length=200)
-    unit_of_measure = models.ForeignKey('UnitOfMeasure', on_delete=models.SET_NULL, blank=True, null=True)
-    appartment = models.ForeignKey(Appartment, on_delete=models.SET_NULL, blank=True, null=True)
+# class Counter(models.Model):
+#     utility_service = models.ForeignKey(UtilityService, on_delete=models.CASCADE, blank=True, null=True, related_name='counter_utility_service')
+    # unit_of_measure = models.ForeignKey('UnitOfMeasure', on_delete=models.SET_NULL, blank=True, null=True)
+    # appartment = models.ForeignKey(Appartment, on_delete=models.SET_NULL, blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.title}: {self.appartment.house.title}, {self.appartment.number}"
+    # def __str__(self):
+    #     return f"{self.title}: {self.appartment.house.title}, {self.appartment.number}"
 
 
 class UnitOfMeasure(models.Model):
@@ -63,11 +63,12 @@ class CounterReadings(models.Model):
         ('taken_into_account', 'Учтено'),
         ('taken_into_account_and_paid', 'Учтено и оплачено'),
     )
-    counter = models.ForeignKey(Counter, on_delete=models.SET_NULL, blank=True, null=True, related_name='counter_reading')
+    utility_service = models.ForeignKey(UtilityService, on_delete=models.SET_NULL, blank=True, null=True, related_name='counter_reading')
     status = models.CharField(max_length=200, choices=COUNTER_READINGS_STATUS)
     date = models.DateField()
     readings = models.DecimalField(max_digits=10, decimal_places=2)
     number = models.PositiveIntegerField(blank=True, null=True, unique=True)
+    appartment = models.ForeignKey(Appartment, on_delete=models.SET_NULL, blank=True, null=True, related_name='counter_readings_appartment')
 
     @classmethod
     def get_verbose_status_dict(cls):

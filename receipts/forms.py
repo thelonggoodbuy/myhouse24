@@ -55,7 +55,8 @@ class AddReceiptForm(forms.ModelForm):
     to_date = forms.DateField(label='Период до', initial=datetime.date.today,
                                 widget=forms.DateInput(attrs={'class': 'form-control'}))
     
-    total_sum = forms.DecimalField(label='Общая сумма', required=False, decimal_places=2,
+    total_sum = forms.DecimalField(label='Общая сумма', required=False, 
+                                decimal_places=2, initial=00.00,
                                 widget=forms.NumberInput(attrs={'class': 'form-control',
                                                           'id': 'total_summ'}))
 
@@ -110,7 +111,8 @@ class ReceiptCellForm(forms.ModelForm):
     
     cost = forms.DecimalField(label='Стоимость, грн.', required=False, decimal_places=2,
                                 widget=forms.NumberInput(attrs={'class': 'form-control',
-                                                          'id': 'cost_field'}))
+                                                          'id': 'cost_field',
+                                                          'old_cost': '00.00'}))
 
     class Meat:
         model = ReceiptCell

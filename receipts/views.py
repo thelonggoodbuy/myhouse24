@@ -221,7 +221,8 @@ class AddReceiptView(TemplateView):
 
 
     def get(self, request, *args, **kwargs):
-        
+
+
         if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_certain_house':
             house_id = self.request.GET['current_house_number']
             house = House.objects.get(id=house_id)
@@ -231,35 +232,49 @@ class AddReceiptView(TemplateView):
                         'appartments':appartments}
             return JsonResponse(response, safe=False)
 
+
         if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_appartments_per_sections':
             sections_id = self.request.GET.get('current_sections_number')
             choosen_sections = Section.objects.get(id=sections_id)
             appartments = list(Appartment.objects.only('id', 'number').filter(sections=choosen_sections).values('id', 'number'))
             response = {'appartments':appartments}
             return JsonResponse(response, safe=False)
-        
+
+
         if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_personal_account_per_appartment':
             appartment_id = self.request.GET.get('appartment')
             choosen_personal_account = list(PersonalAccount.objects.filter(appartment_account__id=appartment_id)\
                                             .values('id', 'number', 'appartment_account__owner_user__full_name',\
                                                     'appartment_account__owner_user__id','appartment_account__owner_user__phone'))
-            response = {'personal_account': choosen_personal_account}
+            choosen_tariff = list(Tariff.objects.filter(appartment_tariff__id=appartment_id).values('id'))
+            response = {'personal_account': choosen_personal_account,
+                        'choosen_tariff': choosen_tariff}
             return JsonResponse(response, safe=False)
         
-        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'add_all_utilities_using_tariff':
+
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'add_counters_readings':
+            Q_list = []
             tariff_id = self.request.GET.get('tariff_id')
-            tariff_cell_data = list(TariffCell.objects.filter(tariff__id=tariff_id)\
+            appartment_id = self.request.GET.get('appartment_data')
+            Q_list.append(Q(tariff__id=tariff_id))
+            Q_list.append(Q(tariff__appartment_tariff=appartment_id))
+            existed_counters_readings = list(CounterReadings.objects.filter(appartment__id=appartment_id).values('utility_service__id').distinct())
+            existed_counters = []
+            for counter_marker in  existed_counters_readings: existed_counters.append(counter_marker['utility_service__id'])
+            Q_list.append(reduce(operator.or_, (Q(utility_service__id=counter_number) for counter_number in existed_counters)))
+
+            tariff_cell_data = list(TariffCell.objects.filter(*Q_list)\
                                             .values('utility_service__id', 'utility_service__unit_of_measure__id', 'cost_per_unit'))
             response = {'tariff_cell_data': tariff_cell_data}
             return JsonResponse(response, safe=False)
 
-        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'add_counters_readings_per_appartment':
-            appartment_id = self.request.GET.get('appartment_id')
 
-            counter_tariff_cell_data = list(CounterReadings.objects.filter(counter__appartment__id=appartment_id)\
-                                            .values('counter__id', 'counter__unit_of_measure__id', 'readings', 'id'))
-            response = {'tariff_cell_data': counter_tariff_cell_data}
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'add_all_utilities_using_tariff':
+            tariff_id = self.request.GET.get('tariff_id')
+            counter_tariff_cell_data = list(TariffCell.objects.filter(tariff__id=tariff_id).values('utility_service__id', 'utility_service__unit_of_measure__id', 'cost_per_unit'))
+            response = {'counter_tariff_cell_data': counter_tariff_cell_data}
             return JsonResponse(response, safe=False)
+
 
 
         else:
