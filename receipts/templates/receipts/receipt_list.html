@@ -113,9 +113,6 @@
                                             </td>
 
                                             <td>
-                                                {% comment %} ---------------------------------------------------------- {% endcomment %}
-                                                {% comment %} <input colnumb="6" type="text" class="form-control" placeholder="" id="appartment__owner_user__full_name"> {% endcomment %}
-                                                {% comment %} ---------------------------------------------------------- {% endcomment %}
                                                 <select colnumb="6" id="choose_owner" class="form-control" placeholder="">
                                                     <option value="all_owners"></option>
                                                 </select>
@@ -127,15 +124,9 @@
                                                     <option id="True">Проведена</option>
                                                     <option id="False">Не проведена</option>
                                                 </select>
-                                                {% comment %} <input colnumb="7" type="text" class="form-control" placeholder="" id="payment_was_made"> {% endcomment %}
                                             </td>
                                             <td>
-                                                {% comment %} <select colnumb="8" id="choose_balance" class="form-control">
-                                                    <option id="all_balance">ВСЕ</option>
-                                                    <option id="debt">ДА</option>
-                                                  
-                                                </select> {% endcomment %}
-                                                {% comment %} <input colnumb="8" type="text" class="form-control datepicker_added" placeholder="" id="payment_was_made"> {% endcomment %}
+
                                             </td>
 
                                             <td>
@@ -434,16 +425,17 @@ $(document).ready(function () {
 
 
     //reversion logic for row except links to send inviting, deleting and editing
-//    table.on('click', 'tbody > tr > td', function () {
-//        if(
-//            $(this).find("div").attr("id") != "buttons_interaction"
-//            )
-//        {
-//            var basic_url = "{% url 'appartments:owner_detail' %}"
-//            var url_index = table.row(this).id().toString();
-//            document.location.href = basic_url + url_index;
-//        }
-//    } );
+    table.on('click', 'tbody > tr > td', function () {
+        if(
+            $(this).find("div").attr("id") != "buttons_interaction"
+            )
+        {
+            var basic_url = "{% url 'receipts:receipt_detail' %}"
+            var url_index = table.row(this).id().toString();
+            document.location.href = basic_url + url_index;
+            //console.log(`Now you click in link ${url_index}`)
+        }
+    } );
 
 
     // delete and confirm display lofic

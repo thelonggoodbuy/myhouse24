@@ -1,0 +1,153 @@
+{% extends "layout/base_crm.html" %}
+
+{% block title %}
+    <title>Квитанция №{{ receipt.number }}</title>
+{% endblock title %}
+
+{% block content-header %}
+<h1>Квитанция №{{ receipt.number }}</h1>
+{% comment %} <ul class="breadcrumb"><li><a href="#"><i class="fa fa-home"></i> Главная</a></li>
+    <li><a href="{% url 'appartments:appartments_list' %}">Квартиры</a></li>
+    <li class="active">Квартира №4, ЖК "Башня Чкалов"</li>
+</ul> {% endcomment %}
+{% endblock %}
+
+{% block content %}
+<div class="box">
+    <div class="box-header with-border">
+        <h3 class="box-title">Просмотр квитанции</h3>
+    <div class="box-tools">
+        <a href="#" class="btn btn-default btn-sm">
+            <span class="hidden-xs"> Печать </span><i class="fa fa-dollar visible-xs" aria-hidden="true"></i>
+        </a>
+        <a href="#" class="btn btn-default btn-sm">
+            <span class="hidden-xs"> отправить на email </span><i class="fa fa-files-o visible-xs" aria-hidden="true"></i>
+        </a>
+        <a href="#" class="btn btn-primary btn-sm">
+            <span class="hidden-xs">Редактировать квитанцию</span><i class="fa fa-pencil visible-xs" aria-hidden="true"></i>
+        </a>
+    </div>
+</div>
+    <div class="box-body">
+    <div class="row">
+        <div class="col-xs-12">
+            <table class="table table-bordered table-striped table-view">
+                <tbody>
+                    <tr>
+                        <td><strong>Проведена</strong></td>
+                        <td>
+                            {% comment %} {{ receipt.payment_was_made }} {% endcomment %}
+                            {% if receipt.payment_was_made == True %}
+                                <small class='label label-success my-3'>Проведена</small>
+                            {% elif receipt.payment_was_made == False %}
+                                <small class='label label-danger my-3'>Не проведена</small>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Статус</strong></td>
+                        <td>
+                            {% if receipt.status == 'paid_for' %}
+                                <small class='label label-success my-3'>Оплачена</small>
+                            {% elif receipt.status == 'partly' %}
+                                <small class='label label-warning'>Частично</small>
+                            {% elif receipt.status == 'unpaid' %}
+                                <small class='label label-danger'>Неоплачена</small>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Период</strong></td>
+                        <td>{{ receipt.from_date }} - {{ receipt.to_date }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Владелец</strong></td>
+                        <td>
+                            <a href="{% url 'appartments:owner_detail' pk=receipt.appartment.owner_user.id %}">
+                                {{ receipt.appartment.owner_user.full_name }}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>---Лицевой---счет---</strong></td>
+                        <td>
+                            <a href="#">
+                                {{ receipt.appartment.personal_account.number }}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Телефон</strong></td>
+                        <td>{{ receipt.appartment.owner_user.phone }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Дом</strong></td>
+                        <td>
+                            <a href="{% url 'appartments:house_detail' pk=receipt.appartment.house.id %}">
+                                {{ receipt.appartment.house.title }}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Квартира</strong></td>
+                        <td>
+                            <a href="{% url 'appartments:appartment_detail' pk=receipt.appartment.id %}">
+                                {{ receipt.appartment.number }}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Секция</strong></td>
+                        <td>
+                            {{ receipt.appartment.sections.title }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Тариф</strong></td>
+                        <td>
+                            {{ receipt.appartment.tariff.title }}
+                        </td>
+                    </tr>
+
+                </tbody>
+                
+            </table>
+            {% comment %} -------------------------------------------- {% endcomment %}
+            <div class="table-responsive no-padding">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; min-width: 40px;">#</th>
+                            <th>Услуга</th>
+                            <th>Количество потребления (расход)</th>
+                            <th style="width: 80px; min-width: 80px;">Ед. изм.</th>
+                            <th>Цена за ед., грн</th>
+                            <th>Стоимость, грн</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <td colspan="5"></td>
+                            <td colspan="2"><b>Итого: {{ receipt.total_sum }}</b></td>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        {% for receipt_cell in receipt.receipt_cells.all %}
+                            <tr role="row">
+                                <td>1</td>
+                                <td>{{ receipt_cell.utility_service.title }}</td>
+                                <td>{{ receipt_cell.consumption }}</td>
+                                <td>{{ receipt_cell.unit_of_measure.title }}</td>
+                                <td>{{ receipt_cell.cost_per_unit }}</td>
+                                <td>{{ receipt_cell.cost }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% comment %} -------------------------------------- {% endcomment %}
+        </div>
+    </div>
+</div>
+</div>
+{% endblock content %}

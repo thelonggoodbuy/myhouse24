@@ -160,7 +160,6 @@ class HouseEditeView(UpdateView):
     
 
 class HouseDetailView(DetailView):
-    # model = House
     queryset = House.objects.select_related().all()
     template_name = "appartments/house_detail.html"
     context_object_name = 'house'

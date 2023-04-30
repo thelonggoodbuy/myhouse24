@@ -33,7 +33,7 @@ class Receipt(models.Model):
 
 
 class ReceiptCell(models.Model):
-    receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE, blank=True, null=True)
+    receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE, blank=True, null=True, related_name='receipt_cells')
     utility_service = models.ForeignKey(UtilityService, on_delete=models.SET_NULL, blank=True, null=True)
     # utility_service = models.ForeignKey(UtilityService, on_delete=models.SET_NULL, blank=True, null=True)
     consumption = models.DecimalField(max_digits=10, decimal_places=2)

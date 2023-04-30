@@ -12,7 +12,9 @@ import calendar
 from django.urls import reverse_lazy
 from django.contrib import messages
 
+
 from django.views.generic.base import TemplateView
+from django.views.generic.detail import DetailView
 
 
 from users.models import User
@@ -216,12 +218,72 @@ class AddReceiptView(TemplateView):
         context['main_form'] = AddReceiptForm(prefix='main_form')
         context['utility_form'] = UtilityReceiptForm(prefix='utility_form')
         context['receipt_cell_formset'] = ReceiptCellFormset(prefix='receipt_cell_formset')
-
         return context
 
 
     def get(self, request, *args, **kwargs):
+        if self.request.is_ajax() and self.request.method == 'GET' and request.GET.get('draw'):
+            receipt_data_get_request = request.GET
+            Q_list = []
+            if request.GET.get('search[value]'):
+                if request.GET.get('search[value]') != "empty_appartment":
+                    Q_list.append(Q(appartment__id=request.GET.get('search[value]')))
 
+            draw = int(receipt_data_get_request.get("draw"))
+            start = int(receipt_data_get_request.get("start"))
+            length = int(receipt_data_get_request.get("length"))
+
+            raw_data = CounterReadings.objects.filter(*Q_list)\
+                                    .annotate(date_with_month_year = F('date'))\
+                                    .values('number', 'status', 'date',\
+                                            'date_with_month_year', 'appartment__house__title',\
+                                            'appartment__sections__title', 'appartment__number',\
+                                            'utility_service__title', 'readings',\
+                                            'utility_service__unit_of_measure__title')
+            
+
+            data = list(raw_data)
+            print(data)
+            verbose_status_dict = CounterReadings.get_verbose_status_dict()
+
+            for counter_receipt in data:  
+                verbose_status = ""
+                try: 
+                    verbose_status = verbose_status_dict[counter_receipt['status']]
+                    counter_receipt['status'] = verbose_status
+                except:
+                    counter_receipt['status'] = ''
+
+
+                simple_date = counter_receipt['date']
+                new_simple_date = format_date(simple_date, 'dd.MM.yyyy', locale='ru')
+                counter_receipt['date'] = new_simple_date
+
+                date_per_month = counter_receipt['date_with_month_year']
+                date_per_month = format_date(date_per_month, 'LLLL Y', locale='ru')
+                counter_receipt['date_with_month_year'] = date_per_month
+
+            
+            paginator = Paginator(data, length)
+            page_number = start / length + 1
+            try:
+                obj = paginator.page(page_number).object_list
+            except PageNotAnInteger:
+                obj = paginator(1).object_list
+            except EmptyPage:
+                obj = paginator.page(1).object_list
+
+            total = len(data)
+            records_filter = total
+
+            response = {
+                'data': obj,
+                'draw': draw,
+                'recordsTotal:': total,
+                'recordsFiltered': records_filter,
+            }
+            return JsonResponse(response, safe=False)
+        
 
         if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_certain_house':
             house_id = self.request.GET['current_house_number']
@@ -242,14 +304,15 @@ class AddReceiptView(TemplateView):
 
 
         if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_personal_account_per_appartment':
-            appartment_id = self.request.GET.get('appartment')
-            choosen_personal_account = list(PersonalAccount.objects.filter(appartment_account__id=appartment_id)\
-                                            .values('id', 'number', 'appartment_account__owner_user__full_name',\
-                                                    'appartment_account__owner_user__id','appartment_account__owner_user__phone'))
-            choosen_tariff = list(Tariff.objects.filter(appartment_tariff__id=appartment_id).values('id'))
-            response = {'personal_account': choosen_personal_account,
-                        'choosen_tariff': choosen_tariff}
-            return JsonResponse(response, safe=False)
+            if self.request.GET.get('appartment') != "empty_appartment":
+                appartment_id = self.request.GET.get('appartment')
+                choosen_personal_account = list(PersonalAccount.objects.filter(appartment_account__id=appartment_id)\
+                                                .values('id', 'number', 'appartment_account__owner_user__full_name',\
+                                                        'appartment_account__owner_user__id','appartment_account__owner_user__phone'))
+                choosen_tariff = list(Tariff.objects.filter(appartment_tariff__id=appartment_id).values('id'))
+                response = {'personal_account': choosen_personal_account,
+                            'choosen_tariff': choosen_tariff}
+                return JsonResponse(response, safe=False)
         
 
         if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'add_counters_readings':
@@ -300,13 +363,23 @@ class AddReceiptView(TemplateView):
         
     def form_valid(self, main_form, receipt_cell_formset):
         mainform_instance = main_form.save()
-        # main_form.save()
-        # receipt_cell_formset.save()
         for receipt_cell_form in receipt_cell_formset:
             receipt_cell = receipt_cell_form.save(commit=False)
             receipt_cell.receipt = mainform_instance
             receipt_cell.save()
-        # receipt_cell_formset.save()
         success_url = self.success_url
         messages.success(self.request, f"Квитанция создана!")
         return HttpResponseRedirect(success_url)
+    
+
+# DETAIL VIEW----------------------------------------------------------------------------------------------------
+class ReceiptCardView(DetailView):
+    queryset = Receipt.objects.all()
+    template_name = "receipts/receipt_card.html"
+    context_object_name = 'receipt'
+
+    # def get_context_data(self, **kwargs):
+
+    #     context = super().get_context_data(**kwargs)     
+    #     context['responsibility_users'] = self.get_object().responsibilities.select_related('role').filter()
+    #     return context

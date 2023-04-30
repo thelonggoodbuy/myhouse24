@@ -41,306 +41,298 @@
 {% block content %}
 
 <form method="post" enctype="multipart/form-data">
-<div class="row">
-    <div class="col-xs-12 col-md-8 col-lg-7">
-        <div class="box-body">
-            <div class="row">
-                <div class="col-xs-5">
-                    <div class="input-group">
-                        <div class="input-group-addon">
-                            №
+    <div class="row">
+        <div class="col-xs-12 col-md-8 col-lg-7">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-5">
+                        <div class="input-group">
+                            <div class="input-group-addon">
+                                №
+                            </div>
+                            {{ main_form.number }}
                         </div>
-                        {{ main_form.number }}
-                    </div>
-                </div>
-
-                <div class="col-xs-1 column-center">
-                    <strong><span>от</span></strong>
-                </div>
-                <div class="col-xs-5">
-                    
-                    <div class="input-group">
-                        <span class="input-group-addon" title="Выбрать дату">
-                            <i class="glyphicon glyphicon-calendar"></i>
-                        </span>
-                        {{ main_form.payment_due }}
                     </div>
 
+                    <div class="col-xs-1 column-center">
+                        <strong><span>от</span></strong>
+                    </div>
+                    <div class="col-xs-5">
+                        
+                        <div class="input-group">
+                            <span class="input-group-addon" title="Выбрать дату">
+                                <i class="glyphicon glyphicon-calendar"></i>
+                            </span>
+                            {{ main_form.payment_due }}
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 
-<div class="box">
-    <div class="box-body">
-            {% csrf_token %}
-            
-            <div class="row">
-                <div class="col-xs-6 col-md-6">
-                    <div class="form-group">
-                        <label class="control-label">{{ utility_form.house.label}}</label>
-                        {{ utility_form.house }}
-                        <div class="help-block"></div>
+    <div class="box">
+        <div class="box-body">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-xs-6 col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">{{ utility_form.house.label}}</label>
+                            {{ utility_form.house }}
+                            <div class="help-block"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">{{ utility_form.section.label }}</label>
+                            {{ utility_form.section }}
+                            <div class="help-block"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">{{ main_form.appartment.label }}</label>
+                            {{ main_form.appartment }}
+                            <div class="help-block"></div>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="control-label">{{ utility_form.section.label }}</label>
-                        {{ utility_form.section }}
-                        <div class="help-block"></div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label">{{ main_form.appartment.label }}</label>
-                        {{ main_form.appartment }}
-                        <div class="help-block"></div>
-                    </div>
-                </div>
+                    <div class="col-xs-6 col-md-6">
+                        <div class="form-group">
+                            {{ main_form.payment_was_made }}
+                            <label class="control-label">{{ main_form.payment_was_made.label}}</label>
+                            <div class="help-block"></div>
+                        </div>
 
-                <div class="col-xs-6 col-md-6">
-                    <div class="form-group">
-                        {{ main_form.payment_was_made }}
-                        <label class="control-label">{{ main_form.payment_was_made.label}}</label>
-                        <div class="help-block"></div>
-                    </div>
+                        <div class="form-group">
+                            <label class="control-label">{{ main_form.status.label}}</label>
+                            {{ main_form.status }}
+                            <div class="help-block"></div>
+                        </div>
 
-                    <div class="form-group">
-                        <label class="control-label">{{ main_form.status.label}}</label>
-                        {{ main_form.status }}
-                        <div class="help-block"></div>
-                    </div>
+                        <div class="form-group">
+                            <label class="control-label">{{ main_form.tariff.label }}</label>
+                            {{ main_form.tariff }}
+                            <div class="help-block"></div>
+                        </div>
 
-                    <div class="form-group">
-                        <label class="control-label">{{ main_form.tariff.label }}</label>
-                        {{ main_form.tariff }}
-                        <div class="help-block"></div>
-                    </div>
+                        {% comment %} ----------------------- {% endcomment %}
+                        <div class="form-group">
+                            {% comment %} <label class="control-label">{{ main_form.total_sum.label }}</label> {% endcomment %}
+                            {{ main_form.total_sum }}
+                            <div class="help-block"></div>
+                        </div>
+                        {% comment %} ----------------------- {% endcomment %}
 
-                    {% comment %} ----------------------- {% endcomment %}
-                    <div class="form-group">
-                        {% comment %} <label class="control-label">{{ main_form.total_sum.label }}</label> {% endcomment %}
-                        {{ main_form.total_sum }}
-                        <div class="help-block"></div>
-                    </div>
-                    {% comment %} ----------------------- {% endcomment %}
-
-                    <div class="row">
-                        <div class="col-xs-6">
-                            <strong>{{ main_form.from_date.label }}</strong>
-                            <div class="input-group">
-                                <div class="input-group-addon">
-                                    <i class="glyphicon glyphicon-calendar"></i>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <strong>{{ main_form.from_date.label }}</strong>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="glyphicon glyphicon-calendar"></i>
+                                    </div>
+                                    {{ main_form.from_date }}
                                 </div>
-                                {{ main_form.from_date }}
+                            </div>
+            
+                            <div class="col-xs-6">
+                                <strong>{{ main_form.to_date.label }}</strong>
+                                <div class="input-group">
+                                    <span class="input-group-addon" title="Выбрать дату">
+                                        <i class="glyphicon glyphicon-calendar"></i>
+                                    </span>
+                                    {{ main_form.to_date }}
+                                </div>
                             </div>
                         </div>
-        
-                        <div class="col-xs-6">
-                            <strong>{{ main_form.to_date.label }}</strong>
-                            <div class="input-group">
-                                <span class="input-group-addon" title="Выбрать дату">
-                                    <i class="glyphicon glyphicon-calendar"></i>
-                                </span>
-                                {{ main_form.to_date }}
-                            </div>
                         </div>
                     </div>
-                    </div>
-                </div>
-            
-            
+                
+                
 
-            <div class="row">
-                <div class="col-xs-12 col-sm-6">
-                    <div class="form-group">
-                        <label>{{ utility_form.personal_account.label }}</label>
-                        {{ utility_form.personal_account }}                      
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6">
+                        <div class="form-group">
+                            <label>{{ utility_form.personal_account.label }}</label>
+                            {{ utility_form.personal_account }}                      
+                        </div>
+                        <p>
+                            <b>Владелец:</b> 
+                            <span id="user-fullname">не выбран</span>
+                        </p>
+                        <p>
+                            <b>Телефон:</b> 
+                            <span id="user-phone">не выбран</span>
+                        </p>
                     </div>
-                    <p>
-                        <b>Владелец:</b> 
-                        <span id="user-fullname">не выбран</span>
-                    </p>
-                    <p>
-                        <b>Телефон:</b> 
-                        <span id="user-phone">не выбран</span>
-                    </p>
+                    <div class="col-xs-12 col-sm-6">
+                    </div>
                 </div>
-                <div class="col-xs-12 col-sm-6">
-                </div>
-            </div>
-            {% comment %} ----------------------------------- {% endcomment %}
-            <table class="table table-bordered table-hover" id="utility_service_table">
-                <thead>
-                    <tr>
-                        <th style="min-width: 200px;">Услуга</th>
-                        <th style="min-width: 180px;">Расход</th>
-                        <th style="min-width: 120px;">Ед. изм.</th>
-                        <th style="min-width: 180px;">Цена за ед., грн.</th>
-                        <th style="min-width: 180px;">Стоимость, грн.</th>
-                        <th style="width: 40px; min-width: 40px;"></th>
-                    </tr>
-                </thead>
-                {% comment %} ********************************************************************* {% endcomment %}
-                <tbody id="receipt_cell_formset_table">
-                    {{ receipt_cell_formset.management_form }}
-                    {% for receipt_cell_form in receipt_cell_formset %}
-                        {% for hidden in receipt_cell_form.hidden_fields %}
-                            {{ hidden }}
+                {% comment %} ----------------------------------- {% endcomment %}
+                <table class="table table-bordered table-hover" id="utility_service_table">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 200px;">Услуга</th>
+                            <th style="min-width: 180px;">Расход</th>
+                            <th style="min-width: 120px;">Ед. изм.</th>
+                            <th style="min-width: 180px;">Цена за ед., грн.</th>
+                            <th style="min-width: 180px;">Стоимость, грн.</th>
+                            <th style="width: 40px; min-width: 40px;"></th>
+                        </tr>
+                    </thead>
+                    {% comment %} ********************************************************************* {% endcomment %}
+                    <tbody id="receipt_cell_formset_table">
+                        {{ receipt_cell_formset.management_form }}
+                        {% for receipt_cell_form in receipt_cell_formset %}
+                            {% for hidden in receipt_cell_form.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
+
+                            <tr class="utility_data_row">
+                                <td>
+                                    {{ receipt_cell_form.utility_service }}
+                                </td>
+                                <td>
+                                    {{ receipt_cell_form.consumption }}
+                                </td>
+                                <td>
+                                    {{ receipt_cell_form.unit_of_measure }}
+                                </td>
+                                <td>
+                                    {{ receipt_cell_form.cost_per_unit }}
+                                </td>
+                                <td>
+                                    {{ receipt_cell_form.cost }}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-default btn-sm form-row-remove-btn" title="Удалить услугу">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                    {{ receipt_cell_form.DELETE }}
+                                </td>
+                            </tr>
                         {% endfor %}
 
-                        <tr class="utility_data_row">
-                            <td>
-                                {{ receipt_cell_form.utility_service }}
-                            </td>
-                            <td>
-                                {{ receipt_cell_form.consumption }}
-                            </td>
-                            <td>
-                                {{ receipt_cell_form.unit_of_measure }}
-                            </td>
-                            <td>
-                                {{ receipt_cell_form.cost_per_unit }}
-                            </td>
-                            <td>
-                                {{ receipt_cell_form.cost }}
-                            </td>
-                            <td>
-                                <button type="button" class="btn btn-default btn-sm form-row-remove-btn" title="Удалить услугу">
-                                    <i class="fa fa-trash"></i>
+                        {% comment %} <div id="empty_form_container"> {% endcomment %}
+                            <tr id="empty_form_container">
+                                <td>
+                                    {{ receipt_cell_formset.empty_form.utility_service }}
+                                </td>
+                                <td>
+                                    {{ receipt_cell_formset.empty_form.consumption }}
+                                </td>
+                                <td>
+                                    {{ receipt_cell_formset.empty_form.unit_of_measure }}
+                                </td>
+                                <td>
+                                    {{ receipt_cell_formset.empty_form.cost_per_unit }}
+                                </td>
+                                <td>
+                                    {{ receipt_cell_formset.empty_form.cost }}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-default btn-sm form-row-remove-btn" title="Удалить услугу">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                    {{ receipt_cell_formset.empty_form.DELETE }}
+                                </td>
+                            </tr>
+                        {% comment %} </div> {% endcomment %}
+                        
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4" valing="middle">
+                                <button type="button" class="btn btn-default btn-hover-change" id="add_simple_utility">
+                                    Добавить услугу
                                 </button>
-                                {{ receipt_cell_form.DELETE }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-
-                    {% comment %} <div id="empty_form_container"> {% endcomment %}
-                        <tr id="empty_form_container">
-                            <td>
-                                {{ receipt_cell_formset.empty_form.utility_service }}
-                            </td>
-                            <td>
-                                {{ receipt_cell_formset.empty_form.consumption }}
-                            </td>
-                            <td>
-                                {{ receipt_cell_formset.empty_form.unit_of_measure }}
-                            </td>
-                            <td>
-                                {{ receipt_cell_formset.empty_form.cost_per_unit }}
-                            </td>
-                            <td>
-                                {{ receipt_cell_formset.empty_form.cost }}
-                            </td>
-                            <td>
-                                <button type="button" class="btn btn-default btn-sm form-row-remove-btn" title="Удалить услугу">
-                                    <i class="fa fa-trash"></i>
+                                <button type="button" class="btn btn-default" id="add_all_utilities_using_tariff">
+                                    Установить все услуги согласно тарифу
                                 </button>
-                                {{ receipt_cell_formset.empty_form.DELETE }}
+                                <button type="button" class="btn btn-default add-counters" id="add_counters_readings">
+                                    Добавить показания счетчиков
+                                </button>
                             </td>
+                            <td style="min-width: 180px;">
+                                <div class="h4">
+                                    Итого: <b><span id="price-total">0.00</span></b> грн
+                                </div>
+                            </td>
+                            <td style="width: 40px; min-width: 40px;"></td>
                         </tr>
-                    {% comment %} </div> {% endcomment %}
-                    
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="4" valing="middle">
-                            <button type="button" class="btn btn-default btn-hover-change" id="add_simple_utility">
-                                Добавить услугу
-                            </button>
-                            <button type="button" class="btn btn-default" id="add_all_utilities_using_tariff">
-                                Установить все услуги согласно тарифу
-                            </button>
-                            <button type="button" class="btn btn-default add-counters" id="add_counters_readings">
-                                Добавить показания счетчиков
-                            </button>
-                        </td>
-                        <td style="min-width: 180px;">
-                            <div class="h4">
-                                Итого: <b><span id="price-total">0.00</span></b> грн
-                            </div>
-                        </td>
-                        <td style="width: 40px; min-width: 40px;"></td>
-                    </tr>
-                </tfoot>
-            </table>
-            {% comment %} ----------------------------------- {% endcomment %}
-            <div class="row">
-                <div class="col-xs-11 text-right">
-                    <div class="form-group">
-                        <a class="btn btn-default" href="#">Отменить</a>
-                        <button type="submit" class="btn btn-success">Сохранить</button>
+                    </tfoot>
+                </table>
+                {% comment %} ----------------------------------- {% endcomment %}
+                <div class="row">
+                    <div class="col-xs-11 text-right">
+                        <div class="form-group">
+                            <a class="btn btn-default" href="#">Отменить</a>
+                            <button type="submit" class="btn btn-success">Сохранить</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Показания счетчиков</h3>
-                </div>
-    
-                <div id="counters" data-pjax-container="" data-pjax-push-state="" data-pjax-timeout="1000">
-                    <div id="w0" class="grid-view"><div class="box-body table-responsive no-padding">
-                        <table class="table table-bordered table-hover table-striped table-nowrap">
-                            <thead>
-                                <tr>
-                                    <th style="width: 125px; min-width: 125px">№</th>
-                                    <th>Статус</th>
-                                    <th style="width: 125px; min-width: 125px">Дата</th>
-                                    <th style="width: 125px; min-width: 125px">Месяц</th>
-                                    <th style="min-width: 200px">Дом</th>
-                                    <th style="min-width: 160px">Секция</th>
-                                    <th style="width: 110px; min-width: 110px">№ квартиры</th>
-                                    <th>Счетчик</th>
-                                    <th style="width: 90px; min-width: 90px">Показания</th>
-                                    <th style="width: 90px; min-width: 90px">Ед. изм.</th>
-                                </tr>
-                                <tr id="w0-filters" class="filter-hidden">
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                    <td><input type="hidden" id="filterMonthYear" name="CounterDataSearch[searchUidMonthYear]" value="">
-                                        <input type="hidden" id="filterFlatId" name="CounterDataSearch[flat_id]" value="97">
-                                    </td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                    <td>&nbsp;</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr data-key="123">
-                                    <td>20072200123</td>
-                                    <td>
-                                        <small class="label label-success">Учтено</small>
-                                    </td>
-                                    <td>20.07.2022</td>
-                                    <td>Июль 2022</td>
-                                    <td>ЖК "Башня Чкалов"</td>
-                                    <td>
-                                        <span class="not-set">(не задано)</span>
-                                    </td>
-                                    <td>345345</td>
-                                    <td></td>
-                                    <td style="background-color: #DFD5; font-weight: normal">24123523.0</td>
-                                    <td style="background-color: #DFD5; font-weight: normal">кв.м.к</td>
-                                </tr>
-                            </tbody>
-                        </table>
+        {% comment %} <span>--------------------------------</span>
+        <div class="row">
+            <div class="col-xs-12">
+                <table id="counter_readings_table">
+                    <thead>
+                        <tr>
+                            <th id="number">0</th>
+                            <th id="status">1</th>
+                            <th id="date">2</th>
+                            <th id="date">3</th>
+                            <th id="appartment__house__title">4</th>
+                            <th id="appartment__sections__title">5</th>
+                            <th id="appartment__number">6</th>
+                            <th id="utility_service__title">7</th>
+                            <th id="readings">8</th>
+                            <th id="utility_service__unit_of_measure__title">10</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <span>--------------------------------</span> {% endcomment %}
+
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Показания счетчиков</h3>
                     </div>
-                    <div class="box-footer clearfix">
+
+                    <table class="table-bordered table-hover table-striped" id="counter_readings_table">
+                        <thead>
+                            <tr>
+                                <th id="number">№</th>
+                                <th id="status">статус</th>
+                                <th id="date">дата</th>
+                                <th id="date">месяц</th>
+                                <th id="appartment__house__title">дом</th>
+                                <th id="appartment__sections__title">секция</th>
+                                <th id="appartment__number">№ квартиры</th>
+                                <th id="utility_service__title">Счетчик</th>
+                                <th id="readings">Показания</th>
+                                <th id="utility_service__unit_of_measure__title">Ед. изм.</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+
                 </div>
             </div>
         </div>
-    </div>
-</div>
-</div>
 
-</div>
+
+
+    </div>
+
+
+    </div>
 
 </form>
 
@@ -416,10 +408,62 @@
         })
 
 
+        var table = $('#counter_readings_table').DataTable({
+
+            "dom": "<<t>p>",
+                "processing": true,
+                "serverSide": true,
+                "pageLength": 50,
+                "ordering": false,
+                //"scrollX": true,
+                "ajax": {
+                    "type": "GET",
+                    "url": "{% url 'receipts:add_receipt' %}",
+                    "dataSrc": "data",
+                    "dataType": "json",
+                },
+                "rowCallback": function(row, data){
+                    if (data.status === "Учтено" || data.status === "Учтено и оплачено") {
+                        $('td:eq(1)', row).wrapInner("<small class='label label-success my-3'></small>");
+                    } else if (data.status === "Новое") {
+                        $('td:eq(1)', row).wrapInner("<small class='label label-warning'></small>");
+                    } else if (data.status === "Нулевое") {
+                        $('td:eq(1)', row).wrapInner("<small class='label label-primary'></small>");
+                    }
+                },
+                "columns": [
+                {"data": "number", "name": "number"},
+                {"data": "status", "name": "status"},
+                {"data": "date", "name": "date"},
+                {"data": "date_with_month_year", "name": "date_with_month_year"},
+                {"data": "appartment__house__title", "name": "appartment__house__title"},
+                {"data": "appartment__sections__title", "name": "appartment__sections__title"},
+                {"data": "appartment__number", "name": "appartment__number"},
+                {"data": "utility_service__title", "name": "utility_service__title"},
+                {"data": "readings", "name": "readings"},
+                {"data": "utility_service__unit_of_measure__title", "name": "utility_service__unit_of_measure__title"},
+                ],
+                "createdRow": function( row, data, dataIndex ) {
+                    $('td:eq(8)', row).css({'background-color':'#DFD5'})
+                    $('td:eq(9)', row).css({'background-color':'#DFD5'})
+                  }
+
+        })
+
+
+        $('#appartment_field').on('change clear', function(){
+            var appartment_id = $(this).val()
+            table.search(appartment_id).draw();
+        })
+
+
         // personal account filter
         $("#appartment_field").on('change', function(){
             var appartment_number = $(this).find(":selected").val()
-
+            console.log('--------------------------')
+            console.log($(this))
+            console.log($(this).val())
+            console.log('--------------------------')
             $.ajax({
                 dataType: "json",
                 url: "{% url 'receipts:add_receipt' %}",
@@ -457,14 +501,9 @@
 
         
 
-///        $("#appartment_field").on('change', function(){
-///            $
-///        })
-
 
 
         $("#empty_form_container").hide()
-
 
         $("#utility_service_table").on('click', "button[id^='add']", function(){
             current_form_tab = $(this).closest('table')
