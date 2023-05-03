@@ -11,17 +11,28 @@ from babel.dates import format_date
 import calendar
 from django.urls import reverse_lazy
 from django.contrib import messages
+from django.http import FileResponse
+from django.http import HttpResponse
+from tempfile import NamedTemporaryFile
+from django.utils.encoding import smart_str
+
+from openpyxl import load_workbook
+from openpyxl.styles import Side, Border, Font, Alignment, NamedStyle
+
+
+from decimal import Decimal
 
 
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
+from django.views.generic.edit import FormView
 
 
 from users.models import User
 from appartments.models import House, Section, Appartment, PersonalAccount
 from utility_services.models import Tariff, TariffCell, CounterReadings
-from .models import Receipt
-from .forms import AddReceiptForm, UtilityReceiptForm, ReceiptCellFormset
+from .models import Receipt, ReceiptTemplate, ReceiptCell
+from .forms import AddReceiptForm, UtilityReceiptForm, ReceiptCellFormset, ReceiptTemplateListForm
 
 
 
@@ -378,8 +389,177 @@ class ReceiptCardView(DetailView):
     template_name = "receipts/receipt_card.html"
     context_object_name = 'receipt'
 
-    # def get_context_data(self, **kwargs):
 
-    #     context = super().get_context_data(**kwargs)     
-    #     context['responsibility_users'] = self.get_object().responsibilities.select_related('role').filter()
-    #     return context
+class ReceiptTemplateListView(FormView):
+    form_class = ReceiptTemplateListForm
+    template_name = "receipts/receipt_template_list.html"
+
+    def form_valid(self, form):
+        if 'print_xls_doc' in self.request.POST:
+            print('You print xls!')
+        elif 'send_to_email_pdf' in self.request.POST:
+            print('You send email!')
+        receipt_id = self.kwargs['pk']
+        template_id = form.cleaned_data['templates_list']
+        response = return_xlm_receipt(receipt_id, template_id)
+        return response
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)     
+        receipt_id = self.kwargs['pk']
+        context['receipt_id'] = receipt_id
+        return context
+
+
+def return_xlm_receipt(receipt_id, template_id):
+    receipt = Receipt.objects.get(id=receipt_id)
+    template = ReceiptTemplate.objects.get(id=template_id)
+
+    formated_month = format_date(receipt.from_date, 'LLLL Y', locale='ru')
+    receipt_data_dictionary = {'%' + 'accountNumber' + '%': receipt.appartment.personal_account.number,
+                               '%' + 'payCompany' + '%': 'TEMPORARY EMPTY DATA. CHANGE AFTER CREATING REQUISITE',
+                               '%' + 'invoiceNumber' + '%': receipt.number,
+                               '%' + 'invoiceDate' + '%': receipt.payment_due.strftime("%d.%m.%Y"),
+                               '%' + 'invoiceAddress' + '%': f'{receipt.appartment.owner_user.full_name}, {receipt.appartment.house.address}, {receipt.appartment.number} квартира',
+                               '%' + 'total' + '%': receipt.total_sum,
+                               '%' + 'accountBalance' + '%': f'{receipt.appartment.personal_account.balance}',
+                               '%' + 'totalDebt' + '%': f'{-(receipt.appartment.personal_account.balance - receipt.total_sum)}',
+                               '%' + 'invoiceMonth' + '%': f'{formated_month}',
+                               '%' + 'serviceTotal' + '%': f'{receipt.total_sum}',
+                               }
+                                
+    # my workbook
+    current_template = load_workbook(filename=str(template.receipt_template.file))
+    
+    # my work sheet
+    current_sheet = current_template.active
+
+    # ----------------------------------------------------------------------------------------
+    # get all receipt sells
+    receipt_cells = list(ReceiptCell.objects.filter(receipt=receipt)\
+                                        .values('utility_service__title',\
+                                                 'cost_per_unit',
+                                                 'unit_of_measure__title',
+                                                 'consumption',
+                                                 'cost'))
+    
+    current_row = 19
+    number_of_receipts = len(receipt_cells)
+    maximum_rows = current_row + number_of_receipts + 5
+
+    # work with cells of receipt
+    for row in current_sheet.iter_rows(min_row=1, min_col=1, max_row=maximum_rows, max_col=12):
+        for cell in row:
+            if cell.value in receipt_data_dictionary.keys():
+                current_sheet[cell.coordinate] = receipt_data_dictionary[cell.value]
+
+    
+
+    # styles for deifferent types of cells
+
+    simple_cell_style = NamedStyle('cell_style')
+    simple_cell_style.font = Font(size=12, italic=False)
+    simple_cell_style.border = Border(
+        left=Side(style="thin", color="00333333"),
+        right=Side(style="thin", color="00333333"),
+        top=Side(style='thick', color="00333333"),
+        bottom=Side(style='thick', color="00333333"),
+    )
+    simple_cell_style.alignment = Alignment(horizontal='center', vertical='center')
+    # simple_cell_style.row_dimensions[1].height = 70
+    current_template.add_named_style(simple_cell_style)
+
+
+    for receipt_cell in receipt_cells:
+
+        current_sheet.insert_rows(current_row)
+        current_sheet.row_dimensions[current_row].height = 25
+
+        # utility services cell
+        current_sheet[f'A{current_row}'] =  receipt_cell['utility_service__title']
+        current_sheet[f'A{current_row}'].style = simple_cell_style
+        current_sheet.merge_cells(f'A{current_row}:B{current_row}')
+        
+        # cost per unit cell
+        current_sheet[f'C{current_row}'] = receipt_cell['cost_per_unit']
+        current_sheet[f'C{current_row}'].style = simple_cell_style
+        current_sheet[f'C{current_row}'].number_format = '#,##0.00'
+        current_sheet.merge_cells(f'C{current_row}:D{current_row}')
+
+        # unit of measure cell
+        current_sheet[f'E{current_row}'] = receipt_cell['unit_of_measure__title']
+        current_sheet[f'E{current_row}'].style = simple_cell_style
+        current_sheet.merge_cells(f'E{current_row}:F{current_row}')
+
+        # consumption cell
+        current_sheet[f'G{current_row}'] = receipt_cell['consumption']
+        current_sheet[f'G{current_row}'].style = simple_cell_style
+        current_sheet[f'G{current_row}'].number_format = '#,##0.00'
+        current_sheet.merge_cells(f'G{current_row}:H{current_row}')
+
+        # cost cell
+        current_sheet[f'I{current_row}'] = receipt_cell['cost']
+        current_sheet[f'I{current_row}'].style = simple_cell_style
+        current_sheet[f'I{current_row}'].number_format = '#,##0.00'
+        current_sheet.merge_cells(f'I{current_row}:K{current_row}')
+
+
+        current_sheet[f'K{current_row}'].border = Border(top=Side(style='thick'), \
+                                                        left=Side(style='thick'), \
+                                                        right=Side(style='thick'), \
+                                                        bottom=Side(style='thick'))
+
+        # counter
+        current_row += 1
+
+    # total data logic 
+    current_sheet.merge_cells(start_row=current_row,\
+                                start_column=1,\
+                                end_row=current_row+3,\
+                                end_column=2)
+
+    current_sheet.merge_cells(start_row=current_row,\
+                                start_column=3,\
+                                end_row=current_row+3,\
+                                end_column=4)
+
+    current_sheet.merge_cells(start_row=current_row,\
+                                start_column=5,\
+                                end_row=current_row+3,\
+                                end_column=6)
+
+    current_sheet.merge_cells(start_row=current_row,\
+                                start_column=7,\
+                                end_row=current_row+3,\
+                                end_column=8)
+
+    current_sheet.merge_cells(start_row=current_row,\
+                                start_column=9,\
+                                end_row=current_row+3,\
+                                end_column=11)
+
+    current_sheet[f'A{current_row}'] = ''
+
+    current_sheet[f'G{current_row}'] = 'РАЗОМ'
+    current_sheet[f'G{current_row}'].font = Font(size=12, italic=False, bold=True, color="00000000")
+    current_sheet[f'G{current_row}'].alignment = Alignment(horizontal='right')
+
+    current_sheet[f'I{current_row}'] = receipt.total_sum
+    current_sheet[f'I{current_row}'].font = Font(size=12, italic=False, bold=True, color="00000000")
+    current_sheet[f'I{current_row}'].alignment = Alignment(horizontal='right')
+    
+    with NamedTemporaryFile() as tmp:
+        current_template.save(tmp.name)
+        tmp.seek(0)
+        stream = tmp.read()
+        response = HttpResponse(stream, content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = f'attachment; filename=invoice_{receipt.number}_{receipt.payment_due.strftime("%d.%m.%Y")}.xlsx'
+
+    return response
+
+
+
+# class ReceiptTemplateEditeView(TemplateView):
+#     template_name = "receipts/receipt_template_edite.html"
+

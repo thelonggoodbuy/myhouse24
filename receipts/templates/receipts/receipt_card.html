@@ -17,7 +17,7 @@
     <div class="box-header with-border">
         <h3 class="box-title">Просмотр квитанции</h3>
     <div class="box-tools">
-        <a href="#" class="btn btn-default btn-sm">
+        <a href="{% url "receipts:receipt_template_list_view" pk=receipt.id %}" class="btn btn-default btn-sm">
             <span class="hidden-xs"> Печать </span><i class="fa fa-dollar visible-xs" aria-hidden="true"></i>
         </a>
         <a href="#" class="btn btn-default btn-sm">
@@ -112,7 +112,6 @@
                 </tbody>
                 
             </table>
-            {% comment %} -------------------------------------------- {% endcomment %}
             <div class="table-responsive no-padding">
                 <table class="table table-bordered table-striped">
                     <thead>
@@ -145,9 +144,9 @@
                     </tbody>
                 </table>
             </div>
-            {% comment %} -------------------------------------- {% endcomment %}
         </div>
     </div>
 </div>
 </div>
 {% endblock content %}
+

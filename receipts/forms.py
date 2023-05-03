@@ -4,7 +4,7 @@ from django.db.models import Max
 import random
 
 
-from .models import Receipt, ReceiptCell
+from .models import Receipt, ReceiptCell, ReceiptTemplate
 from appartments.models import Appartment
 from utility_services.models import Tariff, UtilityService, UnitOfMeasure
 from appartments.models import House
@@ -114,7 +114,7 @@ class ReceiptCellForm(forms.ModelForm):
                                                           'id': 'cost_field',
                                                           'old_cost': '00.00'}))
 
-    class Meat:
+    class Meta:
         model = ReceiptCell
         fields = ('utility_service', 'consumption', 'unit_of_measure', 'cost_per_unit', 'cost')
 
@@ -128,3 +128,21 @@ ReceiptCellFormset = forms.inlineformset_factory(Receipt,
                                                 can_delete=True,
                                                 extra=0,
                                                 min_num=0)
+
+
+class ReceiptTemplateListForm(forms.Form):
+
+    TEMPLATE_CHOICES = []
+    DEFAULT_TEMPLATE = None
+    receipts = ReceiptTemplate.objects.all().order_by('id').values( 'id', 'name', 'is_default')
+    for receipt in receipts:
+        template_cell = (receipt['id'], receipt['name'])
+        TEMPLATE_CHOICES.append(template_cell)
+        if receipt['is_default'] == True: DEFAULT_TEMPLATE = receipt['id'] 
+
+    
+    templates_list = forms.ChoiceField(required=True, label="Шаблон", choices=TEMPLATE_CHOICES, initial=DEFAULT_TEMPLATE,
+                                            widget=forms.RadioSelect(attrs={'class': 'form-check-input'}))
+    
+    # def download_xls_file(self):
+    #     print('!print!print!print!print!print!print!')

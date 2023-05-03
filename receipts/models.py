@@ -45,7 +45,8 @@ class ReceiptCell(models.Model):
 
 class ReceiptTemplate(models.Model):
     name = models.CharField(max_length=200)
-    receipt_template = models.FileField(upload_to='mailing_templates/', blank=True)
+    is_default = models.BooleanField(default=False)
+    receipt_template = models.FileField(upload_to='receipt_templates/', blank=True)
 
 
 class Requisite(models.Model):

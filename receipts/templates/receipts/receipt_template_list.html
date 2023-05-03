@@ -1,0 +1,85 @@
+{% extends "layout/base_crm.html" %}
+
+{% block title %}
+    <title>Печатная форма документа</title>
+{% endblock title %}
+
+{% block content-header %}
+<h1>Печатная форма документа</h1>
+{% endblock %}
+{% block content %}
+<div class="box">
+    <div class="box-header with-border">
+        <h3 class="box-title">Список шаблонов</h3>
+    <div class="box-tools">
+        <a href="#" class="btn btn-default btn-sm">
+            <span class="hidden-xs"> Настройка шаблонов </span><i class="fa fa-dollar visible-xs" aria-hidden="true"></i>
+        </a>
+    </div>
+</div>
+    <div class="box-body">
+        <form action = "" method="POST">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-xs-12 ml-xs-5">
+                    {% for radio in form.templates_list %}
+                        <div><p>{{ radio }}</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-11 text-right">
+                    <div class="form-group">
+                        <input class="btn btn-btn-default" type="submit" value="Выслать на email" name="send_to_email_pdf">
+                        <input class="btn btn-success" type="submit" value="Скачать" name="print_xls_doc">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        //$('#download_link').on('click', function(){
+//            var choosen_template_id = $('input[id^=id_templates]:checked').val()
+//            var receipt_id = window.location.href.match(/\d+$/);
+
+//            console.log(`Choosen template id is ${choosen_template_id}`)
+//            console.log(`Choosen receipt id is ${receipt_id}`)
+
+
+            
+//            $.ajax({
+//                    url: "{% url 'receipts:receipt_template_list_view' %}",
+//                    type: "GET",
+//                    data: {
+//                        'ajax_indicator': 'receipt_template_list_view',
+//                        'choosen_template_id': choosen_template_id,
+//                        'receipt_id': receipt_id,
+//                    },
+//                    dataType: "json",
+//                    success: () => {
+
+//                        console.log('Print! Print! Print!')
+
+//                    }
+
+//                })
+
+            
+                //else {
+                //    $('#choose_section').empty().append("<option id='empty_sect'>Выберите дом</option>");
+                //    $('#choose_section').trigger('change')
+    
+                //}
+
+
+//            })
+
+
+    })
+</script>
+{% endblock content %}
