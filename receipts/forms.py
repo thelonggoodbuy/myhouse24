@@ -134,7 +134,7 @@ class ReceiptTemplateListForm(forms.Form):
 
     TEMPLATE_CHOICES = []
     DEFAULT_TEMPLATE = None
-    receipts = ReceiptTemplate.objects.all().order_by('id').values( 'id', 'name', 'is_default')
+    receipts = ReceiptTemplate.objects.filter().order_by('id').values( 'id', 'name', 'is_default')
     for receipt in receipts:
         template_cell = (receipt['id'], receipt['name'])
         TEMPLATE_CHOICES.append(template_cell)
@@ -144,5 +144,26 @@ class ReceiptTemplateListForm(forms.Form):
     templates_list = forms.ChoiceField(required=True, label="Шаблон", choices=TEMPLATE_CHOICES, initial=DEFAULT_TEMPLATE,
                                             widget=forms.RadioSelect(attrs={'class': 'form-check-input'}))
     
-    # def download_xls_file(self):
-    #     print('!print!print!print!print!print!print!')
+
+
+class ReceiptTeplateEditeForm(forms.ModelForm):
+
+    name = forms.CharField(label='название шаблона', required=False,
+                            widget=forms.TextInput(attrs={'class': 'form-control',
+                                                            'id': 'template_name'}))
+    
+    receipt_template = forms.FileField(label='Загрузить пользовательский шаблон', required=False)
+
+
+
+    class Meta:
+        model = ReceiptTemplate
+        fields = ('name', 'receipt_template', 'is_default')
+
+
+
+ReceiptTeplateEditeFormSet = forms.modelformset_factory(model=ReceiptTemplate,
+                                                        form=ReceiptTeplateEditeForm, 
+                                                        can_delete=True, 
+                                                        # extra=1
+                                                        )

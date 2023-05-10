@@ -15,9 +15,16 @@ from django.http import FileResponse
 from django.http import HttpResponse
 from tempfile import NamedTemporaryFile
 from django.utils.encoding import smart_str
+from django.template.loader import render_to_string
+from io import BytesIO, StringIO
+from django.template.loader import get_template
+
+
+
 
 from openpyxl import load_workbook
 from openpyxl.styles import Side, Border, Font, Alignment, NamedStyle
+from xhtml2pdf import pisa
 
 
 from decimal import Decimal
@@ -26,13 +33,11 @@ from decimal import Decimal
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import FormView
-
-
 from users.models import User
 from appartments.models import House, Section, Appartment, PersonalAccount
 from utility_services.models import Tariff, TariffCell, CounterReadings
 from .models import Receipt, ReceiptTemplate, ReceiptCell
-from .forms import AddReceiptForm, UtilityReceiptForm, ReceiptCellFormset, ReceiptTemplateListForm
+from .forms import AddReceiptForm, UtilityReceiptForm, ReceiptCellFormset, ReceiptTemplateListForm, ReceiptTeplateEditeFormSet, ReceiptTeplateEditeForm
 
 
 
@@ -388,28 +393,176 @@ class ReceiptCardView(DetailView):
     queryset = Receipt.objects.all()
     template_name = "receipts/receipt_card.html"
     context_object_name = 'receipt'
+    
 
 
 class ReceiptTemplateListView(FormView):
     form_class = ReceiptTemplateListForm
     template_name = "receipts/receipt_template_list.html"
+    success_url = reverse_lazy('receipts:receipt_list')
 
     def form_valid(self, form):
-        if 'print_xls_doc' in self.request.POST:
-            print('You print xls!')
-        elif 'send_to_email_pdf' in self.request.POST:
-            print('You send email!')
         receipt_id = self.kwargs['pk']
         template_id = form.cleaned_data['templates_list']
-        response = return_xlm_receipt(receipt_id, template_id)
-        return response
 
+        if 'print_xls_doc' in self.request.POST:
+            response = return_xlm_receipt(receipt_id, template_id)
+            return response
+
+        elif 'send_to_email_pdf' in self.request.POST:
+            print('You send email!')
+            response = return_pdf_receipt(receipt_id, template_id)
+            # response = HttpResponseRedirect(self.success_url)
+        
+        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)     
         receipt_id = self.kwargs['pk']
         context['receipt_id'] = receipt_id
         return context
+#########################################################################################################
+#########################################################################################################
+###############################----------------WORK-----------###########################################
+#########################################################################################################
+#########################################################################################################
+
+import os
+from django.conf import settings
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.contrib.staticfiles import finders
+
+
+
+def link_callback(uri, rel):
+        """
+        Convert HTML URIs to absolute system paths so xhtml2pdf can access those
+        resources
+        """
+        result = finders.find(uri)
+        if result:
+            if not isinstance(result, (list, tuple)):
+                    result = [result]
+            result = list(os.path.realpath(path) for path in result)
+            path=result[0]
+        else:
+            sUrl = settings.STATIC_URL        # Typically /static/
+            sRoot = settings.STATIC_ROOT      # Typically /home/userX/project_static/
+            mUrl = settings.MEDIA_URL         # Typically /media/
+            mRoot = settings.MEDIA_ROOT       # Typically /home/userX/project_static/media/
+
+            if uri.startswith(mUrl):
+                    path = os.path.join(mRoot, uri.replace(mUrl, ""))
+            elif uri.startswith(sUrl):
+                    path = os.path.join(sRoot, uri.replace(sUrl, ""))
+            else:
+                    return uri
+
+        # make sure that file exists
+        if not os.path.isfile(path):
+                raise Exception(
+                        'media URI must start with %s or %s' % (sUrl, mUrl)
+                )
+        return path
+
+
+def return_pdf_receipt(receipt_id, template_id):
+    print(f'Receipt id: {receipt_id}')
+    print(f'Template id: {template_id}')
+
+    receipt_data = list(Receipt.objects\
+                            .filter(id=receipt_id)\
+                            .values('id', 'appartment__personal_account__number',\
+                                    'number', 'payment_due'))
+    
+
+    template_path = 'receipts/test_templates.html'
+    context = {'receipt_id': receipt_id, 'template_id': template_id}
+
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+    # with NamedTemporaryFile() as tmp:
+        # template_for_pdf = 'receipts/test_templates.html'
+        # context = {'receipt_id': receipt_id, 'template_id': template_id}
+
+        # response = HttpResponse(content_type='application/pdf')
+        # response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+        
+    #     template = get_template(template_for_pdf)
+    #     html = template.render(context)
+    #     # new:
+    #     result = BytesIO()
+    #     pisa_status = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result, link_callback=link_callback)
+
+
+    #     # pisa_status = pisa.CreatePDF(html, dest=response, link_callback=link_callback)
+        
+    #     response = HttpResponse(result, content_type='application/pdf')
+    #     response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+
+    #     # if pisa_status.err:
+    #         # return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    #         # return HttpResponse(result.getvalue(), content_type='application/pdf')
+        
+    #     # return None
+    #     return response
+
+    # #     source_html = render_to_string(template_for_pdf, context)
+    #     pisa.CreatePDF(source_html, dest=tmp, encoding='utf-8', link_callback=link_callback)
+    #     tmp.seek(0)
+    #     stream = tmp.read()
+    #     response = HttpResponse(stream, content_type='application/pdf')
+    #     response['Content-Disposition'] = f'attachment; testfile.pdf'
+
+    # return response
+
+
+
+    # good work but without css and bootstrap
+    # template_path = 'receipts/test_templates.html'
+    # context = {'receipt_id': receipt_id, 'template_id': template_id}
+
+    # template = get_template(template_path)
+    # html = template.render(context)
+
+
+
+    # pisa_status = pisa.CreatePDF(
+    #     html, desc=response,
+    #     link_callback=link_callback 
+    # )
+
+    # response = HttpResponse(html, content_type='application/pdf')
+    # response['Content-Disposition'] = f'attachment; testfile.pdf'
+
+    # if pisa_status.err:
+    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
+
+    # return response
+
+
+
+
+#########################################################################################################
+#########################################################################################################
+###############################----------------END#WORK-------###########################################
+#########################################################################################################
+#########################################################################################################
 
 
 def return_xlm_receipt(receipt_id, template_id):
@@ -510,7 +663,8 @@ def return_xlm_receipt(receipt_id, template_id):
                                                         right=Side(style='thick'), \
                                                         bottom=Side(style='thick'))
 
-        # counter
+        # counterpdf_receipt(receipt_id, template_id):
+#     pass
         current_row += 1
 
     # total data logic 
@@ -558,8 +712,43 @@ def return_xlm_receipt(receipt_id, template_id):
 
     return response
 
+# def return_pdf_receipt(receipt_id, template_id):
+#     pass
 
 
-# class ReceiptTemplateEditeView(TemplateView):
-#     template_name = "receipts/receipt_template_edite.html"
 
+class ReceiptTemplateEditeView(FormView):
+    template_name = "receipts/receipt_template_edite.html"
+    templates = ReceiptTemplate.objects.all()
+    form_class = ReceiptTeplateEditeForm
+    success_url = reverse_lazy('receipts:receipt_template_edite_view')
+
+
+    def post(self, request, *args, **Kwargs):
+        template_edit_formset = ReceiptTeplateEditeFormSet(request.POST,\
+                                                           request.FILES,\
+                                                            queryset=self.templates,\
+                                                            prefix="templates")
+        
+        if template_edit_formset.is_valid():
+            return self.form_valid(template_edit_formset)
+        else:
+            if template_edit_formset.errors:
+                for receipt_form in template_edit_formset:
+                    for field, error in receipt_form.errors.items():
+                        print(f'{field}: {error}')
+
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)     
+        context['receipt_edit_formset'] = ReceiptTeplateEditeFormSet(queryset=self.templates,\
+                                                                    prefix="templates")
+        return context
+    
+
+    def form_valid(self, template_edit_formset):
+        template_edit_formset.save()
+        success_url = self.success_url
+        messages.success(self.request, f"Изменения в шаблоны внесены!")
+        return HttpResponseRedirect(success_url)

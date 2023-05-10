@@ -1,0 +1,273 @@
+
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+
+{% block additionaly_css %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.css }} 
+    {% endfor %}
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2/dist/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2-theme-bootstrap4/dist/select2-bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+
+    <style>
+        .column-center {
+            margin-top: 5pt;
+        }
+    </style>
+
+{% endblock additionaly_css %}
+
+
+
+{% block additionaly_js %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.js }}
+    {% endfor %}
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script src="{% static 'appartments/plugins/select2/dist/js/select2.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+{% endblock additionaly_js %}
+
+
+{% block title %}
+    <title> Новая приходная ведомость </title>
+
+{% endblock title %}
+
+{% block content-header %}
+    
+    <h1>Новая приходная ведомость</h1>
+    
+{% endblock %}
+
+{% block content %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-xs-12 col-md-8 col-lg-7">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-5">
+                        <div class="input-group">
+                            <div class="input-group-addon">
+                                №
+                            </div>
+                            {{ statement_form.number }}
+                        </div>
+                    </div>
+
+                    <div class="col-xs-1 column-center">
+                        <strong><span>от</span></strong>
+                    </div>
+                    <div class="col-xs-5">
+                        
+                        <div class="input-group">
+                            <span class="input-group-addon" title="Выбрать дату">
+                                <i class="glyphicon glyphicon-calendar"></i>
+                            </span>
+                            {{ statement_form.date }}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="box">
+        <div class="box-body">
+                
+                
+                <div class="row">
+                    <div class="col-xs-6 col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">{{ statement_form.owner.label}}</label>
+                            {{ statement_form.owner }}
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">{{ statement_form.personal_account.label }}</label>
+                            {{ statement_form.personal_account }}
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">{{ statement_form.type_of_paynent_item.label }}</label>
+                            {{ statement_form.type_of_paynent_item }}
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">{{ statement_form.summ.label }}</label>
+                            {{ statement_form.summ }}
+                        </div>
+                    </div>
+
+
+                    <div class="col-xs-6 col-md-6">
+                        <div class="form-group">
+                            {{ statement_form.checked }}
+                            <label class="control-label">{{ statement_form.checked.label}}</label>
+                            <div class="help-block"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">{{ statement_form.manager.label}}</label>
+                            {{ statement_form.manager }}
+                            <div class="help-block"></div>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-xs-11 text-right">
+                        <div class="form-group">
+                            <a class="btn btn-default" href="#">Отменить</a>
+                            <button type="submit" class="btn btn-success">Сохранить</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12">
+                        <div class="form-group">
+                            <label>{{ statement_form.comment.label }}</label>
+                            {{ statement_form.comment }}                      
+                        </div>
+                    </div>
+                </div>
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+</form>
+
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#owner_field').select2({
+            ajax: {
+                url: "{% url 'statements:statement_arrival_create' %}",
+                dataType: 'json',
+                data: function(params){
+                    if(params.term != undefined && params.term != ''){
+                        var query = {
+                            search: params.term,
+                            type: 'public',
+                            issue_marker: 'owner_marker'
+                        }
+                        return query;
+                    } else {
+                        var query = {
+                            search: params.term,
+                            type: 'public',
+                            issue_marker: 'all_owners_marker'
+                        }
+                        return query;
+                    }  
+                }
+            }
+        })
+
+
+        $('#owner_field').on('change', function(){
+            $('#personal_account_field').val(null).trigger('change');
+        })
+
+
+        $('#personal_account_field').on('change', function(){
+            $.ajax({
+                url: "{% url 'statements:statement_arrival_create' %}",
+                dataType: 'json',
+                data: {'issue_marker': 'correlate_account_with_owner',
+                        'personal_account': $(this).val(),
+                    },
+                    success: (data) => {
+                        if(data['user_id'] != '' && data['user_id'] != undefined){
+                            console.log('you find that!!!')
+                            $('#owner_field').val(data['user_id']).trigger('change.select2');
+                        }
+                        
+                        //console.log(data)
+                    }
+            })
+        })
+
+        
+        $('#personal_account_field').trigger('change')
+        $('#personal_account_field').select2({
+            ajax: {
+                url: "{% url 'statements:statement_arrival_create' %}",
+                dataType: 'json',
+                data: function(params){
+                    if(params.term != undefined && params.term != ''){
+                        var query = {
+                            search: params.term,
+                            type: 'public',
+                            issue_marker: 'personal_account',
+                            owner_marker: $(owner_field).val()
+                        }
+                        return query;
+                    } else {
+                        var query = {
+                            search: params.term,
+                            type: 'public',
+                            issue_marker: 'all_personal_account',
+                            owner_marker: $(owner_field).val()
+                        }
+                        return query;
+                    }  
+                }
+            }
+        })
+
+
+        $('#management_field').select2({
+            ajax: {
+                url: "{% url 'statements:statement_arrival_create' %}",
+                dataType: 'json',
+                data: function(params){
+                    if(params.term != undefined && params.term != ''){
+                        var query = {
+                            search: params.term,
+                            type: 'public',
+                            issue_marker: 'manager'
+                        }
+                        return query;
+                    } else {
+                        var query = {
+                            search: params.term,
+                            type: 'public',
+                            issue_marker: 'all_managers'
+                        }
+                        return query;
+                    }  
+                }
+            }
+        })
+
+
+        $('#date_field').datepicker({
+        format: "dd.mm.yyyy",
+        language: 'ru'
+        })
+
+
+    
+});
+</script>
+{% endblock content %}

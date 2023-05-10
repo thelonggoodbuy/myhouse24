@@ -12,7 +12,7 @@
     <div class="box-header with-border">
         <h3 class="box-title">Список шаблонов</h3>
     <div class="box-tools">
-        <a href="#" class="btn btn-default btn-sm">
+        <a href="{% url 'receipts:receipt_template_edite_view' %}" class="btn btn-default btn-sm">
             <span class="hidden-xs"> Настройка шаблонов </span><i class="fa fa-dollar visible-xs" aria-hidden="true"></i>
         </a>
     </div>
@@ -39,47 +39,4 @@
     </div>
 </div>
 
-
-
-<script>
-    $(document).ready(function () {
-        //$('#download_link').on('click', function(){
-//            var choosen_template_id = $('input[id^=id_templates]:checked').val()
-//            var receipt_id = window.location.href.match(/\d+$/);
-
-//            console.log(`Choosen template id is ${choosen_template_id}`)
-//            console.log(`Choosen receipt id is ${receipt_id}`)
-
-
-            
-//            $.ajax({
-//                    url: "{% url 'receipts:receipt_template_list_view' %}",
-//                    type: "GET",
-//                    data: {
-//                        'ajax_indicator': 'receipt_template_list_view',
-//                        'choosen_template_id': choosen_template_id,
-//                        'receipt_id': receipt_id,
-//                    },
-//                    dataType: "json",
-//                    success: () => {
-
-//                        console.log('Print! Print! Print!')
-
-//                    }
-
-//                })
-
-            
-                //else {
-                //    $('#choose_section').empty().append("<option id='empty_sect'>Выберите дом</option>");
-                //    $('#choose_section').trigger('change')
-    
-                //}
-
-
-//            })
-
-
-    })
-</script>
 {% endblock content %}
