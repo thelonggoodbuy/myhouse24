@@ -10,6 +10,7 @@ from .forms import StatementArrivalCreateForm
 from users.models import User
 from django.contrib import messages
 from django.http import HttpResponseRedirect, JsonResponse
+from general_statistics.models import GraphTotalStatistic
 
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -99,7 +100,7 @@ class StatementListView(TemplateView):
                                         'personal_account__number', 'type_of_statement', 'summ', 'id')
 
             data = list(raw_data)
-            print(data)
+            # print(data)
 
 
             # verbose_status_dict = PersonalAccount.get_verbose_status_dict()
@@ -168,6 +169,8 @@ class StatementListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['items'] = PaymentItem.objects.all()
+        context['general_statistics'] = GraphTotalStatistic.objects.first()
+        
         return context
     
 

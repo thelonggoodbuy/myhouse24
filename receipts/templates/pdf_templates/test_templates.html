@@ -1,0 +1,142 @@
+
+{% load static %}
+
+<html>
+    <head>
+        <style type="text/css">
+            .tg  {border-collapse:collapse;border-spacing:0;}
+            .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+              overflow:hidden;padding:10px 5px;word-break:normal;}
+            .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+              font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+            .tg .tg-llyw{background-color:#c0c0c0;border-color:inherit;text-align:left;vertical-align:top}
+            .tg .tg-ncd7{background-color:#ffffc7;border-color:inherit;text-align:left;vertical-align:top}
+        </style>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+
+        <table class="tg">
+            <thead>
+              <tr>
+                <th class="tg-ncd7" rowspan="3">Отримувач/<br>Виконувач</th>
+                <th class="tg-ncd7" colspan="4" rowspan="3">{{ pay_company }}</th>
+                <th class="tg-ncd7">№ О/рахунку</th>
+                <th class="tg-ncd7" colspan="2">ПОВIДОМЛЕННЯ</th>
+              </tr>
+              <tr>
+                <th class="tg-ncd7" rowspan="2">{{ account_number }}</th>
+                <th class="tg-ncd7">№</th>
+                <th class="tg-ncd7">{{ invoice_number }}</th>
+              </tr>
+              <tr>
+                <th class="tg-ncd7">от</th>
+                <th class="tg-ncd7">{{ invoice_date }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="tg-ncd7">Платник</td>
+                <td class="tg-ncd7" colspan="7">{{ invoice_address }}</td>
+              </tr>
+              <tr>
+                <td class="tg-ncd7">Нараховано</td>
+                <td class="tg-ncd7" colspan="7">{{ total }}</td>
+              </tr>
+              <tr>
+                <td class="tg-ncd7">Баланс О/р</td>
+                <td class="tg-ncd7">{{ account_balance }}</td>
+                <td class="tg-ncd7">на</td>
+                <td class="tg-ncd7" colspan="5">{{ invoice_date }}</td>
+              </tr>
+              <tr>
+                <td class="tg-ncd7">ДО СПЛАТИ</td>
+                <td class="tg-ncd7">{{ total_debt }}</td>
+                <td class="tg-ncd7">за</td>
+                <td class="tg-ncd7">{{ invoice_month }}</td>
+                <td class="tg-ncd7" colspan="4" rowspan="2">С условиями приема банком суммы <br>ознакомлен и согласен<br>________________<br>(пiдпис платника)</td>
+              </tr>
+              <tr>
+                <td class="tg-ncd7"></td>
+                <td class="tg-ncd7"></td>
+                <td class="tg-ncd7"></td>
+                <td class="tg-ncd7"></td>
+              </tr>
+              <tr>
+                <td class="tg-llyw" colspan="8"></td>
+              </tr>
+              <tr>
+                <td class="tg-ncd7" rowspan="2">Отримувач/<br>Виконувач</td>
+                <td class="tg-ncd7" colspan="4" rowspan="2">{{ pay_company }}/td>
+                <td class="tg-ncd7">№ О/рахунку</td>
+                <td class="tg-ncd7" colspan="2">ПОВIДОМЛЕННЯ</td>
+              </tr>
+              <tr>
+                <td class="tg-ncd7">{{ account_number }}</td>
+                <td class="tg-ncd7">№<br></td>
+                <td class="tg-ncd7">{{ invoice_number }}</td>
+              </tr>
+              <tr>
+                <td class="tg-ncd7">Платник</td>
+                <td class="tg-ncd7" colspan="4">{{ invoice_address }}</td>
+                <td class="tg-ncd7"></td>
+                <td class="tg-ncd7">от</td>
+                <td class="tg-ncd7">{{ invoice_date }}</td>
+              </tr>
+              <tr>
+                <td class="tg-ncd7">Нараховано</td>
+                <td class="tg-ncd7" colspan="7">{{ total }}</td>
+              </tr>
+              <tr>
+                <td class="tg-ncd7">Баланс О/р</td>
+                <td class="tg-ncd7">{{ account_balance }}</td>
+                <td class="tg-ncd7">на</td>
+                <td class="tg-ncd7" colspan="5">{{ invoice_date }}</td>
+              </tr>
+              <tr>
+                <td class="tg-ncd7">ДО СПЛАТИ</td>
+                <td class="tg-ncd7">{{ total_debt }}</td>
+                <td class="tg-ncd7">за</td>
+                <td class="tg-ncd7" colspan="5">{{ invoice_month }}</td>
+              </tr>
+              <tr>
+                <td class="tg-llyw" colspan="8"></td>
+              </tr>
+              <tr>
+                <td class="tg-ncd7" colspan="2">Услуга</td>
+                <td class="tg-ncd7">Тариф</td>
+                <td class="tg-ncd7">Ед. Изм</td>
+                <td class="tg-ncd7" colspan="2">Расход</td>
+                <td class="tg-ncd7" colspan="2">Сумма, грн</td>
+              </tr>
+                {% for cell in receipt_cells %}
+                    <tr>
+                        <td class="tg-ncd7" colspan="2">{{cell.utility_service__title}}</td>
+                        <td class="tg-ncd7">{{ cell.cost_per_unit }}</td>
+                        <td class="tg-ncd7">
+                            {% if cell.unit_of_measure__title != None %}
+                                {{ cell.unit_of_measure__title }}
+                            {% else %}
+                                не указана
+                            {% endif %}
+                        </td>
+                        <td class="tg-ncd7" colspan="2">{{ cell.consumption }}</td>
+                        <td class="tg-ncd7" colspan="2">{{ cell.cost }}</td>
+                    </tr>
+                {% endfor %}
+              <tr>
+                <td class="tg-ncd7" colspan="2"></td>
+                <td class="tg-ncd7"></td>
+                <td class="tg-ncd7"></td>
+                <td class="tg-ncd7" colspan="2"><span style="font-weight:bold">Разом:</span></td>
+                <td class="tg-ncd7" colspan="2"><span style="font-weight:bold">{{ service_total }}</span></td>
+              </tr>
+            </tbody>
+            </table>
+        {% comment %} <p> квитанция Id:{{receipt_id}}</p>
+        <h1> Template Id:{{template_id}}</h1> {% endcomment %}
+    </body>
+</html>
+
+
+

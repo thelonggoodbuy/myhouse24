@@ -28,6 +28,9 @@ class Statement(models.Model):
     tariff = models.ForeignKey(Tariff, on_delete=models.SET_NULL, null=True)
     comment = models.TextField(blank=True, null=True)
 
+
+    
+
 # class ArrivalStatement(models.Model):
 #     personal_account = models.ForeignKey(PersonalAccount, on_delete=models.SET_NULL)
 #     item = models.ForeignKey('Item', on_delete=models.SET_NULL)

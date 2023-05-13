@@ -13,18 +13,15 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.http import FileResponse
 from django.http import HttpResponse
-from tempfile import NamedTemporaryFile
+from django.urls import reverse
+
 from django.utils.encoding import smart_str
 from django.template.loader import render_to_string
 from io import BytesIO, StringIO
 from django.template.loader import get_template
 
+from .services import return_pdf_receipt, return_xlm_receipt
 
-
-
-from openpyxl import load_workbook
-from openpyxl.styles import Side, Border, Font, Alignment, NamedStyle
-from xhtml2pdf import pisa
 
 
 from decimal import Decimal
@@ -399,7 +396,6 @@ class ReceiptCardView(DetailView):
 class ReceiptTemplateListView(FormView):
     form_class = ReceiptTemplateListForm
     template_name = "receipts/receipt_template_list.html"
-    success_url = reverse_lazy('receipts:receipt_list')
 
     def form_valid(self, form):
         receipt_id = self.kwargs['pk']
@@ -407,13 +403,11 @@ class ReceiptTemplateListView(FormView):
 
         if 'print_xls_doc' in self.request.POST:
             response = return_xlm_receipt(receipt_id, template_id)
-            return response
+            # return response
 
         elif 'send_to_email_pdf' in self.request.POST:
-            print('You send email!')
-            response = return_pdf_receipt(receipt_id, template_id)
-            # response = HttpResponseRedirect(self.success_url)
-        
+            return_pdf_receipt(receipt_id, template_id)
+            response = HttpResponseRedirect(reverse('receipts:receipt_template_list_view', kwargs={'pk': receipt_id}))
         return response
 
     def get_context_data(self, **kwargs):
@@ -421,299 +415,6 @@ class ReceiptTemplateListView(FormView):
         receipt_id = self.kwargs['pk']
         context['receipt_id'] = receipt_id
         return context
-#########################################################################################################
-#########################################################################################################
-###############################----------------WORK-----------###########################################
-#########################################################################################################
-#########################################################################################################
-
-import os
-from django.conf import settings
-from django.http import HttpResponse
-from django.template.loader import get_template
-from xhtml2pdf import pisa
-from django.contrib.staticfiles import finders
-
-
-
-def link_callback(uri, rel):
-        """
-        Convert HTML URIs to absolute system paths so xhtml2pdf can access those
-        resources
-        """
-        result = finders.find(uri)
-        if result:
-            if not isinstance(result, (list, tuple)):
-                    result = [result]
-            result = list(os.path.realpath(path) for path in result)
-            path=result[0]
-        else:
-            sUrl = settings.STATIC_URL        # Typically /static/
-            sRoot = settings.STATIC_ROOT      # Typically /home/userX/project_static/
-            mUrl = settings.MEDIA_URL         # Typically /media/
-            mRoot = settings.MEDIA_ROOT       # Typically /home/userX/project_static/media/
-
-            if uri.startswith(mUrl):
-                    path = os.path.join(mRoot, uri.replace(mUrl, ""))
-            elif uri.startswith(sUrl):
-                    path = os.path.join(sRoot, uri.replace(sUrl, ""))
-            else:
-                    return uri
-
-        # make sure that file exists
-        if not os.path.isfile(path):
-                raise Exception(
-                        'media URI must start with %s or %s' % (sUrl, mUrl)
-                )
-        return path
-
-
-def return_pdf_receipt(receipt_id, template_id):
-    print(f'Receipt id: {receipt_id}')
-    print(f'Template id: {template_id}')
-
-    receipt_data = list(Receipt.objects\
-                            .filter(id=receipt_id)\
-                            .values('id', 'appartment__personal_account__number',\
-                                    'number', 'payment_due'))
-    
-
-    template_path = 'receipts/test_templates.html'
-    context = {'receipt_id': receipt_id, 'template_id': template_id}
-
-    # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="report.pdf"'
-    # find the template and render it.
-    template = get_template(template_path)
-    html = template.render(context)
-
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-       html, dest=response, link_callback=link_callback)
-    # if error then show some funny view
-    if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    return response
-
-    # with NamedTemporaryFile() as tmp:
-        # template_for_pdf = 'receipts/test_templates.html'
-        # context = {'receipt_id': receipt_id, 'template_id': template_id}
-
-        # response = HttpResponse(content_type='application/pdf')
-        # response['Content-Disposition'] = 'attachment; filename="report.pdf"'
-        
-    #     template = get_template(template_for_pdf)
-    #     html = template.render(context)
-    #     # new:
-    #     result = BytesIO()
-    #     pisa_status = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result, link_callback=link_callback)
-
-
-    #     # pisa_status = pisa.CreatePDF(html, dest=response, link_callback=link_callback)
-        
-    #     response = HttpResponse(result, content_type='application/pdf')
-    #     response['Content-Disposition'] = 'attachment; filename="report.pdf"'
-
-    #     # if pisa_status.err:
-    #         # return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    #         # return HttpResponse(result.getvalue(), content_type='application/pdf')
-        
-    #     # return None
-    #     return response
-
-    # #     source_html = render_to_string(template_for_pdf, context)
-    #     pisa.CreatePDF(source_html, dest=tmp, encoding='utf-8', link_callback=link_callback)
-    #     tmp.seek(0)
-    #     stream = tmp.read()
-    #     response = HttpResponse(stream, content_type='application/pdf')
-    #     response['Content-Disposition'] = f'attachment; testfile.pdf'
-
-    # return response
-
-
-
-    # good work but without css and bootstrap
-    # template_path = 'receipts/test_templates.html'
-    # context = {'receipt_id': receipt_id, 'template_id': template_id}
-
-    # template = get_template(template_path)
-    # html = template.render(context)
-
-
-
-    # pisa_status = pisa.CreatePDF(
-    #     html, desc=response,
-    #     link_callback=link_callback 
-    # )
-
-    # response = HttpResponse(html, content_type='application/pdf')
-    # response['Content-Disposition'] = f'attachment; testfile.pdf'
-
-    # if pisa_status.err:
-    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
-
-    # return response
-
-
-
-
-#########################################################################################################
-#########################################################################################################
-###############################----------------END#WORK-------###########################################
-#########################################################################################################
-#########################################################################################################
-
-
-def return_xlm_receipt(receipt_id, template_id):
-    receipt = Receipt.objects.get(id=receipt_id)
-    template = ReceiptTemplate.objects.get(id=template_id)
-
-    formated_month = format_date(receipt.from_date, 'LLLL Y', locale='ru')
-    receipt_data_dictionary = {'%' + 'accountNumber' + '%': receipt.appartment.personal_account.number,
-                               '%' + 'payCompany' + '%': 'TEMPORARY EMPTY DATA. CHANGE AFTER CREATING REQUISITE',
-                               '%' + 'invoiceNumber' + '%': receipt.number,
-                               '%' + 'invoiceDate' + '%': receipt.payment_due.strftime("%d.%m.%Y"),
-                               '%' + 'invoiceAddress' + '%': f'{receipt.appartment.owner_user.full_name}, {receipt.appartment.house.address}, {receipt.appartment.number} квартира',
-                               '%' + 'total' + '%': receipt.total_sum,
-                               '%' + 'accountBalance' + '%': f'{receipt.appartment.personal_account.balance}',
-                               '%' + 'totalDebt' + '%': f'{-(receipt.appartment.personal_account.balance - receipt.total_sum)}',
-                               '%' + 'invoiceMonth' + '%': f'{formated_month}',
-                               '%' + 'serviceTotal' + '%': f'{receipt.total_sum}',
-                               }
-                                
-    # my workbook
-    current_template = load_workbook(filename=str(template.receipt_template.file))
-    
-    # my work sheet
-    current_sheet = current_template.active
-
-    # ----------------------------------------------------------------------------------------
-    # get all receipt sells
-    receipt_cells = list(ReceiptCell.objects.filter(receipt=receipt)\
-                                        .values('utility_service__title',\
-                                                 'cost_per_unit',
-                                                 'unit_of_measure__title',
-                                                 'consumption',
-                                                 'cost'))
-    
-    current_row = 19
-    number_of_receipts = len(receipt_cells)
-    maximum_rows = current_row + number_of_receipts + 5
-
-    # work with cells of receipt
-    for row in current_sheet.iter_rows(min_row=1, min_col=1, max_row=maximum_rows, max_col=12):
-        for cell in row:
-            if cell.value in receipt_data_dictionary.keys():
-                current_sheet[cell.coordinate] = receipt_data_dictionary[cell.value]
-
-    
-
-    # styles for deifferent types of cells
-
-    simple_cell_style = NamedStyle('cell_style')
-    simple_cell_style.font = Font(size=12, italic=False)
-    simple_cell_style.border = Border(
-        left=Side(style="thin", color="00333333"),
-        right=Side(style="thin", color="00333333"),
-        top=Side(style='thick', color="00333333"),
-        bottom=Side(style='thick', color="00333333"),
-    )
-    simple_cell_style.alignment = Alignment(horizontal='center', vertical='center')
-    # simple_cell_style.row_dimensions[1].height = 70
-    current_template.add_named_style(simple_cell_style)
-
-
-    for receipt_cell in receipt_cells:
-
-        current_sheet.insert_rows(current_row)
-        current_sheet.row_dimensions[current_row].height = 25
-
-        # utility services cell
-        current_sheet[f'A{current_row}'] =  receipt_cell['utility_service__title']
-        current_sheet[f'A{current_row}'].style = simple_cell_style
-        current_sheet.merge_cells(f'A{current_row}:B{current_row}')
-        
-        # cost per unit cell
-        current_sheet[f'C{current_row}'] = receipt_cell['cost_per_unit']
-        current_sheet[f'C{current_row}'].style = simple_cell_style
-        current_sheet[f'C{current_row}'].number_format = '#,##0.00'
-        current_sheet.merge_cells(f'C{current_row}:D{current_row}')
-
-        # unit of measure cell
-        current_sheet[f'E{current_row}'] = receipt_cell['unit_of_measure__title']
-        current_sheet[f'E{current_row}'].style = simple_cell_style
-        current_sheet.merge_cells(f'E{current_row}:F{current_row}')
-
-        # consumption cell
-        current_sheet[f'G{current_row}'] = receipt_cell['consumption']
-        current_sheet[f'G{current_row}'].style = simple_cell_style
-        current_sheet[f'G{current_row}'].number_format = '#,##0.00'
-        current_sheet.merge_cells(f'G{current_row}:H{current_row}')
-
-        # cost cell
-        current_sheet[f'I{current_row}'] = receipt_cell['cost']
-        current_sheet[f'I{current_row}'].style = simple_cell_style
-        current_sheet[f'I{current_row}'].number_format = '#,##0.00'
-        current_sheet.merge_cells(f'I{current_row}:K{current_row}')
-
-
-        current_sheet[f'K{current_row}'].border = Border(top=Side(style='thick'), \
-                                                        left=Side(style='thick'), \
-                                                        right=Side(style='thick'), \
-                                                        bottom=Side(style='thick'))
-
-        # counterpdf_receipt(receipt_id, template_id):
-#     pass
-        current_row += 1
-
-    # total data logic 
-    current_sheet.merge_cells(start_row=current_row,\
-                                start_column=1,\
-                                end_row=current_row+3,\
-                                end_column=2)
-
-    current_sheet.merge_cells(start_row=current_row,\
-                                start_column=3,\
-                                end_row=current_row+3,\
-                                end_column=4)
-
-    current_sheet.merge_cells(start_row=current_row,\
-                                start_column=5,\
-                                end_row=current_row+3,\
-                                end_column=6)
-
-    current_sheet.merge_cells(start_row=current_row,\
-                                start_column=7,\
-                                end_row=current_row+3,\
-                                end_column=8)
-
-    current_sheet.merge_cells(start_row=current_row,\
-                                start_column=9,\
-                                end_row=current_row+3,\
-                                end_column=11)
-
-    current_sheet[f'A{current_row}'] = ''
-
-    current_sheet[f'G{current_row}'] = 'РАЗОМ'
-    current_sheet[f'G{current_row}'].font = Font(size=12, italic=False, bold=True, color="00000000")
-    current_sheet[f'G{current_row}'].alignment = Alignment(horizontal='right')
-
-    current_sheet[f'I{current_row}'] = receipt.total_sum
-    current_sheet[f'I{current_row}'].font = Font(size=12, italic=False, bold=True, color="00000000")
-    current_sheet[f'I{current_row}'].alignment = Alignment(horizontal='right')
-    
-    with NamedTemporaryFile() as tmp:
-        current_template.save(tmp.name)
-        tmp.seek(0)
-        stream = tmp.read()
-        response = HttpResponse(stream, content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = f'attachment; filename=invoice_{receipt.number}_{receipt.payment_due.strftime("%d.%m.%Y")}.xlsx'
-
-    return response
-
-# def return_pdf_receipt(receipt_id, template_id):
-#     pass
 
 
 
@@ -737,8 +438,6 @@ class ReceiptTemplateEditeView(FormView):
                 for receipt_form in template_edit_formset:
                     for field, error in receipt_form.errors.items():
                         print(f'{field}: {error}')
-
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)     

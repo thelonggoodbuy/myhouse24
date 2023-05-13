@@ -152,16 +152,11 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = os.path.join(BASE_DIR,'project_name/static/')
 
-
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'wt/static/media/')
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -189,3 +184,8 @@ EMAIL_HOST = env('EMAIL_SENDING_EMAIL_HOST')
 EMAIL_PORT = env('EMAIL_SENDING_EMAIL_PORT')
 EMAIL_HOST_USER =  env('EMAIL_SENDING_EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+
+
+# Celery settings
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
