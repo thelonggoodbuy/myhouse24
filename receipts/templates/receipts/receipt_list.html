@@ -32,9 +32,9 @@
 
         <section class="content">
 
-            {% comment %} <div id="myDialog">
+            <div id="myDialog">
                 Content of the modal dialog box.
-            </div> {% endcomment %}
+            </div>
             <div class="row">
                 <div class="col-xs-12 col-lg-9">
                     <div class="row">
@@ -259,7 +259,7 @@ $(document).ready(function () {
                                                         return prerendered_checkbox
                                                     }
                                                 },
-                {"data": "number", "name": "number", "width": "75pt"},
+                {"data": "number", "name": "number", "class":"number", "width": "75pt"},
                 {"data": "status", "name": "status", "width": "50pt"},
                 {"data": "to_date", "name": "to_date", "width": "100pt"},
                 {"data": "date_with_month_year", "name": "date_with_month_year", "width": "100pt"},
@@ -479,28 +479,30 @@ $(document).ready(function () {
 
 
     // delete and confirm display lofic
-//    $("#myDialog").dialog({
-//        autoOpen  : false,
-//        modal     : true,
-//        title     : "avadamedia.myhoise24",
-//        buttons   : {
-//                    'удалить квартиру' : function() {
-//                        var textValue = $('#myTextBox').val();
-//                        var basic_url = "{% url 'appartments:owner_delete' %}"
-//                        var row_number = $(this).data('row_number')
-//                        document.location.href = basic_url + row_number;
-//                    },
-//                    'отмена' : function() {
-//                        $(this).dialog('close');
-//                    }
-//                    }
-//    });
+    $("#myDialog").dialog({
+        autoOpen  : false,
+        modal     : true,
+        title     : "avadamedia.myhoise24",
+        buttons   : {
+                    'удалить квартиру' : function() {
+                        var textValue = $('#myTextBox').val();
+                        var basic_url = "{% url 'receipts:receipt_delete' %}"
+                        var row_number = $(this).data('row_number')
+                        document.location.href = basic_url + row_number;
+                    },
+                    'отмена' : function() {
+                        $(this).dialog('close');
+                    }
+                    }
+    });
 
 
-//    table.on('click', '#delete_button', function(){
-//        var row_number = $(this).closest('tr').attr('id')
-//        $("#myDialog").text(`Удалить квартиру с id ${row_number}?`).data('row_number', row_number).dialog("open");
-//    })
+    table.on('click', '#delete_button', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        var receipt_number = $(this).closest("tr").find("td[class*='number']").text()
+        console.log(number)
+        $("#myDialog").text(`Удалить квитанцию ${receipt_number}?`).data('row_number', row_number).dialog("open");
+    })
 
 
     table.on('click', '#edite_button', function(){

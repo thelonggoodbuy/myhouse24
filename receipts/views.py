@@ -19,7 +19,7 @@ from django.utils.encoding import smart_str
 from django.template.loader import render_to_string
 from io import BytesIO, StringIO
 from django.template.loader import get_template
-
+from general_statistics.models import GraphTotalStatistic
 from .services import return_pdf_receipt, return_xlm_receipt
 
 
@@ -29,7 +29,7 @@ from decimal import Decimal
 
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import FormView, UpdateView
+from django.views.generic.edit import FormView, UpdateView, DeleteView
 from users.models import User
 from appartments.models import House, Section, Appartment, PersonalAccount
 from utility_services.models import Tariff, TariffCell, CounterReadings
@@ -480,6 +480,30 @@ class ReceiptUpdateView(UpdateView):
         messages.success(self.request, f"Квитанция изменена!")
         return HttpResponseRedirect(success_url)
 
+class ReceiptDeleteView(DeleteView):
+
+    model = Receipt
+    success_url = reverse_lazy('receipts:receipt_list')
+    
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        receipt_number = self.object.number
+        success_url = self.get_success_url()
+        if self.object.status == "paid_for" and self.object.payment_was_made == True:
+            general_statistics_object = GraphTotalStatistic.objects.first()
+            general_statistics_object.total_balance -= self.object.total_sum
+            general_statistics_object.total_fund_state -= self.object.total_sum
+            self.object.appartment.personal_account.balance -= self.object.total_sum
+            self.object.appartment.personal_account.save()
+            general_statistics_object.total_debt = -(PersonalAccount.objects.filter(balance__lte=0)\
+                                                .aggregate(Sum('balance'))['balance__sum'])
+        self.object.delete()
+        general_statistics_object.save()
+        messages.success(request, (f'Квитанция {receipt_number}. Удалена. Данные о квитанции также удалены'))
+        return HttpResponseRedirect(success_url)
 
 
 class ReceiptCardView(DetailView):

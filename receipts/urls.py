@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import CRMReportView, ReceiptListView, AddReceiptView, ReceiptUpdateView,\
-    ReceiptCardView, ReceiptTemplateListView, ReceiptTemplateEditeView
+    ReceiptCardView, ReceiptTemplateListView, ReceiptTemplateEditeView, ReceiptDeleteView
 
 
 app_name='receipts'
@@ -15,6 +15,8 @@ urlpatterns = [
     path('edit_receipt/<int:pk>', ReceiptUpdateView.as_view(), name='edit_receipt'),
     path('receipt_detail/', ReceiptCardView.as_view(), name='receipt_detail'),
     path('receipt_detail/<int:pk>', ReceiptCardView.as_view(), name='receipt_detail'),
+    path('receipt_delete/', ReceiptDeleteView.as_view(), name='receipt_delete'),
+    path('receipt_delete/<int:pk>', ReceiptDeleteView.as_view(), name='receipt_delete'),
     path('receipt_list_of_templates', ReceiptTemplateListView.as_view(), name='receipt_template_list_view'),
     path('receipt_list_of_templates/<int:pk>', ReceiptTemplateListView.as_view(), name='receipt_template_list_view'),
     path('receipt_template_edite_view/',ReceiptTemplateEditeView.as_view(), name='receipt_template_edite_view'),
