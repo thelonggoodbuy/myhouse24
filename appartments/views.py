@@ -24,14 +24,12 @@ from django.views.generic.detail import DetailView
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import ImproperlyConfigured
 
-
-
 from .models import House, HouseAdditionalImage, Section, Appartment, Floor, PersonalAccount
 from users.models import User
 from utility_services.models import Tariff
 
 from .forms import HouseEditeForm, HouseEditeFormSetImage, SectionEditeFormSet, FloorEditeFormSet, ResponsibilitiesEditeFormset,\
-                    AppartmentEditeForm, OwnerUpdateForm, AppartmentTariffForm, AppartmentTariffForset
+                    AppartmentEditeForm, OwnerUpdateForm, AppartmentTariffForm, AppartmentTariffForset, PersonalAccountCreateForm
 
 
 # view for testing role using
@@ -170,7 +168,9 @@ class HouseDetailView(DetailView):
         context['responsibility_users'] = self.get_object().responsibilities.select_related('role').filter()
         return context
     
-
+# ------------------------------------------------------------------
+# -----------------Appartments CRUID--------------------------------
+# ------------------------------------------------------------------
 class AppartmentsListView(TemplateView):
     template_name = 'appartments/appartments_list.html'
 
@@ -535,7 +535,7 @@ class PersonalAccountsListView(TemplateView):
                                 .order_by()\
                                 .values('number','status', 'appartment_account__number',\
                                          'appartment_account__house__title', 'appartment_account__sections__title',\
-                                              'appartment_account__owner_user__full_name', 'balance')
+                                              'appartment_account__owner_user__full_name', 'balance', 'id')
 
             data = list(raw_data)
             verbose_status_dict = PersonalAccount.get_verbose_status_dict()
@@ -604,7 +604,115 @@ class PersonalAccountsListView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['houses'] = House.objects.all()
         return context
+    # ---------------------------------------------------------------------------------------------------------------------------------------------
+class PersonalAccountAddView(TemplateView):
+    template_name = 'appartments/personal_accounts_create.html'    
+    form_class = PersonalAccountCreateForm
+    model = PersonalAccount
+    success_url = reverse_lazy('appartments:personal_accounts_list')
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['main_form'] = PersonalAccountCreateForm(prefix='main_form') 
+        return context
+
+    def get(self, request, *args, **kwargs):
+        
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_certain_house':
+            house_id = self.request.GET['current_house_number']
+            house = House.objects.get(id=house_id)
+            print(house)
+            sections = list(Section.objects.only('id', 'title').filter(house=house).values('id', 'title'))
+            # print(sections)
+            q_list = []
+            q_list.append(Q(house=house))
+            q_list.append(Q(Q(personal_account__isnull=True)))
+            appartments = list(Appartment.objects.filter(*q_list).values('id', 'number'))
+            print(appartments)
+            response = {'sections': sections,
+                        'appartments':appartments}
+            return JsonResponse(response, safe=False)
+
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_appartments_per_sections':
+            sections_id = self.request.GET.get('current_sections_number')
+            choosen_sections = Section.objects.get(id=sections_id)
+            q_list = []
+            q_list.append(Q(sections=choosen_sections))
+            q_list.append(Q(personal_account__isnull=True))
+            appartments = list(Appartment.objects.filter(*q_list).values('id', 'number'))
+            print(appartments)
+            response = {'appartments':appartments}
+            return JsonResponse(response, safe=False)
+
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_owner_and_phone_per_appartment':
+            appartment_id = self.request.GET.get('current_appartment_id')
+            owner_data = list(Appartment.objects.filter(id=appartment_id).values('owner_user__id', 'owner_user__full_name', 'owner_user__phone'))
+            
+            response = {}
+
+            if owner_data[0]['owner_user__id']:
+                response['user_id'] = owner_data[0]['owner_user__id']
+
+            if owner_data[0]['owner_user__full_name']:
+                response['user_full_name'] = owner_data[0]['owner_user__full_name']
+            else:
+                response['user_full_name'] = "Не указан"
+
+            if owner_data[0]['owner_user__phone']:
+                response['user_phone'] = owner_data[0]['owner_user__phone']
+            else:
+                response['user_phone'] = "Не указан"
+
+            return JsonResponse(response, safe=False)
+
+
+        else:
+            return super().get(request, *args, **kwargs)
+
+
+    def post(self, request, *args, **Kwargs):
+        main_form = PersonalAccountCreateForm(request.POST, prefix='main_form')        
+        if main_form.is_valid():
+            return self.form_valid(main_form)
+        else:
+            if main_form.errors:
+                for field, error in main_form.errors.items():
+                    print(f'{field}: {error}')
+
+    def form_valid(self, main_form):
+        main_form.save()
+        success_url = self.success_url
+        messages.success(self.request, f"Лицевой счет создан!!")
+        return HttpResponseRedirect(success_url)
     
+
+class PersonalAccountEditeView(UpdateView):
+    template_name = 'appartments/personal_accounts_create.html'    
+    form_class = PersonalAccountCreateForm
+    model = PersonalAccount
+    success_url = reverse_lazy('appartments:personal_accounts_list')    
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)     
+        context['main_form'] = PersonalAccountCreateForm(instance=self.get_object(), prefix='main_form')
+        return context
+    
+    def post(self, request, *args, **Kwargs):
+        main_form = PersonalAccountCreateForm(request.POST, instance=self.get_object(), prefix='main_form')
+        if main_form.is_valid():
+            return self.form_valid(main_form)
+        else:
+            if main_form.errors:
+                for field, error in main_form.errors.items():
+                    print(f'{field}: {error}')
+
+    def form_valid(self, main_form):
+        main_form.save()
+        success_url = self.success_url
+        messages.success(self.request, f"Изменения в лицевой счет внесены!")
+        return HttpResponseRedirect(success_url)
+
 
     # ------------------------------------------------------------------------
     # -------------------APPARTMENT-OWNERS-CRUD-------------------------------

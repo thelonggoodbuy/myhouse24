@@ -33,5 +33,5 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(PersonalAccount)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('number', 'status', 'balance')
+    list_display = ('number', 'status', 'balance', 'appartment_account')
     list_filter = ('number', )

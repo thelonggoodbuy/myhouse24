@@ -78,7 +78,7 @@
                             Выберите действие <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a href="#">Добавить лицевой счет</a></li>
+                            <li><a href="{% url 'appartments:personal_accounts_create' %}">Добавить лицевой счет</a></li>
                             <li><a href="#">Выгрузить в Excel</a></li>
                         </ul>
                     </div>
@@ -240,7 +240,7 @@ $(document).ready(function () {
             "dom": "<<t>p>",
             "processing": true,
             "serverSide": true,
-            "pageLength": 5,
+            "pageLength": 50,
             "ordering": false,
             "ajax": {
                 "type": "GET",
@@ -400,13 +400,13 @@ $(document).ready(function () {
 
 
 
-        //cleaning searh filters
-//    $('.box-header').on('click', '#clear_filters', function () {
-//        $("*[colnumb]").val('').change()
-//    } ); 
+//cleaning searh filters
+    $('.box-header').on('click', '#clear_filters', function () {
+        $("*[colnumb]").val('').change()
+    } ); 
 
 
-        //reversion logic for row except links to send inviting, deleting and editing
+//reversion logic for row except links to send inviting, deleting and editing
 //    table.on('click', 'tbody > tr > td', function () {
 //        if(
 //            $(this).find("div").attr("id") != "buttons_interaction"
@@ -444,11 +444,11 @@ $(document).ready(function () {
 //    })
 
 
-//    table.on('click', '#edite_button', function(){
-//        var row_number = $(this).closest('tr').attr('id')
-//        var basic_url = "{% url 'appartments:appartment_edite' %}"
-//        document.location.href = basic_url + row_number;
-//    })
+    table.on('click', '#edite_button', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        var basic_url = "{% url 'appartments:personal_accounts_edite' %}"
+        document.location.href = basic_url + row_number;
+    })
 
 
     });

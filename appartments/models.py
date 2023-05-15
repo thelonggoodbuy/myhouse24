@@ -67,7 +67,7 @@ class PersonalAccount(models.Model):
     )
     number = models.CharField(max_length=200)
     status = models.CharField(max_length=200, choices=PERSONAL_ACCOUNT_STATUS)
-    balance = models.DecimalField(max_digits=10, decimal_places=2)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
         return f"{self.number}"

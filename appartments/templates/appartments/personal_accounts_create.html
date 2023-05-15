@@ -1,0 +1,238 @@
+
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+
+{% block additionaly_css %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.css }} 
+    {% endfor %}
+
+    <style>
+
+        .column-center {
+            margin-top: 5pt;
+        }
+        
+    </style>
+
+{% endblock additionaly_css %}
+
+
+
+{% block additionaly_js %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.js }}
+    {% endfor %}
+{% endblock additionaly_js %}
+
+
+{% block title %}
+    <title> Новая лицевой счет </title>
+
+{% endblock title %}
+
+{% block content-header %}
+    
+    <h1>Новая лицевой счет</h1>
+    
+{% endblock %}
+
+{% block content %}
+
+<form method="post" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-xs-12 col-md-8 col-lg-7">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-5">
+                        <div class="input-group">
+                            <div class="input-group-addon">
+                                №
+                            </div>
+                            {{ main_form.number }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="box">
+        <div class="box-body">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-xs-6 col-md-6">
+
+                        <div class="form-group">
+                            <label>{{ main_form.status.label }}</label>
+                            {{ main_form.status }}                      
+                        </div>
+
+                        <div class="form-group">
+                            <label>{{ main_form.house.label }}</label>
+                            {{ main_form.house }}                      
+                        </div>
+
+                        <div class="form-group">
+                            <label>{{ main_form.section.label }}</label>
+                            {{ main_form.section }}                      
+                        </div>
+
+                        <div class="form-group">
+                            <label>{{ main_form.appartment.label }}</label>
+                            {{ main_form.appartment }}                      
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div class="row" id="list_container">
+                    <div class="col-xs-12 col-sm-6">
+                        <p>
+                            <b>Владелец:</b> 
+                            <span id="user-fullname">не выбран</span>
+                        </p>
+                        <p>
+                            <b>Телефон:</b> 
+                            <span id="user-phone">не выбран</span>
+                        </p>
+                    </div>
+                    <div class="col-xs-12 col-sm-6">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-7 text-right">
+                        <div class="form-group">
+                            <a class="btn btn-default" href="#">Отменить</a>
+                            <button type="submit" class="btn btn-success">Сохранить</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+
+
+    </div>
+
+
+    </div>
+
+</form>
+
+
+
+<script>
+    $(document).ready(function () {
+
+    $("#appartment_field > option").not("option[value='']").hide()
+    $("#section_utility_field > option").not("option[value='']").hide()
+
+    $("#house_utility_field").on('change', function(){
+        var house_number = $(this).find(":selected").val()
+        if (house_number){
+            $('#user-fullname').html("<span> не выбран </span>")
+            $('#user-phone').html("<span> не выбран </span>")
+            $.ajax({
+                dataType: "json",
+                url: "{% url 'appartments:personal_accounts_create' %}",
+                data: {"ajax_indicator": "get_certain_house",
+                        "current_house_number": house_number},
+                success: (data) => {
+                    var sections = data['sections']
+                    var additional_sections_html = "<option value='empty_section'>Выберите секцию</option>"
+                    for (section of sections){
+                        additional_sections_html +=`<option value=${section["id"]}>${section["title"]}</option>`
+                    }
+                    $("#section_utility_field").not("option[value='']").empty().append(additional_sections_html)
+
+                    var appartments = data['appartments']
+                    var additional_appartment_html = "<option value='empty_appartment'>Выберите квартиру</option>"
+                    for (appartment of appartments){
+                        additional_appartment_html +=`<option value=${appartment["id"]}>${appartment["number"]}</option>`
+                    }
+                    $("#appartment_field").not("option[value='']").empty().append(additional_appartment_html)    
+                }
+            })
+        } else {
+            $("#section_utility_field").not("option[value='']").empty().append("<option value='empty_section'>Выберите дом</option>")
+            $("#appartment_field").not("option[value='']").empty().append("<option value='empty_appartment'>Выберите дом</option>")
+        }
+    })
+
+
+
+    $("#section_utility_field").on('change', function(){
+
+        var section_number = $(this).find(":selected").val()
+        $('#user-fullname').html("<span> не выбран </span>")
+        $('#user-phone').html("<span> не выбран </span>")
+        if (section_number != 'empty_section'){
+            
+            $.ajax({
+                dataType: "json",
+                url: "{% url 'appartments:personal_accounts_create' %}",
+                data: {"ajax_indicator": "get_appartments_per_sections",
+                        "current_sections_number": section_number},
+                success: (data) => {
+
+                    var appartments = data['appartments']
+                    var additional_appartment_html = "<option value='empty_appartment'>Выберите квартиру</option>"
+                    for (appartment of appartments){
+                        additional_appartment_html +=`<option value=${appartment["id"]}>${appartment["number"]}</option>`
+                    }
+                    $("#appartment_field").not("option[value='']").empty().append(additional_appartment_html)
+                    
+                }
+            })
+
+        } else {
+            $("#house_utility_field").trigger('change')
+            $('#personal_account_utility_field').val('')
+            
+        }
+    })
+
+        //================================================================================================================================
+        $("#appartment_field").on('change', function(){
+
+            var appartment_value = $(this).find(":selected").val()
+            
+            if (appartment_value != 'empty_appartment'){
+                $.ajax({
+                    dataType: "json",
+                    url: "{% url 'appartments:personal_accounts_create' %}",
+                    data: {"ajax_indicator": "get_owner_and_phone_per_appartment",
+                            "current_appartment_id": appartment_value},
+                    success: (data) => {
+                        
+                        $('#user-fullname').html("<span> не выбран </span>")
+                        $('#user-phone').html("<span> не выбран </span>")
+                        if(data['user_id']){
+                            $('#user-fullname').html(`<a id=${data['user_id']} class=user_link>${data['user_full_name']}</a>`)
+                            $('#user-phone').html(`${data['user_phone']}`)
+                        } else {
+                            $('#user-fullname').html(`${data['user_full_name']}`)
+                            $('#user-phone').html(`${data['user_phone']}`)
+                        }   
+                    }                    
+                })
+            }
+
+        })
+
+
+        $('#list_container').on('click', 'a', function(){
+            var basic_url = "{% url 'appartments:owner_detail' %}"
+            var url_index = $(this).attr('id')
+            document.location.href = basic_url + url_index;
+        })
+
+});
+</script>
+{% endblock content %}

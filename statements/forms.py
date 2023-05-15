@@ -64,7 +64,7 @@ class StatementArrivalCreateForm(forms.ModelForm):
 
     class Meta:
         model = Statement
-        # fields = ['number', 'date', 'personal_account']
         fields = ['number', 'date', 'personal_account',\
                         'type_of_paynent_item', 'summ', 'checked',\
                         'manager', 'comment']
+        

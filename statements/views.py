@@ -3,7 +3,7 @@ import operator
 from functools import reduce
 
 from babel.dates import format_date
-
+from django.db.models import Sum
 from django.views.generic.base import TemplateView
 from .models import Statement, PaymentItem, PersonalAccount
 from .forms import StatementArrivalCreateForm
@@ -18,7 +18,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from datetime import datetime
 from django.urls import reverse_lazy
-
+from general_statistics.models import GraphTotalStatistic
 from django.views.generic.edit import FormView, UpdateView
 
 
@@ -299,6 +299,16 @@ class StatementArrivalCreateView(StatementCreateView):
         inst = statement_form.save()
         inst.type_of_statement = 'arrival'
         inst.save()
+        if inst.checked == True:
+            # balance logic
+            inst.personal_account.balance += inst.summ
+            inst.personal_account.save()
+            # statistics logic
+            total_statistic_state = GraphTotalStatistic.objects.first()
+            total_statistic_state.total_fund_state += inst.summ
+            total_statistic_state.total_balance += inst.summ
+            total_statistic_state.total_debt = -(PersonalAccount.objects.filter(balance__lte=0).aggregate(Sum('balance'))['balance__sum'])
+            total_statistic_state.save()
         
         success_url = self.success_url
         messages.success(self.request, f"Приходская ведомость готова!")
@@ -311,7 +321,18 @@ class StatementExpenseCreateView(StatementCreateView):
         inst = statement_form.save()
         inst.type_of_statement = 'expense'
         inst.save()
-        
+        if inst.checked == True:
+            # balance logic
+            inst.personal_account.balance -= inst.summ
+            inst.personal_account.save()
+            # statistics logic
+            total_statistic_state = GraphTotalStatistic.objects.first()
+            total_statistic_state.total_fund_state -= inst.summ
+            total_statistic_state.total_balance -= inst.summ
+            total_statistic_state.total_debt = -(PersonalAccount.objects.filter(balance__lte=0).aggregate(Sum('balance'))['balance__sum'])
+            total_statistic_state.save()
+
+
         success_url = self.success_url
         messages.success(self.request, f"Расходная ведомость готова!")
         return HttpResponseRedirect(success_url)
@@ -341,7 +362,59 @@ class StatementUpdateView(UpdateView):
 
 
     def form_valid(self, statement_form):
-        statement_form.save()
+
+
+    # statistic and logic for pretending 
+        initial_statement_state = self.get_object()
+        inst = statement_form.save(commit=False)
+        total_statistic_state = GraphTotalStatistic.objects.first()
+
+    # if we turn on statement
+        if 'checked' in statement_form.changed_data and inst.checked == True:
+
+            if initial_statement_state.type_of_statement == "arrival":
+                inst.personal_account.balance += inst.summ
+                total_statistic_state.total_fund_state += inst.summ
+                total_statistic_state.total_balance += inst.summ
+
+            elif initial_statement_state.type_of_statement == "expense":
+                inst.personal_account.balance -= inst.summ
+                total_statistic_state.total_fund_state -= inst.summ
+                total_statistic_state.total_balance -= inst.summ
+        
+    # if we turn off statement
+        elif 'checked' in statement_form.changed_data and inst.checked == False:
+
+            if initial_statement_state.type_of_statement == "arrival":
+                inst.personal_account.balance -= initial_statement_state.summ
+                total_statistic_state.total_fund_state -= initial_statement_state.summ
+                total_statistic_state.total_balance -= initial_statement_state.summ
+
+            elif initial_statement_state.type_of_statement == "expense":
+                inst.personal_account.balance += initial_statement_state.summ
+                total_statistic_state.total_fund_state += initial_statement_state.summ
+                total_statistic_state.total_balance += initial_statement_state.summ
+
+    # changes in general statistics if we change data in statements
+        if 'checked' not in statement_form.changed_data and inst.checked == True:
+            
+            if initial_statement_state.type_of_statement == "arrival":
+                inst.personal_account.balance += inst.summ - initial_statement_state.summ
+                total_statistic_state.total_fund_state += inst.summ - initial_statement_state.summ
+                total_statistic_state.total_balance += inst.summ - initial_statement_state.summ
+
+            elif initial_statement_state.type_of_statement == "expense":
+                inst.personal_account.balance -= inst.summ - initial_statement_state.summ
+                total_statistic_state.total_fund_state -= inst.summ - initial_statement_state.summ
+                total_statistic_state.total_balance -= inst.summ - initial_statement_state.summ
+
+        inst.personal_account.save()
+        total_statistic_state.total_debt = -(PersonalAccount.objects.filter(balance__lte=0).aggregate(Sum('balance'))['balance__sum'])
+        total_statistic_state.save()
+
+
+        inst.save()
+
         success_url = self.success_url
         messages.success(self.request, f"Изменения в ведомость внесены!")
         return HttpResponseRedirect(success_url)

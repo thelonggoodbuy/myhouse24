@@ -219,7 +219,6 @@ class ReceiptListView(TemplateView):
 
 # class AddCounterReadingsView(CreateView):
 class AddReceiptView(TemplateView):
-
     template_name = 'receipts/receipt_create.html'    
     form_class = AddReceiptForm
     model = Receipt
@@ -256,7 +255,7 @@ class AddReceiptView(TemplateView):
             
 
             data = list(raw_data)
-            print(data)
+            
             verbose_status_dict = CounterReadings.get_verbose_status_dict()
 
             for counter_receipt in data:  
@@ -380,12 +379,20 @@ class AddReceiptView(TemplateView):
             receipt_cell = receipt_cell_form.save(commit=False)
             receipt_cell.receipt = mainform_instance
             receipt_cell.save()
+
+        # print(mainform_instance.__dict__)
+        # if mainform_instance.payment_was_made == True:
+
+        # print(mainform_instance.appartment.personal_account)
+
+
+        
         success_url = self.success_url
         messages.success(self.request, f"Квитанция создана!")
         return HttpResponseRedirect(success_url)
     
 
-# DETAIL VIEW----------------------------------------------------------------------------------------------------
+
 class ReceiptCardView(DetailView):
     queryset = Receipt.objects.all()
     template_name = "receipts/receipt_card.html"

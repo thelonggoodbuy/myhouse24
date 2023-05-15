@@ -3,7 +3,7 @@ from django.urls import path
 from .views import ReportView,\
                     HousesListView, HouseDeleteView, HouseEditeView, HouseDetailView,\
                     AppartmentsListView, AppartmentsCardView, AppartmentDeleteView, AppartmentEditeView,\
-                    PersonalAccountsListView,\
+                    PersonalAccountsListView, PersonalAccountAddView, PersonalAccountEditeView,\
                     OwnersListView, OwnerCardView, OwnerEditeView, OwnerDeleteView, CreteNewUser
 
 
@@ -32,6 +32,9 @@ urlpatterns = [
 
     # personal accounts CRUD
     path('personal_accounts_list/', PersonalAccountsListView.as_view(), name="personal_accounts_list"),
+    path('personal_accounts_create/', PersonalAccountAddView.as_view(), name="personal_accounts_create"),
+    path('personal_accounts_edite/', PersonalAccountEditeView.as_view(), name="personal_accounts_edite"),
+    path('personal_accounts_edite/<int:pk>', PersonalAccountEditeView.as_view(), name="personal_accounts_edite"),
 
     # owners CRUD
     path('owners_list/', OwnersListView.as_view(), name="owner_list"),
