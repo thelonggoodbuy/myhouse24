@@ -33,8 +33,8 @@ from django.views.generic.edit import FormView, UpdateView, DeleteView
 from users.models import User
 from appartments.models import House, Section, Appartment, PersonalAccount
 from utility_services.models import Tariff, TariffCell, CounterReadings
-from .models import Receipt, ReceiptTemplate, ReceiptCell
-from .forms import AddReceiptForm, UtilityReceiptForm, ReceiptCellFormset, ReceiptTemplateListForm, ReceiptTeplateEditeFormSet, ReceiptTeplateEditeForm
+from .models import Receipt, ReceiptTemplate, ReceiptCell, Requisite
+from .forms import AddReceiptForm, UtilityReceiptForm, ReceiptCellFormset, ReceiptTemplateListForm, ReceiptTeplateEditeFormSet, ReceiptTeplateEditeForm, RequisiteUpdateForm
 
 
 
@@ -570,4 +570,39 @@ class ReceiptTemplateEditeView(FormView):
         template_edit_formset.save()
         success_url = self.success_url
         messages.success(self.request, f"Изменения в шаблоны внесены!")
+        return HttpResponseRedirect(success_url)
+    
+
+
+
+
+
+    # requiside logic
+class RequisiteUpdateView(FormView):
+    model = Requisite
+    template_name = "receipts/requiside_update.html"
+    form_class = RequisiteUpdateForm
+    success_url = reverse_lazy('receipts:receipt_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)     
+        context['requisite_form'] = RequisiteUpdateForm(instance=Requisite.objects.first(), prefix="requisite")
+        return context
+    
+
+    def post(self, request, *args, **Kwargs):
+        requisite_form = RequisiteUpdateForm(request.POST, instance=Requisite.objects.first(), prefix="requisite")
+        if requisite_form.is_valid():
+            return self.form_valid(requisite_form)
+        else:
+            if requisite_form.errors:
+                # for receipt_form in requisite_form:
+                for field, error in requisite_form.errors.items():
+                    print(f'{field}: {error}')
+
+
+    def form_valid(self, requisite_form):
+        requisite_form.save()
+        success_url = self.success_url
+        messages.success(self.request, f"Изменения реквизиты внесены!")
         return HttpResponseRedirect(success_url)

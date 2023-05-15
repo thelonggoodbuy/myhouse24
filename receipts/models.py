@@ -49,6 +49,7 @@ class ReceiptTemplate(models.Model):
     receipt_template = models.FileField(upload_to='receipt_templates/', blank=True)
 
 
+
 class Requisite(models.Model):
     company_title = models.CharField(max_length=200)
     description = models.TextField()

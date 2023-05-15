@@ -1,0 +1,47 @@
+{% extends "layout/base_crm.html" %}
+
+{% block title %}
+    <title>Реквизиты</title>
+{% endblock title %}
+
+{% block content-header %}
+<h1>Реквизиты</h1>
+
+{% endblock %}
+
+{% block content %}
+<div class="box">
+    <div class="box-header with-border">
+        <h3 class="box-title">Просмотр квитанции</h3>
+</div>
+    <div class="box-body">
+    <form method="post" enctype="multipart/form-data">
+
+    <div class="row">
+        <div class="col-xs-6">
+            <table class="table table-bordered table-striped table-view">
+                <tbody>
+                        {% csrf_token %}
+                        {{ requisite_form.as_p }}
+                                        
+
+                </tbody>
+                
+            </table>
+        
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6 text-right">
+            <div class="form-group">
+                <input class="btn btn-btn-default" type="submit" value="Отменить">
+                <input class="btn btn-success" type="submit" value="Сохранить" id="save_button">
+            </div>
+        </div>
+    </div>
+    </form>
+
+</div>
+</div>
+{% endblock content %}
+

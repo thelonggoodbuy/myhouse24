@@ -13,7 +13,7 @@ from openpyxl.styles import Side, Border, Font, Alignment, NamedStyle
 from xhtml2pdf import pisa
 from tempfile import NamedTemporaryFile
 
-from .models import Receipt, ReceiptTemplate, ReceiptCell
+from .models import Receipt, ReceiptTemplate, ReceiptCell, Requisite
 import pdfkit
 
 from django.template import Context, Template
@@ -38,8 +38,9 @@ def return_pdf_receipt(receipt_id, template_id):
 
     formated_month = format_date(receipt.from_date, 'LLLL Y', locale='ru')
 
+    requiste = Requisite.objects.first().company_title
     context = {'account_number': receipt.appartment.personal_account.number, 
-                'pay_company': 'TEMPORARY EMPTY DATA. CHANGE AFTER CREATING REQUISITE',
+                'pay_company': requiste,
                 'invoice_number': receipt.number, 
                 'invoice_date': receipt.payment_due.strftime("%d.%m.%Y"),
                 'invoice_address': f'{receipt.appartment.owner_user.full_name}, {receipt.appartment.house.address}, {receipt.appartment.number}',
@@ -74,9 +75,10 @@ def return_xlm_receipt(receipt_id, template_id):
     receipt = Receipt.objects.get(id=receipt_id)
     template = ReceiptTemplate.objects.get(id=template_id)
 
+    requiste = Requisite.objects.first().company_title
     formated_month = format_date(receipt.from_date, 'LLLL Y', locale='ru')
     receipt_data_dictionary = {'%' + 'accountNumber' + '%': receipt.appartment.personal_account.number,
-                               '%' + 'payCompany' + '%': 'TEMPORARY EMPTY DATA. CHANGE AFTER CREATING REQUISITE',
+                               '%' + 'payCompany' + '%': requiste,
                                '%' + 'invoiceNumber' + '%': receipt.number,
                                '%' + 'invoiceDate' + '%': receipt.payment_due.strftime("%d.%m.%Y"),
                                '%' + 'invoiceAddress' + '%': f'{receipt.appartment.owner_user.full_name}, {receipt.appartment.house.address}, {receipt.appartment.number} квартира',

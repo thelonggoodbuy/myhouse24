@@ -62,7 +62,7 @@
         <link rel="shortcut icon" type="image/png" href="{% static 'users/img/favicon.png' %}"/>
     </head>
     <body class="skin-black-light sidebar-mini fixed sidebar-mini-expand-feature" style="height: auto; min-height: 100%;">
-        <div class="wrapper" style="height: auto; min-height: 100%;">
+        <div class="wrapper">
         <header class="main-header">
             <!-- Logo -->
             <a href="#" class="logo">
@@ -163,8 +163,8 @@
         <aside class="main-sidebar">
             <!-- sidebar -->
             
-            <div class="slimScrollDiv overflow-auto" style="position: relative; width: auto; height: 93px;">
-                <section class="sidebar overflow-auto" style="width: auto; height: 93px;">
+            <div class="slimScrollDiv" style="position: relative; width: auto;">
+                <section class="sidebar" style="width: auto; height: 93px;">
                 
                 <ul class="sidebar-menu tree" data-widget="tree">
                     <li class="active">
@@ -290,7 +290,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{% url 'receipts:requiside_update' %}">
                                 <i class="fa fa-credit-card"></i>  
                                 <span>Платежные реквизиты</span>
                             </a>

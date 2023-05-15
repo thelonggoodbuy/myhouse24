@@ -4,7 +4,7 @@ from django.db.models import Max
 import random
 
 
-from .models import Receipt, ReceiptCell, ReceiptTemplate
+from .models import Receipt, ReceiptCell, ReceiptTemplate, Requisite
 from appartments.models import Appartment
 from utility_services.models import Tariff, UtilityService, UnitOfMeasure
 from appartments.models import House
@@ -167,3 +167,17 @@ ReceiptTeplateEditeFormSet = forms.modelformset_factory(model=ReceiptTemplate,
                                                         can_delete=True, 
                                                         # extra=1
                                                         )
+
+
+
+class RequisiteUpdateForm(forms.ModelForm):
+
+    class Meta:
+        model = Requisite
+        fields = ("company_title", "description",)
+        labels = {"company_title": "Название компании",
+                  "description": "Описание"}
+        field_classes = {"company_title": forms.CharField,
+                        "description": forms.CharField}
+        widgets = {"company_title": forms.TextInput(attrs={"class": "form-control"}),
+                        "description": forms.Textarea(attrs={'class':'form-control', 'rows':"6"})}
