@@ -124,15 +124,6 @@ class StatementListView(TemplateView):
                 else:
                     statement['type_of_statement'] = 'Расход'
 
-                # verbose_status = ""
-                # try: 
-                #     verbose_status = verbose_status_dict[account['status']]
-                #     account['status'] = verbose_status
-                # except:
-                #     account['status'] = ''
-
-                
-
 
             # paginator here
             paginator = Paginator(data, length)
@@ -362,8 +353,7 @@ class StatementUpdateView(UpdateView):
 
 
     def form_valid(self, statement_form):
-
-
+        
     # statistic and logic for pretending 
         initial_statement_state = self.get_object()
         inst = statement_form.save(commit=False)

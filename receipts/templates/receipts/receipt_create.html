@@ -617,17 +617,22 @@
         //logic for delete row and calculation subtraction
         $('input[id$=-DELETE]').hide()
 
-        $('tfoot').on('click', 'button[class*=remove-btn]', function(){
+        $(document).on('click', 'button[class*=remove-btn]', function(){
+            console.log('DELETE!!!!')
             $(this).next().attr('checked', true)
             
             var current_cost = $(this).closest('.utility_data_row').find('#cost_field').val()
+
+            $(this).closest('.utility_data_row').hide()
+
+            
             
             if(current_cost){
 
                 var total_summ = parseFloat($('#total_summ').val()) - current_cost
                 $('#total_summ').val(total_summ).change()
 
-                $(this).closest('.utility_data_row').hide()
+                
 
             }
         })

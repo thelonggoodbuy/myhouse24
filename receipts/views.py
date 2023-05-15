@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.http import FileResponse
 from django.http import HttpResponse
 from django.urls import reverse
-
+from general_statistics.models import GraphTotalStatistic
 from django.utils.encoding import smart_str
 from django.template.loader import render_to_string
 from io import BytesIO, StringIO
@@ -29,7 +29,7 @@ from decimal import Decimal
 
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import FormView
+from django.views.generic.edit import FormView, UpdateView
 from users.models import User
 from appartments.models import House, Section, Appartment, PersonalAccount
 from utility_services.models import Tariff, TariffCell, CounterReadings
@@ -213,6 +213,8 @@ class ReceiptListView(TemplateView):
         
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['general_statistics'] = GraphTotalStatistic.objects.first()
+
         return context
 
 
@@ -230,6 +232,7 @@ class AddReceiptView(TemplateView):
         context['main_form'] = AddReceiptForm(prefix='main_form')
         context['utility_form'] = UtilityReceiptForm(prefix='utility_form')
         context['receipt_cell_formset'] = ReceiptCellFormset(prefix='receipt_cell_formset')
+        
         return context
 
 
@@ -350,8 +353,6 @@ class AddReceiptView(TemplateView):
             response = {'counter_tariff_cell_data': counter_tariff_cell_data}
             return JsonResponse(response, safe=False)
 
-
-
         else:
             return super().get(request, *args, **kwargs)
 
@@ -380,17 +381,105 @@ class AddReceiptView(TemplateView):
             receipt_cell.receipt = mainform_instance
             receipt_cell.save()
 
-        # print(mainform_instance.__dict__)
-        # if mainform_instance.payment_was_made == True:
-
-        # print(mainform_instance.appartment.personal_account)
-
+        if mainform_instance.payment_was_made == True:
+            total_statistic_state = GraphTotalStatistic.objects.first()
+            mainform_instance.appartment.personal_account.balance -= mainform_instance.total_sum
+            mainform_instance.appartment.personal_account.save()
+            total_statistic_state.total_balance -= mainform_instance.total_sum
+            total_statistic_state.total_fund_state += mainform_instance.total_sum
+            if mainform_instance.appartment.personal_account.balance < 0:
+                total_statistic_state.total_debt = -(PersonalAccount.objects.filter(balance__lte=0)\
+                                                     .aggregate(Sum('balance'))['balance__sum'])
+                total_statistic_state.save()
 
         
         success_url = self.success_url
         messages.success(self.request, f"Квитанция создана!")
         return HttpResponseRedirect(success_url)
     
+
+class ReceiptUpdateView(UpdateView):
+    template_name = 'receipts/receipt_create.html'    
+    form_class = AddReceiptForm
+    model = Receipt
+    success_url = reverse_lazy('receipts:receipt_list')
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['main_form'] = AddReceiptForm(instance=self.get_object(), prefix='main_form')
+        initial_object = self.get_object().appartment
+        initial_utility_form_dict = {"house": initial_object.house,
+                                     "section": initial_object.sections,
+                                     "personal_account": initial_object.personal_account}
+        context['utility_form'] = UtilityReceiptForm(initial=initial_utility_form_dict, prefix='utility_form')
+        context['receipt_cell_formset'] = ReceiptCellFormset(instance = self.get_object(), prefix='receipt_cell_formset')
+        
+        return context
+
+
+    def post(self, request, *args, **Kwargs):
+        main_form = AddReceiptForm(request.POST, instance=self.get_object(), prefix='main_form')        
+        receipt_cell_formset = ReceiptCellFormset(request.POST, instance = self.get_object(), prefix='receipt_cell_formset')
+        if main_form.is_valid() and receipt_cell_formset.is_valid():
+            return self.form_valid(main_form, receipt_cell_formset)
+        else:
+            if main_form.errors:
+                for field, error in main_form.errors.items():
+                    print(f'{field}: {error}')
+
+            if receipt_cell_formset.errors:
+                for receipt_form in receipt_cell_formset:
+                    for field, error in receipt_form.errors.items():
+                        print(f'{field}: {error}')
+
+        
+    def form_valid(self, main_form, receipt_cell_formset):
+        initial_receipt_state = self.get_object()
+        mainform_instance = main_form.save()
+        for receipt_cell_form in receipt_cell_formset:
+            receipt_cell = receipt_cell_form.save(commit=False)
+            receipt_cell.receipt = mainform_instance
+            receipt_cell.save()
+
+        total_statistic_state = GraphTotalStatistic.objects.first()
+
+        if 'payment_was_made' not in main_form.changed_data\
+                    and mainform_instance.payment_was_made == True\
+                    and mainform_instance.status == "paid_for": #was +, is +
+            # personal account
+            mainform_instance.appartment.personal_account.balance -= (mainform_instance.total_sum - initial_receipt_state.total_sum)
+            mainform_instance.appartment.personal_account.save()
+            # total_statistic_state
+            total_statistic_state.total_balance -= (mainform_instance.total_sum - initial_receipt_state.total_sum)
+            total_statistic_state.total_fund_state += (mainform_instance.total_sum - initial_receipt_state.total_sum)
+
+        if 'payment_was_made' in main_form.changed_data\
+                    and mainform_instance.payment_was_made == False\
+                    and mainform_instance.status == "paid_for": #was +, is -
+            # personal account
+            mainform_instance.appartment.personal_account.balance += initial_receipt_state.total_sum
+            mainform_instance.appartment.personal_account.save()
+            total_statistic_state.total_balance += initial_receipt_state.total_sum
+            total_statistic_state.total_fund_state -= initial_receipt_state.total_sum
+
+        if 'payment_was_made' in main_form.changed_data\
+                    and mainform_instance.payment_was_made == True\
+                    and mainform_instance.status == "paid_for": #was -, is +
+            mainform_instance.appartment.personal_account.balance -= mainform_instance.total_sum
+            mainform_instance.appartment.personal_account.save()
+            total_statistic_state.total_balance -= mainform_instance.total_sum
+            total_statistic_state.total_fund_state += mainform_instance.total_sum
+
+        total_statistic_state.total_debt = -(PersonalAccount.objects.filter(balance__lte=0)\
+                                                .aggregate(Sum('balance'))['balance__sum'])
+        total_statistic_state.save()
+
+    
+        success_url = self.success_url
+        messages.success(self.request, f"Квитанция изменена!")
+        return HttpResponseRedirect(success_url)
+
 
 
 class ReceiptCardView(DetailView):
