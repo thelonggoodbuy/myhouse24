@@ -1,6 +1,7 @@
 from django.urls import path
 
-from .views import StatementListView, StatementArrivalCreateView, StatementExpenseCreateView, StatementUpdateView
+from .views import StatementListView, StatementArrivalCreateView, StatementExpenseCreateView, StatementUpdateView,\
+                     PaymentItemList, PaymentItemCreateView, PaymentItemUpdateView, PaymentItemDeleteView
 
 
 app_name='statements'
@@ -11,4 +12,11 @@ urlpatterns = [
     path('statement_expense_create/', StatementExpenseCreateView.as_view(), name='statement_expense_create'),
     path('statement_update/', StatementUpdateView.as_view(), name='statement_update'),
     path('statement_update/<int:pk>', StatementUpdateView.as_view(), name='statement_update'),
+    path('payment_item_list/', PaymentItemList.as_view(), name='payment_item_list'),
+    path('payment_item_new/', PaymentItemCreateView.as_view(), name='payment_item_new'),
+    path('payment_item_update/', PaymentItemUpdateView.as_view(), name='payment_item_update'),
+    path('payment_item_update/<int:pk>', PaymentItemUpdateView.as_view(), name='payment_item_update'),
+    path('payment_item_delete/', PaymentItemDeleteView.as_view(), name='payment_item_delete'),
+    path('payment_item_delete/<int:pk>', PaymentItemDeleteView.as_view(), name='payment_item_delete'),
+
 ]

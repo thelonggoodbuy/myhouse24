@@ -17,11 +17,8 @@ class StatementArrivalCreateForm(forms.ModelForm):
         while Statement.objects.filter(number=new_number):
             new_number = random.randint(10000000000 , 99999999999)
 
-        self.fields['number'].initial = new_number  
-        
+        self.fields['number'].initial = new_number          
         self.fields['owner'].queryset = User.objects.filter(owning__isnull=False).distinct()
-        # if self.instance: self.fields['owner'].initial = self.instance.personal_account.appartment_account.owner_user.full_name
-
         self.fields['personal_account'].queryset = PersonalAccount.objects.all().distinct()
         self.fields['type_of_paynent_item'].queryset = PaymentItem.objects.filter(type='arrive')
         self.fields['manager'].queryset = User.objects.filter(role__isnull=False).distinct()
@@ -68,3 +65,17 @@ class StatementArrivalCreateForm(forms.ModelForm):
                         'type_of_paynent_item', 'summ', 'checked',\
                         'manager', 'comment']
         
+
+
+class PaymentItemCreateForm(forms.ModelForm):
+
+
+    class Meta:
+        model = PaymentItem
+        fields = ('title', 'type')
+        labels = {"title": "Название",
+                  "type": "Приход/Расход"}
+        field_classes = {"title": forms.CharField,
+                        "type": forms.ModelChoiceField}
+        widgets = {"title": forms.TextInput(attrs={"class": "form-control"}),
+                    "type": forms.Select(attrs={'class':'form-control'})}

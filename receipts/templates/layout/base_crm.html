@@ -163,6 +163,7 @@
         <aside class="main-sidebar">
             <!-- sidebar -->
             
+            
             <div class="slimScrollDiv" style="position: relative; width: auto;">
                 <section class="sidebar" style="width: auto; height: 93px;">
                 
@@ -223,38 +224,38 @@
                             <span>Управление сайтом</span> 
                             <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
                         </a>
-                    <ul class="treeview-menu">
-                    <li>
-                        <a href="#">
-                            <i class="fa fa-circle-o"></i><span>Главная страница</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <i class="fa fa-circle-o"></i>  
-                            <span>О нас</span>
-                        </a>
-                    </li>
+                        <ul class="treeview-menu">
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-circle-o"></i><span>Главная страница</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-circle-o"></i>  
+                                    <span>О нас</span>
+                                </a>
+                            </li>
 
-                    <li>
-                        <a href="#">
-                            <i class="fa fa-circle-o"></i>
-                            <span>Услуги</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <i class="fa fa-circle-o"></i>  
-                            <span>Тарифы</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <i class="fa fa-circle-o"></i>  
-                            <span>Контакты</span>
-                        </a>
-                    </li>
-                    </ul>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-circle-o"></i>
+                                    <span>Услуги</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-circle-o"></i>  
+                                    <span>Тарифы</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-circle-o"></i>  
+                                    <span>Контакты</span>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="treeview">
                         <a href="#">
@@ -264,51 +265,53 @@
                                 <i class="fa fa-angle-left pull-right"></i>
                             </span>
                         </a>
-                    <ul class="treeview-menu">
-                        <li>
-                            <a href="{% url 'utility_services:report_view' %}">
-                                <i class="fa fa-briefcase"></i>  
-                                <span>Услуги</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'utility_services:tariff_list' %}">
-                                <i class="fa fa-money"></i>  
-                                <span>Тарифы</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'users:adm_settings_users_roles' %}">
-                                <i class="fa fa-users"></i>  
-                                <span>Роли</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'users:admin_settings_users_list' %}">
-                                <i class="fa fa-user-plus"></i>  
-                                <span>Пользователи</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'receipts:requiside_update' %}">
-                                <i class="fa fa-credit-card"></i>  
-                                <span>Платежные реквизиты</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <i class="fa fa-list-ol"></i>  
-                                <span>Статьи платежей</span>
-                            </a>
-                        </li>
-                </ul>
-                </li>
+                        <ul class="treeview-menu">
+                            <li>
+                                <a href="{% url 'statements:payment_item_list' %}">
+                                    <i class="fa fa-list-ol"></i>  
+                                    <span>Статьи платежей</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'utility_services:report_view' %}">
+                                    <i class="fa fa-briefcase"></i>  
+                                    <span>Услуги</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'utility_services:tariff_list' %}">
+                                    <i class="fa fa-money"></i>  
+                                    <span>Тарифы</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'users:adm_settings_users_roles' %}">
+                                    <i class="fa fa-users"></i>  
+                                    <span>Роли</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'users:admin_settings_users_list' %}">
+                                    <i class="fa fa-user-plus"></i>  
+                                    <span>Пользователи</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'receipts:requiside_update' %}">
+                                    <i class="fa fa-credit-card"></i>  
+                                    <span>Платежные реквизиты</span>
+                                </a>
+                            </li>
+                            
+                        </ul>
+                    </li>
                 </ul>        
-                </section>
+            </section>
             <div class="slimScrollBar" style="background: rgb(0, 0, 0); width: 7px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 7px; z-index: 99; right: 1px; height: 30px;"></div>
             <div class="slimScrollRail" style="width: 7px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px;"></div>
-        </div>
+        {% comment %} </div> {% endcomment %}
             <!-- /.sidebar -->
+            
         </aside>
 
 

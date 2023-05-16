@@ -29,29 +29,6 @@ class Statement(models.Model):
     comment = models.TextField(blank=True, null=True)
 
 
-    
-
-# class ArrivalStatement(models.Model):
-#     personal_account = models.ForeignKey(PersonalAccount, on_delete=models.SET_NULL)
-#     item = models.ForeignKey('Item', on_delete=models.SET_NULL)
-#     receipt = models.OneToOneField(Receipt, on_delete=models.SET_NULL)
-#     summ = models.DecimalField(max_digits=10, decimal_places=2)
-#     checked = models.BooleanField()
-#     date = models.DateField()
-#     manager = models.ForeignKey(User, on_delete=models.SET_NULL)
-#     tariff = models.ForeignKey(Tariff, on_delete=models.SET_NULL)
-
-
-# class ExpenseStatement(models.Model):
-#     item = models.ForeignKey('Item', on_delete=models.SET_NULL)
-#     summ = models.DecimalField(max_digits=10, decimal_places=2)
-#     checked = models.BooleanField()
-#     manager = models.ForeignKey(User, on_delete=models.SET_NULL)
-#     comment = models.TextField()
-
-
-
-
 class PaymentItem(models.Model):
     ITEM_TYPE = (
         ('arrive', 'приходная'),

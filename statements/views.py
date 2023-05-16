@@ -6,7 +6,7 @@ from babel.dates import format_date
 from django.db.models import Sum
 from django.views.generic.base import TemplateView
 from .models import Statement, PaymentItem, PersonalAccount
-from .forms import StatementArrivalCreateForm
+from .forms import StatementArrivalCreateForm, PaymentItemCreateForm
 from users.models import User
 from django.contrib import messages
 from django.http import HttpResponseRedirect, JsonResponse
@@ -19,7 +19,7 @@ from django.db.models import Q
 from datetime import datetime
 from django.urls import reverse_lazy
 from general_statistics.models import GraphTotalStatistic
-from django.views.generic.edit import FormView, UpdateView
+from django.views.generic.edit import FormView, UpdateView, CreateView, DeleteView
 
 
 # Create your views here.
@@ -408,3 +408,123 @@ class StatementUpdateView(UpdateView):
         success_url = self.success_url
         messages.success(self.request, f"Изменения в ведомость внесены!")
         return HttpResponseRedirect(success_url)
+
+
+class PaymentItemList(TemplateView):
+    template_name = 'statements/payment_item_list.html'
+
+    def get(self, request, *args, **kwargs):
+
+       # datatables serverside logic
+        if self.request.is_ajax() and self.request.method == 'GET' and request.GET.get('draw'):
+            account_data_get_request = request.GET
+
+            #search logic 
+            Q_list = []
+
+            draw = int(account_data_get_request.get("draw"))
+            start = int(account_data_get_request.get("start"))
+            length = int(account_data_get_request.get("length"))
+
+            raw_data = PaymentItem.objects.filter(*Q_list)\
+                                .only('title', 'type', 'id')\
+                                .order_by()\
+                                .values('title', 'type', 'id')
+
+            data = list(raw_data)
+
+            for item in data:
+                if item['type'] == 'arrive':
+                    item['type'] = 'приходная'
+                elif item['type'] == 'expense':
+                    item['type'] = 'расходная'
+                
+            print(data)
+
+            # paginator here
+            paginator = Paginator(data, length)
+            page_number = start / length + 1
+            try:
+                obj = paginator.page(page_number).object_list
+            except PageNotAnInteger:
+                obj = paginator(1).object_list
+            except EmptyPage:
+                obj = paginator.page(1).object_list
+
+            total = len(data)
+            records_filter = total
+
+            response = {
+                'data': obj,
+                'draw': draw,
+                'recordsTotal:': total,
+                'recordsFiltered': records_filter,
+            }
+            return JsonResponse(response, safe=False)
+
+        else:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+    
+
+
+
+class PaymentItemCreateView(CreateView):
+
+    template_name = 'statements/payment_item_create.html'
+    form_class = PaymentItemCreateForm
+    success_url = reverse_lazy('statements:payment_item_list')
+
+
+    def post(self, request, *args, **Kwargs):
+        item_form = PaymentItemCreateForm(request.POST, prefix="payment_item_form")
+
+        if item_form.is_valid():
+
+            return self.form_valid(item_form)
+        else:
+            if item_form.errors:
+                for field, error in item_form.errors.items():
+                    print(f'{field}: {error}')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)     
+        context['item_form'] = PaymentItemCreateForm(prefix="payment_item_form")
+        return context
+    
+
+
+class PaymentItemUpdateView(UpdateView):
+
+    template_name = 'statements/payment_item_create.html'
+    form_class = PaymentItemCreateForm
+    model = PaymentItem
+    success_url = reverse_lazy('statements:payment_item_list')
+
+    def post(self, request, *args, **Kwargs):
+        item_form = PaymentItemCreateForm(request.POST, instance=self.get_object(), prefix="payment_item_form")
+
+        if item_form.is_valid():
+
+            return self.form_valid(item_form)
+        else:
+            if item_form.errors:
+                for field, error in item_form.errors.items():
+                    print(f'{field}: {error}')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)     
+        context['item_form'] = PaymentItemCreateForm(instance=self.get_object(), prefix="payment_item_form")
+        return context
+    
+class PaymentItemDeleteView(DeleteView):
+
+    model = PaymentItem
+    success_url = reverse_lazy('statements:payment_item_list')
+    
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
