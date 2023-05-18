@@ -6,9 +6,7 @@ from django.core.mail import send_mail
 from django.urls import reverse
 
 
-
 from .managers import CustomUserManager
-
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -119,8 +117,18 @@ class Profile(models.Model):
 
 
 class MessageToUser(models.Model):
+
+    MESSAGE_TARGET = (
+    ('one_user', 'один пользователь'),
+    ('all_users_per_house', 'по домам'),
+    ('all_users_per_floor', 'по этажам'),
+    ('all_users_per_sections', 'по секциям'),
+    ('all_users', 'все пользователи')
+    )
+
     topic = models.CharField(max_length=500)
     text = models.TextField()
     date_time = models.DateTimeField()
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="from_user")
     to_users = models.ManyToManyField(User, related_name="to_users")
+    message_target_type = models.CharField(max_length=200, choices=MESSAGE_TARGET, default='one_user')

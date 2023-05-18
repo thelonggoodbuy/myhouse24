@@ -1,6 +1,7 @@
 import math
 import operator
 from functools import reduce
+from babel.dates import format_date, format_datetime
 
 from django.shortcuts import render, redirect
 # from django.views.generic import LoginView
@@ -16,16 +17,19 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_text
 from django.views.generic.base import View, TemplateView
 from django.http import  JsonResponse
-from django.db.models import Q
+
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import json
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
-# from django.contrib.auth.models import User
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models.functions import Concat
+from django.db.models import F, Q, CharField, Value, Case, When
+
 
 from .tokens import account_activation_token
-from .models import User, Role
+from .models import User, Role, MessageToUser
 from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import DeleteView, UpdateView, FormView
@@ -357,3 +361,114 @@ class AppartmentsOwnersView(RolePassesTestMixin, TemplateView):
 
 class PermissionDeniedView(TemplateView):
     template_name = "users/permission_denied.html"
+
+
+# messages logic
+class MessagesListView(TemplateView):
+    
+    template_name = 'users/messages_list.html'
+
+    def get(self, request, *args, **kwargs):
+        
+       # datatables serverside logic
+        if self.request.is_ajax() and self.request.method == 'GET' and request.GET.get('draw'):
+            Q_list = []
+            account_data_get_request = request.GET
+
+            if request.GET.get('search[value]'):
+                Q_list.append(Q(topic__icontains=request.GET.get('search[value]')))
+
+            
+
+                
+
+            #search logic
+            draw = int(account_data_get_request.get("draw"))
+            start = int(account_data_get_request.get("start"))
+            length = int(account_data_get_request.get("length"))
+
+            raw_data = MessageToUser.objects.annotate(
+                                                text_with_title = Case(
+                                                    When(message_target_type='one_user', then=F('to_users__full_name')),
+                                                    When(message_target_type='all_users_per_house', then=(F('to_users__owning__house__title'))),
+                                                    # ------------------------------------------------------------------------------------
+                                                    When(message_target_type='all_users_per_floor', then=(Concat(
+                                                                                                    F('to_users__owning__house__title'),
+                                                                                                    Value(', '),
+                                                                                                    F('to_users__owning__floor__title'),
+                                                                                                    output_field=CharField()
+                                                                                                    ))),
+                                                    When(message_target_type='all_users_per_sections', then=(Concat(
+                                                                                                    F('to_users__owning__house__title'),
+                                                                                                    Value(', '),
+                                                                                                    F('to_users__owning__sections__title'),
+                                                                                                    output_field=CharField(),
+                                                                                                    distinct=True
+                                                                                                    ))),
+                                                    When(message_target_type='all_users', then=Value('все')),
+                                                    distinct=True,
+                                                    output_field=CharField()
+                                                    ))\
+                                            .filter(*Q_list)\
+                                            .only('text_with_title', 'topic','text', 'date_time','id')\
+                                            .order_by()\
+                                            .values('text_with_title', 'topic', 'text', 'date_time', 'id')
+
+
+            data = list({v['id']: v for v in list(raw_data)}.values())
+
+            for message in data:  
+                date_time = message['date_time']
+                formated_date_time = format_datetime(date_time, 'dd.MM.yyyy - HH:mm', locale='ru')
+                message['date_time'] = formated_date_time
+
+
+            # print(data)
+            # paginator here
+            paginator = Paginator(data, length)
+            page_number = start / length + 1
+            try:
+                obj = paginator.page(page_number).object_list
+            except PageNotAnInteger:
+                obj = paginator(1).object_list
+            except EmptyPage:
+                obj = paginator.page(1).object_list
+
+            total = len(data)
+            records_filter = total
+
+            response = {
+                'data': obj,
+                'draw': draw,
+                'recordsTotal:': total,
+                'recordsFiltered': records_filter,
+            }
+            return JsonResponse(response, safe=False)
+
+        else:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+
+# if request.GET.get('ajax_indicator') == 'delete_request':
+                
+#             delete_objects_list = request.GET.get('delete_list[]')
+#             # print(request.GET)
+
+#             print('=====================')
+#             print(request.GET.get('delete_list[]'))
+#             print('=====================')
+
+    def post(self, request, **kwargs):
+        if request.POST.get('ajax_indicator') == 'delete_request':
+            test_list = request.POST.getlist('delete_list[]')
+            # print(test_list)
+            delete_set = MessageToUser.objects.filter(pk__in=test_list)
+            delete_set.delete()
+            # messages.success(self.request,'Вы удалили сообщения')
+            response = 'You finished deleteting!'
+            return JsonResponse(response, safe=False)
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
