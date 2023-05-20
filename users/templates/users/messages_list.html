@@ -176,7 +176,7 @@ $(document).ready(function () {
                                                                 },
                 {"data": "text_with_title", "name": "text_with_title", "width": "40%"},
                 {"data": "topic", "width": "50%"},
-                {"data": "date_time", "name": "date_time", "width": "20%"},
+                {"data": "date_time", "name": "date_time", "width": "30%"},
                 ],
 //            "columnDefs": [
 //                {'orderable': false, targets: 0},
@@ -201,22 +201,17 @@ $(document).ready(function () {
             $(this).find("div").attr("id") != "buttons_interaction"
             )
         {
-            var basic_url = "{% url 'appartments:owner_detail' %}"
+            var basic_url = "{% url 'users:message_detail' %}"
             var url_index = table.row(this).id().toString();
             document.location.href = basic_url + url_index;
         }
     } );
-
-    console.log($('#search_input'))
 
     $('#search_input').on('keyup', function(){
         searched_data = $(this).val()
         table.search(searched_data).draw()
 
     })
-
-
-
 
 
     // delete and confirm display lofic
@@ -266,11 +261,8 @@ $(document).ready(function () {
             var delete_message_id = full_id.slice(7, full_id.length)
             delete_obj_arr.push(delete_message_id)
         })
-
         if (delete_obj_arr.length != 0) {
-
         $("#myDialog").text(`Удалить выбранные сообщения?`).data('delete_obj_arr', delete_obj_arr).dialog("open");
-            
         }
     })
 
@@ -285,6 +277,8 @@ $(document).ready(function () {
             $('input[id^=delete_]').prop('checked', false);
         }
     });
+
+
 
 
 

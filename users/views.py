@@ -424,9 +424,6 @@ class MessagesListView(TemplateView):
                 formated_date_time = format_datetime(date_time, 'dd.MM.yyyy - HH:mm', locale='ru')
                 message['date_time'] = formated_date_time
 
-
-            # print(data)
-            # paginator here
             paginator = Paginator(data, length)
             page_number = start / length + 1
             try:
@@ -450,15 +447,7 @@ class MessagesListView(TemplateView):
         else:
             context = self.get_context_data(**kwargs)
             return self.render_to_response(context)
-
-# if request.GET.get('ajax_indicator') == 'delete_request':
-                
-#             delete_objects_list = request.GET.get('delete_list[]')
-#             # print(request.GET)
-
-#             print('=====================')
-#             print(request.GET.get('delete_list[]'))
-#             print('=====================')
+        
 
     def post(self, request, **kwargs):
         if request.POST.get('ajax_indicator') == 'delete_request':
@@ -501,8 +490,6 @@ class MessageCreateView(CreateView):
         if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_appartments_per_sections':
             sections_id = self.request.GET['current_sections_number']
             sections = Section.objects.get(id=sections_id)
-            # sections = list(Section.objects.only('id', 'title').filter(house=house).values('id', 'title'))
-            # floors = list(Floor.objects.only('id', 'title').filter(house=house).values('id', 'title'))
             appartments = list(Appartment.objects.only('id', 'number').filter(sections=sections).values('id', 'number'))
             response = {'appartments':appartments}
             return JsonResponse(response, safe=False)
@@ -543,3 +530,26 @@ class MessageCreateView(CreateView):
         message.from_user = self.request.user
         message_form.save()
         return HttpResponseRedirect(self.success_url)
+    
+
+
+class MessageDetailView(DetailView):
+    model = MessageToUser
+    template_name = "users/message_detail.html"
+    context_object_name = 'message'
+
+
+class MessageDeleteView(DeleteView):
+    model = MessageToUser
+    success_url = reverse_lazy('users:message_list_view')
+    
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        message_topic = self.object.topic
+        success_url = self.get_success_url()
+        self.object.delete()
+        messages.success(request, (f"Сообщение '{message_topic}' удалено."))
+        return HttpResponseRedirect(success_url)

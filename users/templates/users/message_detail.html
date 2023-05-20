@@ -1,0 +1,110 @@
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+{% block title %}
+    <title> Сообщения </title>
+{% endblock title %}
+
+{% block content-header %}
+    <h1> Сообщения </h1>
+{% endblock %}
+
+{% block additionaly_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2/dist/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2-theme-bootstrap4/dist/select2-bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+{% endblock additionaly_css %}
+
+{% block additionaly_js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script src="{% static 'appartments/plugins/select2/dist/js/select2.min.js' %}"></script>
+    <script src="{% static 'appartments/plugins/bootstrap-datepicker/js/locales/bootstrap-datepicker.ru.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+{% endblock additionaly_js %}
+
+
+
+{% block content %}
+<section class="content">
+
+    <div id="myDialog">
+        Content of the modal dialog box.
+    </div>
+    
+    <div class="box">
+        <div class="box-body no-padding">
+            <div class="mailbox-read-info">
+                <h3>{{ message.topic }}</h3>
+                <h5>От: {{ message.from_user.full_name }}
+                    <span class="mailbox-read-time pull-right">{{ message.date_time }}</span>
+                </h5>
+            </div>
+            <div class="mailbox-read-message">
+                <p>{{ message.text|safe }}</p>
+            </div>
+        </div>
+        <div class="box-footer">
+            {% comment %} <a href="{% url 'users:message_delete' pk=message.id %}" id="delete_link">
+                <button type="button" class="btn btn-default"><i class="fa fa-trash-o"></i> Удалить</button>
+            </a> {% endcomment %}
+            <button type="button" class="btn btn-default" id="delete_button"><i class="fa fa-trash-o"></i> Удалить</button>
+        </div>
+    </div>
+
+</section>
+
+
+
+<script>
+$(document).ready(function () {
+
+//    $('#delete_button').click(function(){
+        //$(this).event.preventDefault();
+//        $("#myDialog").text(`Статью платежа ?`).dialog("open")
+//    })
+$("#myDialog").hide()
+
+    $("#delete_button").on("click", function() {
+        $("#myDialog").dialog({
+                modal: true,
+                height: "auto",
+                width: "30vw",
+                title: "Удалить сообщение?",
+                buttons: {
+                    "Удалить": function () {
+                        document.location.href = "{% url 'users:message_delete' pk=message.id %}"
+                    },
+                    "Отмена": function () {
+                        $(this).dialog("close");
+                    }
+                }
+            }
+        )
+    });
+
+
+//    $('#delete_button').click(function(){
+//        console.log('-----------DELETE---BUTTON-------------!!!')
+//    })
+
+
+//    $("#myDialog").text(`Удалить выбранные сообщения?`).dialog(opt).dialog("open");
+//        $("#myDialog").dialog({
+//            autoOpen  : false,
+//            modal     : true,
+//            title     : "avadamedia.myhoise24",
+//            buttons   : {
+//                        'удалить' : function() {
+                            
+//                        },
+//                        'отмена' : function() {
+//                            $(this).dialog('close');
+//                        }
+//                    }
+//                 });
+
+})
+</script>
+{% endblock content %}

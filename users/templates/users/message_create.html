@@ -15,6 +15,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2/dist/css/select2.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2-theme-bootstrap4/dist/select2-bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/summernote/summernote.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
 
 
 {% endblock additionaly_css %}
@@ -24,6 +25,9 @@
     <script src="{% static 'appartments/plugins/select2/dist/js/select2.min.js' %}"></script>
     <script src="{% static 'appartments/plugins/summernote/summernote.min.js' %}"></script>
     <script src="{% static 'appartments/plugins/summernote/lang/summernote-ru-RU.js' %}"></script>
+    <script src="{% static 'appartments/plugins/bootstrap-datepicker/js/locales/bootstrap-datepicker.ru.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     
 
 {% endblock additionaly_js %}
@@ -256,7 +260,7 @@ $("#message_target_type_block").hide()
                 success: (data) => {
                         console.log(data)
                     var sections = data['sections']
-                    var additional_sections_html = "<option value='empty_section'>Выберите секцию</option>"
+                    var additional_sections_html = "<option value=''>Выберите секцию</option>"
                     for (section of sections){
                         additional_sections_html +=`<option value=${section["id"]}>${section["title"]}</option>`
                     }
@@ -264,7 +268,7 @@ $("#message_target_type_block").hide()
 
 
                     var floors = data['floors']
-                    var additional_floors_html = "<option value='empty_floor'>Выберите этаж</option>"
+                    var additional_floors_html = "<option value=''>Выберите этаж</option>"
                     for (floor of floors){
                         additional_floors_html +=`<option value=${floor["id"]}>${floor["title"]}</option>`
                     }
@@ -272,7 +276,7 @@ $("#message_target_type_block").hide()
 
 
                     var appartments = data['appartments']
-                    var additional_appartment_html = "<option value='empty_appartment'>Выберите квартиру</option>"
+                    var additional_appartment_html = "<option value=''>Выберите квартиру</option>"
                     for (appartment of appartments){
                         additional_appartment_html +=`<option value=${appartment["id"]}>${appartment["number"]}</option>`
                     }
@@ -284,9 +288,9 @@ $("#message_target_type_block").hide()
             })
         } else {
 
-            $("#sections_utility_field").not("option[value='']").empty().append("<option value='empty_section'>Выберите дом</option>")
-            $("#floor_utility_field").not("option[value='']").empty().append("<option value='empty_floor'>Выберите дом</option>")
-            $("#appartment_utility_field").not("option[value='']").empty().append("<option value='empty_appartment'>Выберите дом</option>")        
+            $("#sections_utility_field").not("option[value='']").empty().append("<option value=''>Выберите дом</option>")
+            $("#floor_utility_field").not("option[value='']").empty().append("<option value=''>Выберите дом</option>")
+            $("#appartment_utility_field").not("option[value='']").empty().append("<option value=''>Выберите дом</option>")        
             $("input[id$=message_target_type_4]").prop('checked', true)
 
         }
@@ -295,7 +299,7 @@ $("#message_target_type_block").hide()
 
     $("#sections_utility_field").on('change', function(){
         var section_number = $(this).find(":selected").val()
-        if (section_number != 'empty_section'){
+        if (section_number.val() != ''){
             $.ajax({
                 dataType: "json",
                 url: "{% url 'users:message_create' %}",
@@ -303,13 +307,13 @@ $("#message_target_type_block").hide()
                         "current_sections_number": section_number},
                 success: (data) => {
                     var appartments = data['appartments']
-                    var additional_appartment_html = "<option value='empty_appartment'>Выберите квартиру</option>"
+                    var additional_appartment_html = "<option value=''>Выберите квартиру</option>"
                     for (appartment of appartments){
                         additional_appartment_html +=`<option value=${appartment["id"]}>${appartment["number"]}</option>`
                     }
                     $("#appartment_utility_field").not("option[value='']").empty().append(additional_appartment_html)
                     $("input[id$=message_target_type_3]").prop('checked', true)
-                    $("#floor_utility_field").val('empty_floor')
+                    $("#floor_utility_field").val('')
                     console.log($("#floor_utility_field"))                
                 }
             })
@@ -321,7 +325,7 @@ $("#message_target_type_block").hide()
 
     $("#floor_utility_field").on('change', function(){
         var floor_number = $(this).find(":selected").val()
-        if (floor_number != 'empty_section'){
+        if (floor_number.val() != ''){
             $.ajax({
                 dataType: "json",
                 url: "{% url 'users:message_create' %}",
@@ -329,13 +333,13 @@ $("#message_target_type_block").hide()
                         "current_floor_number": floor_number},
                 success: (data) => {
                     var appartments = data['appartments']
-                    var additional_appartment_html = "<option value='empty_appartment'>Выберите квартиру</option>"
+                    var additional_appartment_html = "<option value=''>Выберите квартиру</option>"
                     for (appartment of appartments){
                         additional_appartment_html +=`<option value=${appartment["id"]}>${appartment["number"]}</option>`
                     }
                     $("#appartment_utility_field").not("option[value='']").empty().append(additional_appartment_html)
                     $("input[id$=message_target_type_2]").prop('checked', true)
-                    $("#sections_utility_field").val('empty_section')
+                    $("#sections_utility_field").val('')
                 }
             })
         } else {

@@ -163,7 +163,6 @@ class HouseDetailView(DetailView):
     context_object_name = 'house'
 
     def get_context_data(self, **kwargs):
-
         context = super().get_context_data(**kwargs)     
         context['responsibility_users'] = self.get_object().responsibilities.select_related('role').filter()
         return context
