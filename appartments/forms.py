@@ -163,7 +163,6 @@ class AppartmentEditeForm(forms.ModelForm):
     def save(self, commit=True):
         current_form = super(AppartmentEditeForm, self).save(commit=False)
         current_form_cleaned = super(AppartmentEditeForm, self).clean()
-        print(current_form_cleaned['personal_account_unbound'])
 
         if self.initial_personal_account and current_form_cleaned['personal_account_unbound'] == self.initial_personal_account:
             if commit:

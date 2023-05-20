@@ -1,0 +1,361 @@
+
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+{% block title %}
+    <title> Новое сообщение </title>
+{% endblock title %}
+
+{% block content-header %}
+    <h1> Новое сообщение </h1>
+{% endblock %}
+
+{% block additionaly_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2/dist/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2-theme-bootstrap4/dist/select2-bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/summernote/summernote.min.css' %}">
+
+
+{% endblock additionaly_css %}
+
+{% block additionaly_js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script src="{% static 'appartments/plugins/select2/dist/js/select2.min.js' %}"></script>
+    <script src="{% static 'appartments/plugins/summernote/summernote.min.js' %}"></script>
+    <script src="{% static 'appartments/plugins/summernote/lang/summernote-ru-RU.js' %}"></script>
+    
+
+{% endblock additionaly_js %}
+
+{% block content %}
+        <section class="content">
+            <div class="box">
+                <div class="box-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-xs-6 col-md-11">
+                                <strong>{{ message_form.topic.label }}</strong>
+                                {{ message_form.topic }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6 col-md-11">
+                            <strong>{{ message_form.text.label }}</strong>
+                                {{ message_form.text }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6 col-md-11">
+                                <h3>Кому отправить:</h3>
+                                {{ message_form.for_users_with_debt }}<strong>{{ message_form.for_users_with_debt.label }}</strong>
+                            </div>
+                        </div>
+                        <div class="row" id="message_target_type_block">
+                            <div class="col-xs-6 col-md-6">
+                                {{ message_form.message_target_type.label }}
+                                {{ message_form.message_target_type }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6 col-md-6">
+                                {{ message_form.house.label }}
+                                {{ message_form.house }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6 col-md-6">
+                                {{ message_form.sections.label }}
+                                {{ message_form.sections }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6 col-md-6">
+                                {{ message_form.floor.label }}
+                                {{ message_form.floor }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6 col-md-6">
+                                {{ message_form.appartment.label }}
+                                {{ message_form.appartment }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-10 text-right">
+                                <div class="form-group">
+                                    <a class="btn btn-default" href="#">Отменить</a>
+                                    <button type="submit" class="btn btn-success">Сохранить</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        </section>
+<script>
+
+
+$(document).ready(function () {
+
+var DefaultStyleButton = function (context) {
+    var ui = $.summernote.ui;
+    var event = ui.buttonGroup([
+        ui.button({
+            contents: '<i class="fa fa-font"/><span>   Обычный текст   </span><b class="caret"></b>',
+            data: {
+                toggle: 'dropdown'
+            }
+        }),
+        ui.dropdown({
+            items: [
+                'Обычный текст',
+                'Заголовок 1',
+                'Заголовок 2',
+                'Заголовок 3',
+                'Заголовок 4',
+                'Заголовок 5',
+                'Заголовок 6',
+            ],
+        callback: function (items) {
+            $(items).find('li a').on('click', function(){
+                var changed_option_text = $(this).attr('data-value')
+                $(this).closest('ul').prev().find('span').text(changed_option_text)
+                if (changed_option_text == 'Обычный текст') {
+                    $('#summernote').summernote('formatPara');
+                } else if (changed_option_text == 'Заголовок 1') {
+                    $('#summernote').summernote('formatH1')
+                } else if (changed_option_text == 'Заголовок 2') {
+                    $('#summernote').summernote('formatH2')
+                } else if (changed_option_text == 'Заголовок 3') {
+                    $('#summernote').summernote('formatH3')
+                } else if (changed_option_text == 'Заголовок 4') {
+                    $('#summernote').summernote('formatH4')
+                } else if (changed_option_text == 'Заголовок 5') {
+                    $('#summernote').summernote('formatH5')
+                } else if (changed_option_text == 'Заголовок 6') {
+                    $('#summernote').summernote('formatH6')
+                }
+                })
+             }
+        })
+    ]);
+    return event.render();
+}
+
+
+var CustomBold = function (context) {
+    var ui = $.summernote.ui;
+    var button = ui.button({
+      contents: '<strong>Полужирный</strong>',
+      click: function () {
+        $('#summernote').summernote('bold')
+      }
+    });
+    return button.render();
+  }
+
+
+var CustomItalic = function (context) {
+    var ui = $.summernote.ui;
+    var button = ui.button({
+      contents: '<i>Курсивный</i>',
+      click: function () {
+        $('#summernote').summernote('italic')
+      }
+    });
+    return button.render();
+  }
+
+var CustomUnderline = function (context) {
+    var ui = $.summernote.ui;
+    var button = ui.button({
+      contents: '<u>Подчеркнутый</u>',
+      click: function () {
+        $('#summernote').summernote('underline')
+      }
+    });
+    return button.render();
+  }
+
+var CustomIndent = function (context) {
+    var ui = $.summernote.ui;
+    var button = ui.button({
+      contents: "<span class='fa fa-indent'></span>",
+      tooltip: "Увеличить отступ",
+      click: function () {
+        $('#summernote').summernote('indent')
+      }
+    });
+    return button.render();
+  }
+
+var CustomOutdent = function (context) {
+    var ui = $.summernote.ui;
+    var button = ui.button({
+      contents: "<span class='fa fa-outdent'></span>",
+      tooltip: "Уменьшить отступ",
+      click: function () {
+        $('#summernote').summernote('outdent')
+      }
+    });
+    return button.render();
+  }
+
+    $('#summernote').summernote({
+        toolbar: [
+            ['style', ['style_cliche']],
+            ['font', ['custom_bold', 'custom_italic', 'custom_underline']],
+            ['para', ['ul', 'ol', 'custom_outdent', 'custom_indent']],
+        ],
+
+        callbacks: {
+            onChange: function (contents, $editable) {
+                var markup = $('#summernote').summernote('code');
+            }
+        },
+
+        buttons: {
+            style_cliche: DefaultStyleButton,
+            custom_bold: CustomBold,
+            custom_italic: CustomItalic,
+            custom_underline: CustomUnderline,
+            custom_indent: CustomIndent,
+            custom_outdent: CustomOutdent,
+          },
+
+        lang: 'ru-RU',
+        placeholder: 'Текст сообщения:',
+        tabsize: 2,
+        height: 200
+        });
+
+
+   
+
+//---------------------------------------------------------------------------------
+//----------filters for house, sections, floors. Dependency buy message type-------
+//---------------------------------------------------------------------------------
+
+
+$("#sections_utility_field > option").not("option[value='']").hide()
+$("#floor_utility_field > option").not("option[value='']").hide()
+$("#appartment_utility_field > option").not("option[value='']").hide()
+$("#message_target_type_block").hide()
+
+    $("#house_utility_field").on('change', function(){
+        var house_number = $(this).find(":selected").val()
+        if (house_number){
+            $.ajax({
+                dataType: "json",
+                url: "{% url 'users:message_create' %}",
+                data: {"ajax_indicator": "get_certain_house",
+                        "current_house_number": house_number},
+                success: (data) => {
+                        console.log(data)
+                    var sections = data['sections']
+                    var additional_sections_html = "<option value='empty_section'>Выберите секцию</option>"
+                    for (section of sections){
+                        additional_sections_html +=`<option value=${section["id"]}>${section["title"]}</option>`
+                    }
+                    $("#sections_utility_field").not("option[value='']").empty().append(additional_sections_html)
+
+
+                    var floors = data['floors']
+                    var additional_floors_html = "<option value='empty_floor'>Выберите этаж</option>"
+                    for (floor of floors){
+                        additional_floors_html +=`<option value=${floor["id"]}>${floor["title"]}</option>`
+                    }
+                    $("#floor_utility_field").not("option[value='']").empty().append(additional_floors_html)
+
+
+                    var appartments = data['appartments']
+                    var additional_appartment_html = "<option value='empty_appartment'>Выберите квартиру</option>"
+                    for (appartment of appartments){
+                        additional_appartment_html +=`<option value=${appartment["id"]}>${appartment["number"]}</option>`
+                    }
+                    $("#appartment_utility_field").not("option[value='']").empty().append(additional_appartment_html)    
+
+                    $("input[id$=message_target_type_1]").prop('checked', true)
+
+                }
+            })
+        } else {
+
+            $("#sections_utility_field").not("option[value='']").empty().append("<option value='empty_section'>Выберите дом</option>")
+            $("#floor_utility_field").not("option[value='']").empty().append("<option value='empty_floor'>Выберите дом</option>")
+            $("#appartment_utility_field").not("option[value='']").empty().append("<option value='empty_appartment'>Выберите дом</option>")        
+            $("input[id$=message_target_type_4]").prop('checked', true)
+
+        }
+        })
+    
+
+    $("#sections_utility_field").on('change', function(){
+        var section_number = $(this).find(":selected").val()
+        if (section_number != 'empty_section'){
+            $.ajax({
+                dataType: "json",
+                url: "{% url 'users:message_create' %}",
+                data: {"ajax_indicator": "get_appartments_per_sections",
+                        "current_sections_number": section_number},
+                success: (data) => {
+                    var appartments = data['appartments']
+                    var additional_appartment_html = "<option value='empty_appartment'>Выберите квартиру</option>"
+                    for (appartment of appartments){
+                        additional_appartment_html +=`<option value=${appartment["id"]}>${appartment["number"]}</option>`
+                    }
+                    $("#appartment_utility_field").not("option[value='']").empty().append(additional_appartment_html)
+                    $("input[id$=message_target_type_3]").prop('checked', true)
+                    $("#floor_utility_field").val('empty_floor')
+                    console.log($("#floor_utility_field"))                
+                }
+            })
+        } else {
+            $("#house_utility_field").trigger('change')
+        }
+    })
+
+
+    $("#floor_utility_field").on('change', function(){
+        var floor_number = $(this).find(":selected").val()
+        if (floor_number != 'empty_section'){
+            $.ajax({
+                dataType: "json",
+                url: "{% url 'users:message_create' %}",
+                data: {"ajax_indicator": "get_appartments_per_floor",
+                        "current_floor_number": floor_number},
+                success: (data) => {
+                    var appartments = data['appartments']
+                    var additional_appartment_html = "<option value='empty_appartment'>Выберите квартиру</option>"
+                    for (appartment of appartments){
+                        additional_appartment_html +=`<option value=${appartment["id"]}>${appartment["number"]}</option>`
+                    }
+                    $("#appartment_utility_field").not("option[value='']").empty().append(additional_appartment_html)
+                    $("input[id$=message_target_type_2]").prop('checked', true)
+                    $("#sections_utility_field").val('empty_section')
+                }
+            })
+        } else {
+            $("#house_utility_field").trigger('change')
+        }
+    })
+
+
+
+    $("#appartment_utility_field").on('change', function(){
+        $("input[id$=message_target_type_0]").prop('checked', true)
+    })
+
+
+//------------------------------------------------------------------------------------------
+//----------filters for house, sections, floors. Dependency buy message type-----END--------
+//------------------------------------------------------------------------------------------
+
+
+
+});   
+</script>
+{% endblock content %}

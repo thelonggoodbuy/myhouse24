@@ -69,7 +69,6 @@ class StatementArrivalCreateForm(forms.ModelForm):
 
 class PaymentItemCreateForm(forms.ModelForm):
 
-
     class Meta:
         model = PaymentItem
         fields = ('title', 'type')

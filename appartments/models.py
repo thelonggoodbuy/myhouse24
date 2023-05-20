@@ -27,7 +27,7 @@ class Section(models.Model):
     house = models.ForeignKey(House, on_delete=models.CASCADE, related_name='sections')
 
     def __str__(self):
-        return f"{ self.title }: { self.house.title }"
+        return f"{ self.title }"
 
 
 class Floor(models.Model):
@@ -35,16 +35,16 @@ class Floor(models.Model):
     house = models.ForeignKey(House, on_delete=models.CASCADE, related_name='floors')
 
     def __str__(self):
-        return f"{self.house.title}: {self.title}"
+        return f"{self.title}"
     
 
 class Appartment(models.Model):
     number = models.PositiveSmallIntegerField()
     area = models.DecimalField(max_digits=7, decimal_places=2)
     personal_account = models.OneToOneField('PersonalAccount', on_delete=models.SET_NULL, related_name="appartment_account", null=True, blank=True)
-    house = models.ForeignKey(House, on_delete=models.CASCADE)
-    sections = models.ForeignKey(Section, on_delete=models.CASCADE)
-    floor = models.ForeignKey(Floor, on_delete=models.CASCADE)
+    house = models.ForeignKey(House, on_delete=models.CASCADE, related_name="related_appartment")
+    sections = models.ForeignKey(Section, on_delete=models.SET_NULL, null=True, blank=True, related_name="related_appartment")
+    floor = models.ForeignKey(Floor, on_delete=models.SET_NULL, null=True, blank=True, related_name="related_appartment")
     owner_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="owning")
     tariff = models.ForeignKey('utility_services.Tariff', on_delete=models.SET_NULL, verbose_name='тариф', related_name='appartment_tariff', blank=True, null=True)
     # balance = models.DecimalField(max_digits=10, decimal_places=2)

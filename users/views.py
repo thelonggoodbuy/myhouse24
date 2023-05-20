@@ -37,13 +37,15 @@ from django.views.generic.detail import SingleObjectTemplateResponseMixin
 from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.list import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from appartments.models import House, Section, Floor, Appartment
+
 
 import html2text
 
 
 
 from .forms import LoginSimpleUserForm, LoginAdminUserForm, SignUpSimpleUserForm, AdminSettingsUsersUpdateForm,\
-                    UsersRolesFormSet, AdminSettingsUsersRolesCellForm
+                    UsersRolesFormSet, AdminSettingsUsersRolesCellForm, MessageToUserForm
 
 
 
@@ -411,7 +413,7 @@ class MessagesListView(TemplateView):
                                                     ))\
                                             .filter(*Q_list)\
                                             .only('text_with_title', 'topic','text', 'date_time','id')\
-                                            .order_by()\
+                                            .order_by('-id')\
                                             .values('text_with_title', 'topic', 'text', 'date_time', 'id')
 
 
@@ -472,3 +474,72 @@ class MessagesListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+    
+
+
+class MessageCreateView(CreateView):
+
+    template_name = 'users/message_create.html'
+    form_class = MessageToUserForm
+    success_url = reverse_lazy('users:message_list_view')
+
+
+    def get(self, request, *args, **kwargs):
+
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_certain_house':
+            house_id = self.request.GET['current_house_number']
+            house = House.objects.get(id=house_id)
+            sections = list(Section.objects.only('id', 'title').filter(house=house).values('id', 'title'))
+            floors = list(Floor.objects.only('id', 'title').filter(house=house).values('id', 'title'))
+            appartments = list(Appartment.objects.only('id', 'number').filter(house=house).values('id', 'number'))
+            response = {'sections': sections,
+                        'appartments':appartments,
+                        'floors': floors}
+            return JsonResponse(response, safe=False)
+        
+
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_appartments_per_sections':
+            sections_id = self.request.GET['current_sections_number']
+            sections = Section.objects.get(id=sections_id)
+            # sections = list(Section.objects.only('id', 'title').filter(house=house).values('id', 'title'))
+            # floors = list(Floor.objects.only('id', 'title').filter(house=house).values('id', 'title'))
+            appartments = list(Appartment.objects.only('id', 'number').filter(sections=sections).values('id', 'number'))
+            response = {'appartments':appartments}
+            return JsonResponse(response, safe=False)
+        
+
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_appartments_per_floor':
+            floor_id = self.request.GET['current_floor_number']
+            floor = Floor.objects.get(id=floor_id)
+            appartments = list(Appartment.objects.only('id', 'number').filter(floor=floor).values('id', 'number'))
+            response = {'appartments':appartments}
+            return JsonResponse(response, safe=False)
+
+        else:
+            return super().get(request, *args, **kwargs)
+
+
+
+    def post(self, request, *args, **Kwargs):
+        message_form = MessageToUserForm(request.POST, prefix="message_to_user")
+
+        if message_form.is_valid():
+            return self.form_valid(message_form)
+        else:
+            if message_form.errors:
+                for field, error in message_form.errors.items():
+                    print(f'{field}: {error}')
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # print(self.request.user)
+        # print(self.request.user.id)
+        context['message_form'] = MessageToUserForm(prefix="message_to_user")
+        return context
+    
+    def form_valid(self, message_form):
+        message = message_form.save(commit=False)
+        message.from_user = self.request.user
+        message_form.save()
+        return HttpResponseRedirect(self.success_url)

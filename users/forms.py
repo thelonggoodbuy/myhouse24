@@ -6,8 +6,11 @@ from django.contrib.auth.password_validation import validate_password
 from django.template.loader import render_to_string
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.html import strip_tags
+import datetime
+from django.db.models import Q
 
-from .models import User, Role
+from .models import User, Role, MessageToUser
+from appartments.models import House, Section, Floor, Appartment
 
 
 
@@ -144,7 +147,6 @@ class SignUpSimpleUserForm(forms.ModelForm):
 
 
 class AdminSettingsUsersUpdateForm(forms.ModelForm):
-    # roles_tuple = User.get_users_role_tupple()
     status_tupple = User.get_users_status_tupple()
 
     name = forms.CharField(required=False, label="Имя",
@@ -245,3 +247,103 @@ class AdminSettingsUsersRolesCellForm(forms.ModelForm):
 
 
 UsersRolesFormSet = forms.modelformset_factory(model=Role, form=AdminSettingsUsersRolesCellForm, can_delete=False, extra=0)
+
+
+class MessageToUserForm(forms.ModelForm):
+    for_users_with_debt = forms.BooleanField(required=False, label="Владельцам с долгами",
+                            widget=forms.CheckboxInput)
+    house = forms.ModelChoiceField(label='Дом', required=False, queryset=None, empty_label='Выберите дом',
+                             widget=forms.Select(attrs={'class': 'form-control',
+                                                        'id': 'house_utility_field'}))
+    
+    sections = forms.ModelChoiceField(label='Секция', required=False, queryset=None, empty_label='Выберите дом',
+                             widget=forms.Select(attrs={'class': 'form-control',
+                                                        'id': 'sections_utility_field'}))
+    floor = forms.ModelChoiceField(label='Этаж', required=False, queryset=None, empty_label='Выберите дом',
+                             widget=forms.Select(attrs={'class': 'form-control',
+                                                        'id': 'floor_utility_field'}))
+    appartment = forms.ModelChoiceField(label='Квартира', required=False, queryset=None, empty_label='Выберите дом',
+                             widget=forms.Select(attrs={'class': 'form-control',
+                                                        'id': 'appartment_utility_field'}))
+
+    class Meta:
+        model = MessageToUser
+        fields = ('topic', 'text', 'message_target_type')
+        labels = {
+            'topic': 'заголовок',
+            'text': 'текст сообщения',
+        }
+        field_classes = {
+            'topic': forms.CharField,
+            'text': forms.CharField,
+            'message_target_type': forms.ModelChoiceField,
+        }
+        widgets = {
+            "topic": forms.TextInput(attrs={"class": "form-control"}),
+            "text": forms.Textarea(attrs={"class": "form-control",
+                                          "id": "summernote",
+                                          "rows": "6"}),
+            "message_target_type": forms.RadioSelect(),
+                    }
+        
+    def __init__(self, *args, **kwargs):
+        
+        super(MessageToUserForm, self).__init__(*args, **kwargs)
+
+        self.fields['house'].queryset = House.objects.all()
+        self.fields['sections'].queryset = Section.objects.all()
+        self.fields['floor'].queryset = Floor.objects.all()
+        self.fields['appartment'].queryset = Appartment.objects.filter(owner_user__isnull=False)
+
+    def save(self, commit=True):
+        message = super(MessageToUserForm, self).save(commit=False)
+        message_form_data = super(MessageToUserForm, self).clean()
+        message.date_time = datetime.datetime.now()
+        message.save()
+        Q_debtor_list = []
+
+        if message_form_data['message_target_type'] == "one_user":
+            item_user = message_form_data['appartment'].owner_user
+            message.to_users.add(item_user)
+
+        elif message_form_data['message_target_type'] == "all_users":
+            if message_form_data['for_users_with_debt'] == True: 
+                Q_debtor_list.append(Q(owning__isnull=False))
+                Q_debtor_list.append(Q(owning__personal_account__balance__lt=0))
+            owners = User.objects.filter(*Q_debtor_list)
+            # print(owners)
+            for owner in owners:
+                
+                message.to_users.add(owner)
+        
+        else:
+            if message_form_data['message_target_type'] == "all_users_per_house":
+                item_owners = list(message_form_data['house'].related_appartment.filter(owner_user__isnull=False).values('owner_user'))
+                
+            if message_form_data['message_target_type'] == "all_users_per_floor":
+                item_owners = list(message_form_data['floor'].related_appartment.filter(owner_user__isnull=False).values('owner_user'))
+
+            if message_form_data['message_target_type'] == "all_users_per_sections":
+                item_owners = list(message_form_data['sections'].related_appartment.filter(owner_user__isnull=False).values('owner_user'))
+
+            
+
+            if message_form_data['for_users_with_debt'] == True: 
+                Q_debtor_list.append(Q(owning__isnull=False))
+                Q_debtor_list.append(Q(owning__personal_account__balance__lt=0))
+
+            list_of_users_id = [user_dict['owner_user'] for user_dict in item_owners]
+            Q_debtor_list.append(Q(id__in = list_of_users_id))
+            owners = User.objects.filter(*Q_debtor_list)
+            print(owners)
+            for owner in owners:
+                message.to_users.add(owner)
+
+
+        message.save()
+        response = message
+
+        
+
+
+        return response

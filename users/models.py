@@ -126,9 +126,9 @@ class MessageToUser(models.Model):
     ('all_users', 'все пользователи')
     )
 
-    topic = models.CharField(max_length=500)
+    topic = models.CharField(max_length=200)
     text = models.TextField()
     date_time = models.DateTimeField()
-    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="from_user")
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="from_user", null=True, blank=True)
     to_users = models.ManyToManyField(User, related_name="to_users")
-    message_target_type = models.CharField(max_length=200, choices=MESSAGE_TARGET, default='one_user')
+    message_target_type = models.CharField(max_length=200, choices=MESSAGE_TARGET, default='all_users')
