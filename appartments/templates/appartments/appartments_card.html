@@ -65,12 +65,20 @@
                     </tr>
                     <tr>
                         <td><strong>Владелец</strong></td>
-                        <td><a href="{% url 'users:admin_settings_users_card' pk=appartment.owner_user.id %}">{{ appartment.owner_user.full_name }}</a></td>
+                        {% if appartment.owner_user %}
+                            <td>
+                                <a href="{% url 'users:admin_settings_users_card' pk=appartment.owner_user.id %}">{{ appartment.owner_user.full_name }}</a>
+                            </td>
+                        {% else %}
+                            <td>Не указано</td>
+                        {% endif %}
                     </tr>
                     <tr>
                         <td><strong>Тариф</strong></td>
                         {% if appartment.tariff.title %}
-                            <td><a href="#">{{ appartment.owner_user.full_name }}</a></td>
+                            <td>
+                                <a href="#">{{ appartment.owner_user.full_name }}</a>
+                            </td>
                         {% else %}
                             <td>Не указано</td>
                         {% endif %}

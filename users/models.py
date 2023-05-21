@@ -117,7 +117,6 @@ class Profile(models.Model):
 
 
 class MessageToUser(models.Model):
-
     MESSAGE_TARGET = (
     ('one_user', 'один пользователь'),
     ('all_users_per_house', 'по домам'),
@@ -125,7 +124,6 @@ class MessageToUser(models.Model):
     ('all_users_per_sections', 'по секциям'),
     ('all_users', 'все пользователи')
     )
-
     topic = models.CharField(max_length=200)
     text = models.TextField()
     date_time = models.DateTimeField()

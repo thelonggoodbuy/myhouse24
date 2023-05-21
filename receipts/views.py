@@ -125,9 +125,6 @@ class ReceiptListView(TemplateView):
 
             # full name of owner
             if request.GET.get('columns[6][search][value]'):
-                print('----------------------------')
-                print(request.GET.get('columns[6][search][value]'))
-                print('----------------------------')
                 if request.GET.get('columns[6][search][value]'):
                     print(request.GET.get('columns[6][search][value]'))
                     user = User.objects.get(id=request.GET.get('columns[6][search][value]'))
@@ -218,8 +215,6 @@ class ReceiptListView(TemplateView):
         return context
 
 
-
-# class AddCounterReadingsView(CreateView):
 class AddReceiptView(TemplateView):
     template_name = 'receipts/receipt_create.html'    
     form_class = AddReceiptForm

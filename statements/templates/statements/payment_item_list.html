@@ -95,67 +95,67 @@ $(document).ready(function () {
       };
 
 
-        var table = $('#payment_item').DataTable({
-            //"initComplete": function(){
+    var table = $('#payment_item').DataTable({
+        //"initComplete": function(){
 
-                //logic for input search element
-            //    $('.filters input').on('keyup change clear', function(){
-            //                                var numb = $(this).attr("colnumb")
-            //                                table.columns(numb).search(this.value).draw();
-            //    })
+            //logic for input search element
+        //    $('.filters input').on('keyup change clear', function(){
+        //                                var numb = $(this).attr("colnumb")
+        //                                table.columns(numb).search(this.value).draw();
+        //    })
 
+            
+            //logic for select element            
+        //    $('.filters select').on('change', function(){
+        //        var choosen_numb = $(this).attr("colnumb")
+        //        var choosen_option = $(this).find(":selected").attr('id')
+        //        table.columns(choosen_numb).search(choosen_option).draw();
+        //    })
+
+
+        //},
+
+        "rowCallback": function(row, data){
+            if (data.type === "приходная") {
+                $('td:eq(1)', row).wrapInner("<span class='text-success'></span>");
                 
-                //logic for select element            
-            //    $('.filters select').on('change', function(){
-            //        var choosen_numb = $(this).attr("colnumb")
-            //        var choosen_option = $(this).find(":selected").attr('id')
-            //        table.columns(choosen_numb).search(choosen_option).draw();
-            //    })
+            } else if (data.type === "расходная") {
+                $('td:eq(1)', row).wrapInner("<span class='text-danger'></span>");
+            }
+        },
 
 
-            //},
-
-            "rowCallback": function(row, data){
-                if (data.type === "приходная") {
-                    $('td:eq(1)', row).wrapInner("<span class='text-success'></span>");
-                    
-                } else if (data.type === "расходная") {
-                    $('td:eq(1)', row).wrapInner("<span class='text-danger'></span>");
-                }
+        "dom": "<<t>p>",
+        "processing": true,
+        "serverSide": true,
+        "pageLength": 50,
+        "ordering": false,
+        //"scrollX": true,
+        "ajax": {
+            "type": "GET",
+            "url": "{% url 'statements:payment_item_list' %}",
+            "dataSrc": "data",
+            "dataType": "json",
+        },
+        "columns": [
+            {"data": "title", "name": "title", "width": "60%"},
+            {"data": "type", "name": "type", "width": "30%"},                            
+            {"data": "", "width": "8%", render: function ( data, type, row, meta ) 
+                                    { prerendered_last_cell = "<div id='buttons_interaction'>\
+                                                <div class='col=12'>\
+                                                    <a class='btn btn-default btn-sm' title='Удалить' data-toggle='tooltip' id='delete_button'>\
+                                                        <i class='fa fa-trash'></i>\
+                                                    </a>\
+                                                    <a class='btn btn-default btn-sm' title='Редактировать' data-toggle='tooltip' id='edite_button'>\
+                                                        <i class='fa fa-pencil'></i>\
+                                                    </a>\
+                                                    </div>\
+                                                </div>";
+                                        
+                                        return prerendered_last_cell
+                                    }
             },
-
-
-            "dom": "<<t>p>",
-            "processing": true,
-            "serverSide": true,
-            "pageLength": 50,
-            "ordering": false,
-            //"scrollX": true,
-            "ajax": {
-                "type": "GET",
-                "url": "{% url 'statements:payment_item_list' %}",
-                "dataSrc": "data",
-                "dataType": "json",
-            },
-            "columns": [
-                {"data": "title", "name": "title", "width": "60%"},
-                {"data": "type", "name": "type", "width": "30%"},                            
-                {"data": "", "width": "8%", render: function ( data, type, row, meta ) 
-                                        { prerendered_last_cell = "<div id='buttons_interaction'>\
-                                                    <div class='col=12'>\
-                                                        <a class='btn btn-default btn-sm' title='Удалить' data-toggle='tooltip' id='delete_button'>\
-                                                            <i class='fa fa-trash'></i>\
-                                                        </a>\
-                                                        <a class='btn btn-default btn-sm' title='Редактировать' data-toggle='tooltip' id='edite_button'>\
-                                                            <i class='fa fa-pencil'></i>\
-                                                        </a>\
-                                                        </div>\
-                                                    </div>";
-                                            
-                                            return prerendered_last_cell
-                                        }
-                },
-                ],
+            ],
 //            "columnDefs": [
 //                {'orderable': false, targets: 0},
 //                {'orderable': false, targets: 1},
@@ -165,9 +165,9 @@ $(document).ready(function () {
 //                {'orderable': false, targets: 5},
 //                {'orderable': false, targets: 6},
 //            ],
-            "rowId": 'id',
-            
-        });
+        "rowId": 'id',
+        
+    });
 
         
 

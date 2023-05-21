@@ -1,0 +1,472 @@
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+{% block title %}
+    <title> Заявки вызова мастера </title>
+{% endblock title %}
+
+{% block content-header %}
+    <h1> Заявки вызова мастера </h1>
+{% endblock %}
+
+{% block additionaly_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2/dist/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2-theme-bootstrap4/dist/select2-bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+{% endblock additionaly_css %}
+
+{% block additionaly_js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script src="{% static 'appartments/plugins/select2/dist/js/select2.min.js' %}"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+{% endblock additionaly_js %}
+
+
+
+{% block content %}
+
+
+        <section class="content">
+
+            <div id="myDialog">
+                Content of the modal dialog box.
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="pull-right margin-bottom">
+                        <a class="btn btn-success" href="#">добавить квартиру</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title"></h3>
+                            <div class="box-tools">
+                                <button class="btn btn-default btn-sm" id="clear_filters">
+                                    <span class="hidden-xs">Очистить</span><i class="fa fa-eraser visible-xs" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="w0" class="grid-view">
+                            <div class="box-body table-responsive no-padding">
+                                <table class="table table-bordered table-hover table-striped linkedRow" id="master_request_table">
+                                    <thead>
+                                        <tr id="order_links">
+                                            <th sort-index="0" id="№_appartment"><a id="order-link_0">№ заявки</a></th>
+                                            <th sort-index="1" id="date_and_time"><a id="order-link_1">Удобное время</a></th>
+                                            <th sort-index="2" id="master_type"><a id="order-link_2">Тип мастера</a></th>
+                                            <th sort-index="3" id="description"><a id="order-link_3">Описание</a></th>
+                                            <th sort-index="4" id="appartment_data"><a id="order-link_4">Квартира</a></th>
+                                            <th sort-index="5" id="owner_sort"><a id="order-link_5">Владелец</a></th>
+                                            <th sort-index="6" id="phone"><a id="order-link_6">Телефон</a></th>
+                                            <th sort-index="7" id="master"><a id="order-link_7">Мастер</a></th>
+                                            <th sort-index="8" id="status"><a id="order-link_8">Статус</a></th>
+                                            <th>&nbsp;</th>
+                                        </tr>
+                                        <tr class="filters">
+                                            <td>
+                                                <input colnumb="0" type="text" class="form-control" placeholder="" id="search_№_appartment">
+                                            </td>
+                                            <td>
+                                                <input colnumb="1" type="text" class="form-control" placeholder="" id="date_and_time">
+                                            </td>
+                                            <td>
+                                                <select colnumb="2" id="master_type" class="form-control">
+                                                    <option id="all_master_types"></option>
+                                                    <option id="electrician">электрик</option>
+                                                    <option id="plumber">сантехник</option>
+                                                    <option id="locksmith">слесарь</option>
+                                                    <option id="any_specialist">любой специалист</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input colnumb="3" type="text" class="form-control" placeholder="" id="description">
+                                            </td>
+                                            <td>
+                                                <input colnumb="4" type="text" class="form-control" placeholder="" id="appartment_data">
+                                            </td>
+                                            <td>
+                                                <select colnumb="5" id="owner" class="form-control" placeholder="">
+                                                    <option value=""></option>
+                                                </select>                                            
+                                            </td>
+                                            <td>
+                                                <input colnumb="6" type="text" class="form-control" placeholder="" id="phone">
+                                            </td>
+                                            <td>
+                                                <select colnumb="7" id="master" class="form-control" placeholder="">
+                                                    <option value=""></option>
+                                                    {% for master in masters %}
+                                                        <option id="{{master.id}}">{{ master.role.name }}: {{ master.full_name }}</option>
+                                                    {% endfor %}
+                                                </select>                                            
+                                            </td>
+                                            <td>
+                                                <select colnumb="8" id="status" class="form-control" placeholder="">
+                                                    <option value=""></option>
+                                                    <option id="new">новая</option>
+                                                    <option id="is_performing">в работе</option>
+                                                    <option id="have_done">выполнена</option>
+                                                </select>                                            
+                                            </td>
+                                            <td>&nbsp;</td>
+                                        </tr>
+                                    </thead>
+                                    
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                    </div>            
+                </div>
+            </div>
+        </div>
+        </section>
+
+
+
+<script>
+
+$(document).ready(function () {
+
+
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      };
+
+
+        var table = $('#master_request_table').DataTable({
+            "initComplete": function(){
+
+                //logic for input search element
+                $('.filters input').on('keyup change clear', function(){
+                                            var numb = $(this).attr("colnumb")
+                                            table.columns(numb).search(this.value).draw();
+                })
+
+                
+                //logic for select element            
+                $('.filters select').on('change', function(){
+                    //console.log('-----------------------------------------------')
+                    var choosen_numb = $(this).attr("colnumb")
+                    var choosen_option = $(this).find(":selected").attr('id')
+                    table.columns(choosen_numb).search(choosen_option).draw();
+                })
+
+
+                //logic for select element from Select2
+                $('#owner').on('change', function(){
+                    var choosen_numb = $(this).attr("colnumb")
+                    var choosen_option = $(this).select2('data')[0]['id']
+                    table.columns(choosen_numb).search(choosen_option).draw();
+                })
+
+            },
+
+            "rowCallback": function(row, data){
+                if (data.status === "выполнена") {
+                    $('td:eq(8)', row).wrapInner("<small class='label label-success my-3'></small>");
+                } else if (data.status === "в работе") {
+                    $('td:eq(8)', row).wrapInner("<small class='label label-warning'></small>");
+                } else if (data.status === "новая") {
+                    $('td:eq(8)', row).wrapInner("<small class='label label-primary'></small>");
+                }
+            },
+
+            
+
+            "dom": "<<t>p>",
+            "processing": true,
+            "serverSide": true,
+            "pageLength": 50,
+            "ordering": true,
+            "ajax": {
+                "type": "GET",
+                "url": "{% url 'masters_services:masters_requests_list' %}",
+                "dataSrc": "data",
+                "dataType": "json",
+            },
+            "columns": [
+                {"data": "id", "name": "id", "width": "5%"},
+                {"data": "date_and_time", "name": "date_and_time", "width": "15%"},
+                {"data": "master_type", "name": "master_type", "width": "10%"},
+                {"data": "description", "name": "description", "width": "10%"},
+                {"data": "appartment_data", "name": "appartment_data", "width": "10%", render: function (data, type, row, meta)
+                                                                                        {if (data == null)
+                                                                                            {return '(не задано)'
+                                                                                        } else {
+                                                                                            apartments_html = ''
+                                                                                            apartments_html += `<div id='appartment_container'><a href="javascript:;">${data}</a></div>`
+
+                                                                                            return apartments_html
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                {"data": "appartment__owner_user__full_name", "name": "appartment__owner_user__full_name", "width": "10%",
+                                                                                         render: function (data, type, row, meta)
+                                                                                        {if (data == null)
+                                                                                            {return '(не задано)'
+                                                                                        } else {
+                                                                                            owner_html = ''
+                                                                                            owner_html += `<div id='owner_container'><a href="javascript:;">${data}</a></div>`
+
+                                                                                            return owner_html
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                {"data": "appartment__owner_user__phone", "name": "appartment__owner_user__phone", "width": "10%"},
+                {"data": "master__full_name", "name": "master__full_name", "width": "10%"},
+                {"data": "status", "name": "status", "width": "10%"},
+                {"data": "id", render: function ( data, type, row, meta ) 
+                                        { prerendered_last_cell = "<div id='buttons_interaction'>\
+                                                    <div class='col=12'>\
+                                                        <a class='btn btn-default btn-sm' title='Удалить' data-toggle='tooltip' id='delete_button'>\
+                                                            <i class='fa fa-trash'></i>\
+                                                        </a>\
+                                                        <a class='btn btn-default btn-sm' title='Редактировать' data-toggle='tooltip' id='edite_button'>\
+                                                            <i class='fa fa-pencil'></i>\
+                                                        </a>\
+                                                        </div>\
+                                                    </div>";
+                                            
+                                            return prerendered_last_cell
+                                        }
+                },
+                ],
+            "columnDefs": [
+                {'orderable': false, targets: 0},
+                {'orderable': false, targets: 1},
+                {'orderable': false, targets: 2},
+                {'orderable': false, targets: 3},
+                {'orderable': false, targets: 4},
+                {'orderable': false, targets: 5},
+                {'orderable': false, targets: 6},
+                {'orderable': false, targets: 7},
+                {'orderable': false, targets: 8},
+                {'orderable': false, targets: 9},
+            ],
+            "rowId": 'id',
+            
+        });
+
+        //{ targets: 10, render: function (data, type, row, meta) {return (data == null) ? "" : data + "ct";} },
+
+    //------------------------------------------------------------------------------
+
+
+    var click_counter = 0
+    $("a[id^='order-link']").on('click', function(){
+        var col_numb = parseInt($(this).attr('id').replace('order-link_', ''))
+        if (click_counter % 2 == 0){
+            table.order([col_numb, 'asc']).draw();
+        } else {
+            table.order([col_numb, 'desc']).draw();
+        }
+        click_counter++
+    })
+
+
+//------------------------------------------------------------------------
+    $("input[id='date_and_time']").daterangepicker({
+        timePicker: true,
+        startDate: moment().startOf("hour"),
+        endDate: moment().startOf("hour").add(32, "hour"),
+        locale:{
+            "format": "DD.MM.YYYY",
+            "language": 'ru',
+            "applyLabel": "Принять",
+            "cancelLabel": "Отмена",
+            "fromLabel": "от",
+            "toLabel": "до",
+            "customRangeLabel": "Диапазон",
+            "daysOfWeek": [ "Вск", "Пнд", "Втр", "Срд", "Чтв", "Птн", "Сбт"],
+            "monthNames": ["Январь", "Февраль", "Март", "Апрель",
+                            "Май", "Июнь", "Июль", "Август",
+                            "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+            "firstDay": 1
+        }
+    })
+
+
+        //options data for owners
+        $('#owner').select2({
+            //theme: "bootstrap",
+            ajax: {
+                url: "{% url 'masters_services:masters_requests_list' %}",
+                dataType: 'json',
+                data: function(params){
+                    if(params.term != undefined && params.term != undefined){
+                        var query = {
+                            search: params.term,
+                            type: 'public',
+                            issue_marker: 'owners'
+                        }
+                        return query;
+                    } else {
+                        var query = {
+                            search: params.term,
+                            type: 'public',
+                            issue_marker: 'all_owners'
+                        }
+                        return query;
+                    }  
+                }
+            }
+        })
+
+
+    table.on('click', 'tbody > tr > td', function () {
+            if(
+                ($(this).find("div").attr("id") != "buttons_interaction")
+                && ($(this).find("div").attr("id") != "appartment_container")
+                && ($(this).find("div").attr("id") != "owner_container")
+                )
+            {
+                //var basic_url = "{% url 'appartments:appartment_detail' %}"
+                //var url_index = table.row(this).id().toString();
+                //document.location.href = basic_url + url_index;
+                console.log('you click on master request!')
+
+            } else if ($(this).find("div").attr("id") == "appartment_container"){
+                var appartmnet_id = table.row(this).data()['appartment__id']
+                var basic_url = "{% url 'appartments:appartment_detail' %}"
+                document.location.href = basic_url + appartmnet_id;
+
+            } else if ($(this).find("div").attr("id") == "owner_container"){
+                var owner_id = table.row(this).data()['appartment__owner_user__id']
+                var basic_url = "{% url 'appartments:owner_detail' %}"
+                document.location.href = basic_url + owner_id;
+            }
+        } );
+
+
+
+// -------------------------------------OLD-CODE------------------------------
+// -------------------------------------OLD-CODE------------------------------
+// -------------------------------------OLD-CODE------------------------------
+// -------------------------------------OLD-CODE------------------------------
+
+
+    // options data for all dropbox exclude owners
+    $('#choose_house').on('change', function(){
+        var choosen_house = $(this).find('option:selected').val()
+        console.log(choosen_house)
+        if(choosen_house){
+            $.ajax({
+                url: "{% url 'appartments:appartments_list' %}",
+                type: "GET",
+                data: {
+                    'choosen_house': choosen_house,
+                },
+                dataType: "json",
+                success: (data) => {               
+    
+                    var sections_arr = data["section_data"]
+                    var additional_section_html = "<option id='empty_sect'></option>"
+                    for (section of sections_arr){
+                        additional_section_html +=`<option id=${section["id"]}>${section["title"]}</option>`
+                    }
+                    $('#choose_section').not("option[value='']").empty().append(additional_section_html);
+    
+    
+                    var floor_arr = data["floors_data"]
+                    var additional_floor_html = "<option id='empty_floor'></option>"
+                    for(floor of floor_arr){
+                        additional_floor_html +=`<option id=${floor["id"]}>${floor["title"]}</option>`
+                    }
+                    $('#choose_floor').not("option[value='']").empty().append(additional_floor_html);
+                    
+                }
+                })
+            } else {
+                $('#choose_section').empty().append("<option id='empty_sect'>Выберите дом</option>");
+                $('#choose_floor').empty().append("<option id='empty_floor'>Выберите дом</option>");
+
+            }
+
+
+    })
+
+
+
+
+    
+    //change row coursor
+    table.on('mouseover', "a[id^='order-link']", function(){
+        $(this).css('cursor','pointer')
+        }
+    )
+    
+    table.on('mouseout', "a[id^='order-link']", function(){
+        $(this).css('cursor','auto');
+        }
+    )
+
+
+
+        //cleaning searh filters
+    $('.box-header').on('click', '#clear_filters', function () {
+        $("*[colnumb]").val('').change()
+    } ); 
+
+
+        //reversion logic for row except links to send inviting, deleting and editing
+    
+
+
+    // delete and confirm display lofic
+    $("#myDialog").dialog({
+        autoOpen  : false,
+        modal     : true,
+        title     : "avadamedia.myhoise24",
+        buttons   : {
+                    'удалить квартиру' : function() {
+                        var textValue = $('#myTextBox').val();
+                        var basic_url = "{% url 'appartments:appartment_delete' %}"
+                        var row_number = $(this).data('row_number')
+                        document.location.href = basic_url + row_number;
+                    },
+                    'отмена' : function() {
+                        $(this).dialog('close');
+                    }
+                    }
+    });
+
+
+    table.on('click', '#delete_button', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        $("#myDialog").text(`Удалить квартиру с id ${row_number}?`).data('row_number', row_number).dialog("open");
+    })
+
+
+    table.on('click', '#edite_button', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        var basic_url = "{% url 'appartments:appartment_edite' %}"
+        document.location.href = basic_url + row_number;
+    })
+
+
+    });
+
+
+
+    
+</script>
+{% endblock content %}
