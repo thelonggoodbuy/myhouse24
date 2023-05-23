@@ -172,6 +172,7 @@ class StatementCreateView(FormView):
 
 
     def get(self, request, *args, **kwargs):
+        
         if self.request.is_ajax() and self.request.GET.get('issue_marker') == 'all_owners':
             owners_data = list(User.objects.filter(owning__isnull=False).values('id', 'full_name'))
             for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
@@ -179,7 +180,7 @@ class StatementCreateView(FormView):
             return JsonResponse(data)
 
 
-        # select 2 all owners data
+        # select 2 owners data
         if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'owner_marker':
             if self.request.GET.get('search'):
                 search_data = self.request.GET.get('search')

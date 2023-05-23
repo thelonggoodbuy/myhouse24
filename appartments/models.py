@@ -51,7 +51,7 @@ class Appartment(models.Model):
 
     def __str__(self):
         # return f'{ self.house }: {self.sections}: {self.floor}: {self.number}'
-        return f'{self.number}'
+        return f'{self.number}, {self.house.title}'
     
     def get_model_fields(model):
         return model._meta.fields

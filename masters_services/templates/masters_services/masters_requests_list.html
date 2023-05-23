@@ -37,7 +37,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <div class="pull-right margin-bottom">
-                        <a class="btn btn-success" href="#">добавить квартиру</a>
+                        <a class="btn btn-success" href="{% url 'masters_services:masters_requests_create' %}">добавить заявку</a>
                     </div>
                 </div>
             </div>
@@ -307,7 +307,6 @@ $(document).ready(function () {
 
         //options data for owners
         $('#owner').select2({
-            //theme: "bootstrap",
             ajax: {
                 url: "{% url 'masters_services:masters_requests_list' %}",
                 dataType: 'json',
@@ -358,55 +357,6 @@ $(document).ready(function () {
 
 
 
-// -------------------------------------OLD-CODE------------------------------
-// -------------------------------------OLD-CODE------------------------------
-// -------------------------------------OLD-CODE------------------------------
-// -------------------------------------OLD-CODE------------------------------
-
-
-    // options data for all dropbox exclude owners
-    $('#choose_house').on('change', function(){
-        var choosen_house = $(this).find('option:selected').val()
-        console.log(choosen_house)
-        if(choosen_house){
-            $.ajax({
-                url: "{% url 'appartments:appartments_list' %}",
-                type: "GET",
-                data: {
-                    'choosen_house': choosen_house,
-                },
-                dataType: "json",
-                success: (data) => {               
-    
-                    var sections_arr = data["section_data"]
-                    var additional_section_html = "<option id='empty_sect'></option>"
-                    for (section of sections_arr){
-                        additional_section_html +=`<option id=${section["id"]}>${section["title"]}</option>`
-                    }
-                    $('#choose_section').not("option[value='']").empty().append(additional_section_html);
-    
-    
-                    var floor_arr = data["floors_data"]
-                    var additional_floor_html = "<option id='empty_floor'></option>"
-                    for(floor of floor_arr){
-                        additional_floor_html +=`<option id=${floor["id"]}>${floor["title"]}</option>`
-                    }
-                    $('#choose_floor').not("option[value='']").empty().append(additional_floor_html);
-                    
-                }
-                })
-            } else {
-                $('#choose_section').empty().append("<option id='empty_sect'>Выберите дом</option>");
-                $('#choose_floor').empty().append("<option id='empty_floor'>Выберите дом</option>");
-
-            }
-
-
-    })
-
-
-
-
     
     //change row coursor
     table.on('mouseover', "a[id^='order-link']", function(){
@@ -420,14 +370,10 @@ $(document).ready(function () {
     )
 
 
-
         //cleaning searh filters
     $('.box-header').on('click', '#clear_filters', function () {
         $("*[colnumb]").val('').change()
     } ); 
-
-
-        //reversion logic for row except links to send inviting, deleting and editing
     
 
 
@@ -437,9 +383,9 @@ $(document).ready(function () {
         modal     : true,
         title     : "avadamedia.myhoise24",
         buttons   : {
-                    'удалить квартиру' : function() {
+                    'удалить сообщение' : function() {
                         var textValue = $('#myTextBox').val();
-                        var basic_url = "{% url 'appartments:appartment_delete' %}"
+                        var basic_url = "{% url 'masters_services:masters_requests_delete' %}"
                         var row_number = $(this).data('row_number')
                         document.location.href = basic_url + row_number;
                     },
@@ -452,13 +398,13 @@ $(document).ready(function () {
 
     table.on('click', '#delete_button', function(){
         var row_number = $(this).closest('tr').attr('id')
-        $("#myDialog").text(`Удалить квартиру с id ${row_number}?`).data('row_number', row_number).dialog("open");
+        $("#myDialog").text(`Удалить сообщение № ${row_number}?`).data('row_number', row_number).dialog("open");
     })
 
 
     table.on('click', '#edite_button', function(){
         var row_number = $(this).closest('tr').attr('id')
-        var basic_url = "{% url 'appartments:appartment_edite' %}"
+        var basic_url = "{% url 'masters_services:masters_requests_update' %}"
         document.location.href = basic_url + row_number;
     })
 

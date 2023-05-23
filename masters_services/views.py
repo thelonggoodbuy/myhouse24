@@ -9,50 +9,22 @@ from django.db.models.functions import Concat
 from django.db.models import F, Q, CharField, Value
 import operator
 from functools import reduce
+from django.http import HttpResponseRedirect
+
 
 from users.models import User
-
-
+from django.views.generic.edit import FormView, UpdateView, DeleteView
+from .forms import MastersRequestsCreateForm
+from django.urls import reverse_lazy
+from django.contrib import messages
+from appartments.models import Appartment
+from .models import MastersRequest
 
 
 class MastersRequestsListView(TemplateView):
     template_name = 'masters_services/masters_requests_list.html'
 
     def get(self, request, *args, **kwargs):
-
-        # get sections and floors data from dropboxes
-        # if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('choosen_house') != None:
-        #     house_data = House.objects.get(title=self.request.GET.get('choosen_house'))
-        #     section_data = list(house_data.sections.values('id', 'title'))
-        #     floors_data = list(house_data.floors.values('id', 'title'))
-        #     data = {'section_data': section_data,
-        #             'floors_data': floors_data}
-        #     return JsonResponse(data)
-
-        # get data owners and users
-        # if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('target') == 'get_choose_owners_data':
-        #     print('----------------------------USER-OWNER-FILTER------------------------')
-        #     owners_dict = list(User.objects.filter(owning__isnull=False).values('id', 'full_name'))
-        #     data = {'owners_dict': owners_dict}
-        #     return JsonResponse(data)
-
-        # test code for ajax_requests
-        # if self.request.is_ajax() and self.request.GET.get('issue_marker') == 'owners':
-        #     if self.request.GET.get('search'):
-        #         search_data = self.request.GET.get('search')
-        #         owners_data = list(User.objects.filter(Q(owning__isnull=False) & Q(full_name__icontains=search_data)).values('id', 'full_name'))
-        #         for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
-        #         data = {'results': owners_data}
-        #         return JsonResponse(data)
-            
-
-        # users search using Select2
-        # if self.request.is_ajax() and self.request.GET.get('issue_marker') == 'all_owners':
-        #     owners_data = list(User.objects.filter(owning__isnull=False).values('id', 'full_name'))
-        #     for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
-        #     data = {'results': owners_data}
-        #     return JsonResponse(data)
-
 
         # SELECT2 logic
         if self.request.is_ajax() and self.request.GET.get('issue_marker') == 'owners':
@@ -134,51 +106,6 @@ class MastersRequestsListView(TemplateView):
 
             if request.GET.get('columns[8][search][value]'):
                 Q_list.append(Q(status=request.GET.get('columns[8][search][value]')))
-
-
-
-                # Q_list.append(Q(description__icontains=request.GET.get('columns[3][search][value]')))
-
-                # if request.GET.get('columns[1][search][value]') != 'all_houses':
-                #     chooset_house = House.objects.get(id=request.GET.get('columns[1][search][value]'))
-                    # Q_list.append(Q(house=chooset_house))
-                
-
-            # if request.GET.get('columns[2][search][value]'):
-            #     print('----------------------------SECTION-FILTER------------------------')
-            #     if request.GET.get('columns[2][search][value]') != 'empty_sect':
-            #         choosed_section = Section.objects.get(id=request.GET.get('columns[2][search][value]'))
-            #         Q_list.append(Q(sections=choosed_section))
-
-            # if request.GET.get('columns[3][search][value]'):
-            #     print('-----------------FLOOR-FILTER-----------------------------')
-            #     print(request.GET.get('columns[3][search][value]'))
-            #     if request.GET.get('columns[3][search][value]') != 'empty_floor':
-            #         print(request.GET.get('columns[3][search][value]'))
-            #         choose_floor = Floor.objects.get(id=request.GET.get('columns[3][search][value]'))
-            #         Q_list.append(Q(floor=choose_floor))
-
-
-            # if request.GET.get('columns[4][search][value]'):
-            #     print('----------------------------OWNERS-FILTER------------------------')
-            #     # if request.GET.get('columns[4][search][value]') != 'empty_sect':
-                
-            #     if request.GET.get('columns[4][search][value]'):
-            #         print(request.GET.get('columns[4][search][value]'))
-            #         user = User.objects.get(id=request.GET.get('columns[4][search][value]'))
-            #         Q_list.append(Q(owner_user=user))
-
-
-            # if request.GET.get('columns[5][search][value]'):
-            #     print('-----------------BALANCE-FILTER-----------------------------')
-            #     print(request.GET.get('columns[5][search][value]'))
-            #     if request.GET.get('columns[5][search][value]') == 'debt':
-            #         Q_list.append(Q(personal_account__balance__lt=0))
-            #     elif request.GET.get('columns[5][search][value]') == 'no_debt':
-            #         Q_list.append(Q(personal_account__balance__gte=0))
-            #     elif request.GET.get('columns[5][search][value]') == 'all_balance':
-            #         pass
-
 
             # initial data
             draw = int(masters_get_request.get("draw"))
@@ -271,3 +198,136 @@ class MastersRequestsListView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['masters'] = User.objects.filter(Q(role__isnull=False) and Q(masters_request__isnull=False))
         return context
+    
+
+
+class MastersRequestsCreateView(FormView):
+    template_name = "masters_services/masters_requests_create.html"
+    form_class = MastersRequestsCreateForm
+    success_url = reverse_lazy('masters_services:masters_requests_list')
+
+
+    def get(self, request, *args, **kwargs):        
+
+        # select 2 owners data
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'owner_marker':
+            if self.request.GET.get('search'):
+                search_data = self.request.GET.get('search')
+                owners_Q_list = []
+                search_full_name_list_parameter = list((search_data.strip()).split(" "))
+                owners_Q_list.append(reduce(operator.and_, (Q(full_name__icontains=part_name) for part_name in search_full_name_list_parameter)))
+                owners_Q_list.append(Q(owning__isnull=False))
+                owners_data = list(User.objects.filter(*owners_Q_list).distinct().values('id', 'full_name'))
+                for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
+                data = {'results': owners_data}
+                return JsonResponse(data)
+
+
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'all_owners_marker':
+            owners_data = list(User.objects.filter(owning__isnull=False).distinct().values('id', 'full_name'))
+            for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
+            data = {'results': owners_data}
+            return JsonResponse(data)
+        # end select 2 owners data
+
+        # select 2 appartments data
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'appartment_marker':
+            if self.request.GET.get('search'):
+                search_data = self.request.GET.get('search')
+                appartment_Q_list = []
+                appartment_Q_list.append(Q(owner_user__isnull=False))
+                appartment_Q_list.append(Q(number_incontains=search_data))
+                if self.request.GET.get('choosen_owner_id'): appartment_Q_list.append(Q(owner_user__id=self.request.GET.get('choosen_owner_id')))
+                appartment_data = list(Appartment.objects.filter(*appartment_Q_list).distinct().values('id', 'number', 'house__title'))
+                for apartment_dict in appartment_data: apartment_dict['text'] = f"{apartment_dict.pop('number'), apartment_dict.pop('house__title')}"
+                data = {'results': appartment_data}
+                print(data)
+                return JsonResponse(data)
+            
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'all_apartments_marker':
+            appartment_Q_list = []
+            appartment_Q_list.append(Q(owner_user__isnull=False))
+            if self.request.GET.get('choosen_owner_id'): appartment_Q_list.append(Q(owner_user__id=self.request.GET.get('choosen_owner_id')))
+            appartment_data = list(Appartment.objects.filter(*appartment_Q_list).distinct().values('id', 'number', 'house__title'))
+            for apartment_dict in appartment_data: apartment_dict['text'] = f"{apartment_dict.pop('number')}, {apartment_dict.pop('house__title')}"
+            data = {'results': appartment_data}
+            print(data)
+            return JsonResponse(data)
+        # end select 2 appartments data
+
+        else:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)     
+        context['masters_request_form'] = MastersRequestsCreateForm(prefix="masters_request_form")
+        return context
+    
+
+    def post(self, request, *args, **Kwargs):
+        masters_request_form = MastersRequestsCreateForm(request.POST, prefix="masters_request_form")
+        if masters_request_form.is_valid():
+            return self.form_valid(masters_request_form)
+        else:
+            if masters_request_form.errors:
+                for field, error in masters_request_form.errors.items():
+                    print(f'{field}: {error}')
+
+
+    def form_valid(self, masters_request_form):
+        masters_request_form.save()
+        success_url = self.success_url
+        messages.success(self.request, f"Запрос на услуги мастера создан!")
+        return HttpResponseRedirect(success_url)
+    
+
+class MastersRequestsEditeView(UpdateView):
+    form_class = MastersRequestsCreateForm
+    model = MastersRequest
+    template_name = 'masters_services/masters_requests_create.html'
+    success_url = reverse_lazy('masters_services:masters_requests_list')
+    
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['masters_request_form'] = MastersRequestsCreateForm(instance=self.get_object(), prefix="masters_request_form")
+        return context
+    
+    def get(self, request, *args, **kwargs):
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'get_owner_marker':
+            appartment_id = self.request.GET['current_appartment']
+            user_data = list(User.objects.filter(owning__id=appartment_id).values('id', 'full_name'))
+            response = {'user_initial_data': user_data}
+            return JsonResponse(response, safe=False)
+        else:
+            self.object = self.get_object()
+            return super().get(request, *args, **kwargs)
+    
+    def post(self, request, *args, **Kwargs):
+        masters_request_form = MastersRequestsCreateForm(request.POST, instance=self.get_object(), prefix="masters_request_form")
+        if masters_request_form.is_valid():
+            return self.form_valid(masters_request_form)
+        else:
+            if masters_request_form.errors:
+                for tariff_cell in masters_request_form:
+                    for field, error in tariff_cell.errors.items():
+                        print(f'{field}: {error}')
+
+        
+    def form_valid(self, masters_request_form):
+        masters_request_form.save()
+        success_url = self.success_url
+        messages.success(self.request, f"Данные о запросе № { masters_request_form.instance.id } обновлены.")
+        return HttpResponseRedirect(success_url)
+
+
+
+class MastersRequestsDeleteView(DeleteView):
+
+    model = MastersRequest
+    success_url = reverse_lazy('masters_services:masters_requests_list')
+    
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)

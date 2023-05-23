@@ -296,24 +296,14 @@ class MessageToUserForm(forms.ModelForm):
         self.fields['appartment'].queryset = Appartment.objects.filter(owner_user__isnull=False)
 
     def save(self, commit=True):
-        print('-------------------')
-        print('--------1----------')
         message = super(MessageToUserForm, self).save(commit=False)
-        print('--------2----------')
         message_form_data = super(MessageToUserForm, self).clean()
-        print('--------3----------')
         message.date_time = datetime.datetime.now()
-        print('--------4----------')
         message.save()
-        print('--------5----------')
         Q_debtor_list = []
-        print('--------6----------')
         if message_form_data['message_target_type'] == "one_user":
-            print('--------7----------')
             item_user = message_form_data['appartment'].owner_user
-            print('--------8----------')
             message.to_users.add(item_user)
-            print('--------9----------')
 
         elif message_form_data['message_target_type'] == "all_users":
             if message_form_data['for_users_with_debt'] == True: 
