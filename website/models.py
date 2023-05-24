@@ -6,7 +6,7 @@ class MainPage(models.Model):
     title = models.CharField(max_length=200)
     short_descriptions = models.TextField()
     show_app_link = models.BooleanField()
-    seo_block = models.OneToOneField('SeoBlock', on_delete=models.CASCADE)
+    seo_block = models.OneToOneField('SeoBlock', on_delete=models.CASCADE, blank=True, null=True, related_name='main_page')
 
 
 class AboutUsPage(models.Model):
@@ -41,6 +41,14 @@ class SeoBlock(models.Model):
 
 
 class SlideBlock(models.Model):
+    TARGET_CHOICES = (
+        ('main_page_slider', 'Главная страница слайдер'),
+        ('main_page_around', 'Главная страница рядом с нами'),
+        ('about_us_galery', 'О нас, галерея'),
+        ('services', 'Услуги'),
+    )
+
     image = models.ImageField(blank=True, verbose_name='фото', upload_to='galery/')
     title = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    target = models.CharField(max_length=200, choices=TARGET_CHOICES)

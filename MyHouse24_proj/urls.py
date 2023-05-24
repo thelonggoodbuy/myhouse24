@@ -27,6 +27,7 @@ urlpatterns = [
     path('utility_services/', include('utility_services.urls')),
     path('statements/', include('statements.urls')),
     path('masters_services/', include('masters_services.urls')),
+    path('website/', include('website.urls')),
     path('general_statistics/', include('general_statistics.urls')),
     path('__debug__/', include('debug_toolbar.urls')),
     path("select2/", include("django_select2.urls")),

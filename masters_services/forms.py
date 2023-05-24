@@ -18,9 +18,11 @@ from appartments.models import PersonalAccount
 
 class MastersRequestsCreateForm(forms.ModelForm):
 
-    owner_utility_field = forms.ModelChoiceField(label='Владелец квартиры', required=False, queryset=None, empty_label='Выберите...',
-                             widget=forms.Select(attrs={'class': 'form-control',
-                                                        'id': 'owner_utility_field'}))
+    owner_utility_field = forms.ModelChoiceField(label='Владелец квартиры',\
+                                                required=False, queryset=None,\
+                                                empty_label='Выберите...',
+                                                widget=forms.Select(attrs={'class': 'form-control',
+                                                                    'id': 'owner_utility_field'}))
 
     class Meta:
         model = MastersRequest
@@ -75,6 +77,3 @@ class MastersRequestsCreateForm(forms.ModelForm):
     def clean_date_work(self):
         date_work = self.cleaned_data.get('date_work')
         return datetime.datetime.strptime(date_work, "%d.%m.%Y").strftime("%Y-%m-%d")
-
-
-
