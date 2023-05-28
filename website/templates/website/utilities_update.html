@@ -1,0 +1,438 @@
+
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+{% block additionaly_css %}
+    <style>
+        .column-center {
+            margin-top: 5pt;
+        }
+    </style>
+    <style>
+        .padding-xs { padding: .25em; }
+.padding-sm { padding: .5em; }
+.padding-md { padding: 1em; }
+.padding-lg { padding: 1.5em; }
+.padding-xl { padding: 3em; }
+
+.padding-x-xs { padding: .25em 0; }
+.padding-x-sm { padding: .5em 0; }
+.padding-x-md { padding: 1em 0; }
+.padding-x-lg { padding: 1.5em 0; }
+.padding-x-xl { padding: 3em 0; }
+
+.padding-y-xs { padding: 0 .25em; }
+.padding-y-sm { padding: 0 .5em; }
+.padding-y-md { padding: 0 1em; }
+.padding-y-lg { padding: 0 1.5em; }
+.padding-y-xl { padding: 0 3em; }
+
+.padding-top-xs { padding-top: .25em; }
+.padding-top-sm { padding-top: .5em; }
+.padding-top-md { padding-top: 1em; }
+.padding-top-lg { padding-top: 1.5em; }
+.padding-top-xl { padding-top: 3em; }
+
+.padding-right-xs { padding-right: .25em; }
+.padding-right-sm { padding-right: .5em; }
+.padding-right-md { padding-right: 1em; }
+.padding-right-lg { padding-right: 1.5em; }
+.padding-right-xl { padding-right: 3em; }
+
+.padding-bottom-xs { padding-bottom: .25em; }
+.padding-bottom-sm { padding-bottom: .5em; }
+.padding-bottom-md { padding-bottom: 1em; }
+.padding-bottom-lg { padding-bottom: 1.5em; }
+.padding-bottom-xl { padding-bottom: 3em; }
+
+.padding-left-xs { padding-left: .25em; }
+.padding-left-sm { padding-left: .5em; }
+.padding-left-md { padding-left: 1em; }
+.padding-left-lg { padding-left: 1.5em; }
+.padding-left-xl { padding-left: 3em; }
+
+.margin-xs { margin: .25em; }
+.margin-sm { margin: .5em; }
+.margin-md { margin: 1em; }
+.margin-lg { margin: 1.5em; }
+.margin-xl { margin: 3em; }
+
+.margin-x-xs { margin: .25em 0; }
+.margin-x-sm { margin: .5em 0; }
+.margin-x-md { margin: 1em 0; }
+.margin-x-lg { margin: 1.5em 0; }
+.margin-x-xl { margin: 3em 0; }
+
+.margin-y-xs { margin: 0 .25em; }
+.margin-y-sm { margin: 0 .5em; }
+.margin-y-md { margin: 0 1em; }
+.margin-y-lg { margin: 0 1.5em; }
+.margin-y-xl { margin: 0 3em; }
+
+.margin-top-xs { margin-top: .25em; }
+.margin-top-sm { margin-top: .5em; }
+.margin-top-md { margin-top: 1em; }
+.margin-top-lg { margin-top: 1.5em; }
+.margin-top-xl { margin-top: 3em; }
+
+.margin-right-xs { margin-right: .25em; }
+.margin-right-sm { margin-right: .5em; }
+.margin-right-md { margin-right: 1em; }
+.margin-right-lg { margin-right: 1.5em; }
+.margin-right-xl { margin-right: 3em; }
+
+.margin-bottom-xs { margin-bottom: .25em; }
+.margin-bottom-sm { margin-bottom: .5em; }
+.margin-bottom-md { margin-bottom: 1em; }
+.margin-bottom-lg { margin-bottom: 1.5em; }
+.margin-bottom-xl { margin-bottom: 3em; }
+
+.margin-left-xs { margin-left: .25em; }
+.margin-left-sm { margin-left: .5em; }
+.margin-left-md { margin-left: 1em; }
+.margin-left-lg { margin-left: 1.5em; }
+.margin-left-xl { margin-left: 3em; }
+    </style>
+    {% comment %} <style>
+        
+    </style> {% endcomment %}
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/summernote/summernote.min.css' %}">
+
+{% endblock additionaly_css %}
+{% block additionaly_js %}
+
+    <script src="{% static 'appartments/plugins/summernote/summernote.min.js' %}"></script>
+    <script src="{% static 'appartments/plugins/summernote/lang/summernote-ru-RU.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+
+{% endblock additionaly_js %}
+
+
+{% block title %}
+    <title> Услуги </title>
+{% endblock title %}
+
+{% block content-header %}
+    <h1> Услуги </h1>
+{% endblock %}
+
+{% block content %}
+
+<form enctype="multipart/form-data" method="post">
+
+
+
+    <div class="box">
+        <div class="box-header with-border">
+            <h3 class="box-title">Редактирование страницы "услуги"</h3>
+            {% comment %} <div class="box-tools">
+                <a href="#" class="btn btn-default btn-sm updateSeoFiles">
+                    <span class="hidden-xs">Обновить robots и sitemap</span><i class="fa fa-refresh visible-xs" aria-hidden="true"></i>
+                </a>
+            </div> {% endcomment %}
+        </div>
+
+        <div class="box-body">
+                {% csrf_token %}
+                <h3 class="page-header">Услуги</h3>
+
+                <div class="row">
+                    {{ utilities_formset.management_form }}
+                    {% for utility_form in utilities_formset %}
+                        {% for hidden in utility_form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+                    <div class="col-md-4" >
+                        <h4>Услуга {{ forloop.counter }}
+                            <a href="javascript:;" class="pull-right text-red margin-right-xl" id="delete_button">
+                                <i class="fa fa-trash"></i>
+                            </a>
+                            {{ utility_form.DELETE }}
+                        </h4>
+                            {% if utility_form.instance.image %}
+                                <img class="fa fa-3x pull-left image_content" style="width:350px; height:200px; object-fit: crop;" src="{{ utility_form.instance.image.url }}" alt="">
+                            {% else %}
+                                <img class="fa fa-3x pull-left image_content" style="width:350px; height:200px; object-fit: crop;" src="{% static 'appartments/img/empty_image.jpeg' %}" alt="">
+                            {% endif %}
+
+                        <p><strong>{{ utility_form.image.label }}</strong></p>
+                        <p>{{ utility_form.image }}</p>
+                        <p><strong>{{ utility_form.title.label }}</strong></p>
+                        <p>{{ utility_form.title }}</p>
+                        <p><strong>{{utility_form.description.label}}</strong></p>
+                        <p>{{utility_form.description}}</p>
+                    </div>
+                    {% endfor %}
+                    
+                    <div id="empty_form_container">
+                        <div class="col-md-4" >
+                            <h4>Услуга __number__
+                                <a href="javascript:;" class="pull-right text-red margin-right-xl" id="delete_button">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                                {{ utilities_formset.empty_form.DELETE }}
+                            </h4>
+                                <img class="fa fa-3x pull-left image_content" style="width:350px; height:200px; object-fit: crop;" src="{% static 'appartments/img/empty_image.jpeg' %}" alt="">
+                            <p>{{ utilities_formset.empty_form.image.label }}</p>
+                            <p>{{ utilities_formset.empty_form.image }}</p>
+                            <p>{{ utilities_formset.empty_form.title.label }}</p>
+                            <p>{{ utilities_formset.empty_form.title }}</p>
+                            <p>{{utilities_formset.empty_form.description.label}}</p>
+                            <p>{{utilities_formset.empty_form.description}}</p>
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+                
+                {% comment %} <---------------WORK-AREA------------------------> {% endcomment %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <label>{{ seo_block_form.title.label }}</label>
+                        <p>{{ seo_block_form.title }}</p>
+                        <label>{{ seo_block_form.description.label }}</label>
+                        <p>{{ seo_block_form.description }}</p>
+                        <label>{{ seo_block_form.keyword.label }}</label>
+                        <p>{{ seo_block_form.keyword }}</p>
+                    </div>
+                </div>
+                {% comment %} <---------------WORK-AREA------------------------> {% endcomment %}
+                </div>
+                <div class="row">
+                    <div class="col-xs-7 text-right">
+                        <div class="form-group">
+                            <a class="btn btn-default" href="#">Отменить</a>
+                            <button type="button" role="button" id="add_button" class="btn btn-success bg-green-active form-row-add-websiteservice-btn">Добавить услугу</button>
+                            <button type="submit" class="btn btn-success">Сохранить</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</form>
+
+
+
+<script>
+    $(document).ready(function () {
+
+    var DefaultStyleButton = function (context) {
+        var ui = $.summernote.ui;
+        var event = ui.buttonGroup([
+            ui.button({
+                contents: '<i class="fa fa-font"/><span>   Обычный текст   </span><b class="caret"></b>',
+                data: {
+                    toggle: 'dropdown'
+                }
+            }),
+            ui.dropdown({
+                items: [
+                    'Обычный текст',
+                    'Заголовок 1',
+                    'Заголовок 2',
+                    'Заголовок 3',
+                    'Заголовок 4',
+                    'Заголовок 5',
+                    'Заголовок 6',
+                ],
+            callback: function (items) {
+                $(items).find('li a').on('click', function(){
+                    var changed_option_text = $(this).attr('data-value')
+                    $(this).closest('ul').prev().find('span').text(changed_option_text)
+                    if (changed_option_text == 'Обычный текст') {
+                        $(this).closest('p').find('#short_descriptions_field').summernote('formatPara');
+                    } else if (changed_option_text == 'Заголовок 1') {
+                        $(this).closest('p').find('#short_descriptions_field').summernote('formatH1')
+                    } else if (changed_option_text == 'Заголовок 2') {
+                        $(this).closest('p').find('#short_descriptions_field').summernote('formatH2')
+                    } else if (changed_option_text == 'Заголовок 3') {
+                        $(this).closest('p').find('#short_descriptions_field').summernote('formatH3')
+                    } else if (changed_option_text == 'Заголовок 4') {
+                        $(this).closest('p').find('#short_descriptions_field').summernote('formatH4')
+                    } else if (changed_option_text == 'Заголовок 5') {
+                        $(this).closest('p').find('#short_descriptions_field').summernote('formatH5')
+                    } else if (changed_option_text == 'Заголовок 6') {
+                        $(this).closest('p').find('#short_descriptions_field').summernote('formatH6')
+                    }
+                    })
+                    }
+            })
+        ]);
+        return event.render();
+    }
+    
+    
+    var CustomBold = function (context) {
+        var ui = $.summernote.ui;
+        var button = ui.button({
+            contents: '<strong>Полужирный</strong>',
+            click: function () {
+                $(this).closest('p').find('#short_descriptions_field').summernote('bold')
+            }
+        });
+        return button.render();
+        }
+    
+    
+    var CustomItalic = function (context) {
+        var ui = $.summernote.ui;
+        var button = ui.button({
+            contents: '<i>Курсивный</i>',
+            click: function () {
+                $(this).closest('p').find('#short_descriptions_field').summernote('italic')
+            }
+        });
+        return button.render();
+        }
+    
+    var CustomUnderline = function (context) {
+        var ui = $.summernote.ui;
+        var button = ui.button({
+            contents: '<u>Подчеркнутый</u>',
+            click: function () {
+                $(this).closest('p').find('#short_descriptions_field').summernote('underline')
+            }
+        });
+        return button.render();
+        }
+    
+    var CustomIndent = function (context) {
+        var ui = $.summernote.ui;
+        var button = ui.button({
+            contents: "<span class='fa fa-indent'></span>",
+            tooltip: "Увеличить отступ",
+            click: function () {
+                $(this).closest('p').find('#short_descriptions_field').summernote('indent')
+            }
+        });
+        return button.render();
+        }
+    
+    var CustomOutdent = function (context) {
+        var ui = $.summernote.ui;
+        var button = ui.button({
+            contents: "<span class='fa fa-outdent'></span>",
+            tooltip: "Уменьшить отступ",
+            click: function () {
+
+            $(this).closest('p').find('#short_descriptions_field').summernote('outdent')
+
+            }
+        });
+        return button.render();
+        }
+    
+
+    
+
+    //$('*[id=short_descriptions_field]').summernote({
+
+
+
+
+    function SummerFunc(text_area){
+    $(text_area).summernote({
+    //$('').summernote({
+        toolbar: [
+            ['style', ['style_cliche']],
+            ['font', ['custom_bold', 'custom_italic', 'custom_underline']],
+            ['para', ['ul', 'ol', 'custom_outdent', 'custom_indent']],
+        ],
+
+        callbacks: {
+            onChange: function (contents, $editable) {
+                var markup = $('#short_descriptions_field').summernote('code');
+            }
+        },
+
+        buttons: {
+            style_cliche: DefaultStyleButton,
+            custom_bold: CustomBold,
+            custom_italic: CustomItalic,
+            custom_underline: CustomUnderline,
+            custom_indent: CustomIndent,
+            custom_outdent: CustomOutdent,
+            },
+
+        lang: 'ru-RU',
+        placeholder: 'Текст сообщения:',
+        tabsize: 2,
+        height: 150
+        });
+}
+
+
+    $('*[id=short_descriptions_field]').not(`textarea[name*='__prefix__']`).each(function(){
+        SummerFunc($(this))
+    })
+
+
+    //console.log($(`textarea[name*='__prefix__']`))
+
+
+    $(".box-body").on('change', "input[name$='image']", function () {
+        console.log(this);
+        var input = $(this);
+        console.log($(input));
+        var output = $(this).closest('div').find("img[class^='img-responsive']")
+        console.log(output);
+        var reader = new FileReader();
+        reader.onload = function () {
+            output.attr("src", reader.result);
+        };
+        reader.readAsDataURL(input[0].files[0]);
+    });
+
+    $('li[aria-label]').each(function(){
+        $(this).find('a').attr('href', 'javascript:;')
+    })
+
+$("button[id='add_button']").click(function(){
+    var current_form_container = $(this).closest("div[class='row']").prev()
+    var form_index = $(current_form_container).find("input[id$='TOTAL_FORMS']").val()
+    var new_form = $(current_form_container).find('#empty_form_container').html().replace(/__prefix__/g, form_index).replace(/__number__/g, (parseInt(form_index) + 1));
+    $(current_form_container).find('.row').append(new_form)
+    $(current_form_container).find("input[id$='TOTAL_FORMS']").val(parseInt(form_index) + 1)
+    
+    SummerFunc($(`textarea[name=utilities_formset-${form_index}-description]`))
+
+    //$(`textarea[name=utilities_formset-${form_index}-description]`).summernote()
+})
+
+
+$('.box-body').on('click', '#delete_button', function(){
+    $(this).parent().find("input[id$=DELETE]").trigger('click')
+    $(this).closest('div[class^=col]').hide()
+})
+
+
+$(".box-body").on('change', "input[name$='image']", function () {
+    console.log('change image')
+    var input = $(this);
+    console.log(input)
+    var output = $(this).closest('div').find("img[class$='image_content']")
+    console.log(output)
+
+    var reader = new FileReader();
+    reader.onload = function () {
+        output.attr("src", reader.result);
+    };
+    reader.readAsDataURL(input[0].files[0]);
+});
+
+$('#empty_form_container').hide()
+
+$('input[name$=DELETE]').hide()
+
+
+
+});
+</script>
+{% endblock content %}

@@ -231,26 +231,27 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#">
+                                <a href="{% url 'website:about_us_page_update_view' %}">
                                     <i class="fa fa-circle-o"></i>  
                                     <span>О нас</span>
                                 </a>
                             </li>
 
                             <li>
-                                <a href="#">
+                                <a href="{% url 'website:utilities_update_view' %}">
+                                    {% comment %} <a href="#"> {% endcomment %}
                                     <i class="fa fa-circle-o"></i>
                                     <span>Услуги</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#">
+                                <a href="{% url 'website:tariff_update_view' %}">
                                     <i class="fa fa-circle-o"></i>  
                                     <span>Тарифы</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#">
+                                <a href="{% url 'website:contact_update_view' %}">
                                     <i class="fa fa-circle-o"></i>  
                                     <span>Контакты</span>
                                 </a>
