@@ -23,7 +23,7 @@ class ExchangePerMounthThisYearCell(models.Model):
     month = models.DecimalField(max_digits=10, decimal_places=2)
     exchange_per_month_sum = models.DecimalField(max_digits=10, decimal_places=2)
 
-
+# -----------------------------------------------
 class CurrentYearExchengeCell(models.Model):
     appartment = models.ForeignKey(Appartment, on_delete=models.CASCADE)
     utility_service = models.ForeignKey(UtilityService, on_delete=models.CASCADE)
@@ -35,7 +35,7 @@ class GraphIncomeExpendCell(models.Model):
     total_income = models.DecimalField(max_digits=10, decimal_places=2)
     total_expend = models.DecimalField(max_digits=10, decimal_places=2)
 
-
+# -----------------------------------------------
 class GraphPayOffReceiptCell(models.Model):
     month = models.DurationField()
     total_debt = models.DecimalField(max_digits=10, decimal_places=2)

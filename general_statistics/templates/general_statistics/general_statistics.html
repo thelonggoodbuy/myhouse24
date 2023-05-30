@@ -1,0 +1,352 @@
+
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+{% block additionaly_css %}
+    <style>
+        .column-center {
+            margin-top: 5pt;
+        }
+    </style>
+    
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    {% comment %} <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/summernote/summernote.min.css' %}"> {% endcomment %}
+
+{% endblock additionaly_css %}
+{% block additionaly_js %}
+
+    {% comment %} <script src="{% static 'appartments/plugins/summernote/summernote.min.js' %}"></script>
+    <script src="{% static 'appartments/plugins/summernote/lang/summernote-ru-RU.js' %}"></script> {% endcomment %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    {% comment %} <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script> {% endcomment %}
+
+
+    
+{% endblock additionaly_js %}
+
+
+{% block title %}
+    <title> Статистика </title>
+{% endblock title %}
+
+{% block content-header %}
+    <h1> Статистика </h1>
+{% endblock %}
+
+{% block content %}
+
+{% comment %} <form enctype="multipart/form-data" method="post"> {% endcomment %}
+
+
+
+    {% comment %} <div class="box"> {% endcomment %}
+        <div class="box-header with-border">
+            <h3 class="box-title">В нашем обслуживании</h3>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 col-sm-6 col-xs-12">
+                <div class="small-box bg-primary">
+                    <div class="inner">
+                        <h3>{{ house_quantity }}</h3>
+                        <p>Домов</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-building"></i>
+                    </div>
+                    <a href="/admin/house/index" class="small-box-footer">
+                        Перейти в дома <i class="fa fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6 col-xs-12">
+                <div class="small-box bg-green">
+                    <div class="inner">
+                        <h3>{{ total_users_quantity }}</h3>
+                        <p>Активных владельцев</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-users"></i>
+                    </div>
+                    <a href="/admin/user/index" class="small-box-footer">
+                        Перейти к владельцам <i class="fa fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6 col-xs-12">
+                <div class="small-box bg-yellow">
+                    <div class="inner">
+                        <h3>{{ master_request_in_work_quantity }}</h3>
+                        <p>Заявок мастера в работе</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-wrench"></i>
+                    </div>
+                    <a href="/admin/master-request/index" class="small-box-footer">
+                        Перейти в заявки <i class="fa fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6 col-xs-12">
+                <div class="small-box bg-primary">
+                    <div class="inner">
+                        <h3>{{ appartments_quantity }}</h3>
+                        <p>Квартир</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-key"></i>
+                    </div>
+                    <a href="/admin/flat/index" class="small-box-footer">
+                        Перейти в квартиры <i class="fa fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6 col-xs-12">
+                <div class="small-box bg-green">
+                    <div class="inner">
+                        <h3>{{ personal_account_quantity }}</h3>
+                        <p>Лицевых счетов</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-child"></i>
+                    </div>
+                    <a href="/admin/account/index" class="small-box-footer">
+                        Перейти к счетам <i class="fa fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6 col-xs-12">
+                <div class="small-box bg-yellow">
+                    <div class="inner">
+                        <h3>{{ master_request_new_quantity }}</h3>
+                        <p>Новых заявок мастера</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-user-plus"></i>
+                    </div>
+                    <a href="/admin/master-request/index" class="small-box-footer">
+                        Перейти в заявки <i class="fa fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+ 
+            <div class="col-lg-8 col-md-7 col-xs-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">График погашения квитанций, грн</h3>
+                    </div>
+                    
+                    <div class="box-body">
+                        <canvas id="receipt_graph" style="height: 230px; width: 820px;"></canvas>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="col-lg-4 col-md-5 col-xs-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-red"><i class="fa fa-money"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Задолженность по счетам, грн</span>
+                        <span class="info-box-number">{{ total_statistics.total_debt}}</span>
+                    </div>
+                </div>
+                <div class="info-box">
+                    <span class="info-box-icon bg-blue"><i class="fa fa-money"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Баланс по счетам, грн</span>
+                        <span class="info-box-number">{{ total_statistics.total_balance }}</span>
+                    </div>
+                </div>
+                <div class="info-box">
+                    <span class="info-box-icon bg-green"><i class="fa fa-money"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Состояние кассы, грн</span>
+                        <span class="info-box-number">{{ total_statistics.total_fund_state }}</span>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-xs-12">
+                <div class="box box-default">
+                <div class="box-body">
+                    <p>-----------------------------</p>
+                    <canvas id="debt_and_profit_graph" style="height: 230px; width: 820px;"></canvas>
+                </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+{{ receipt_statistics_per_month|json_script:'receipt_statistics_per_month'}}
+{{ statement_stat_dict|json_script:'statement_stat_dict'}}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'appartments/plugins/chartjs/chart.js' %}"></script>
+
+<script>
+
+    $(document).ready(function () {
+
+    //-------------------------------------------------------------
+    //receipt_graph
+    //-------------------------------------------------------------
+
+
+    var receipt_statistics_per_month = JSON.parse(document.getElementById('receipt_statistics_per_month').textContent)
+    debts_array = []
+    payed_array = []
+    for(receipt_month in receipt_statistics_per_month){
+        debts_array.push(receipt_statistics_per_month[receipt_month]['total_debd'])
+        payed_array.push(receipt_statistics_per_month[receipt_month]['total_payed'])
+    }
+
+
+
+    var receipt_graph = document.getElementById('receipt_graph');
+    var DATA_COUNT = 12;
+    var NUMBER_CFG = {count: DATA_COUNT, min: 0, max: 20000};
+
+    var labels = ['янв., 2023', 'февр., 2023', 'март, 2023',
+                     'апр., 2023', 'май, 2023', 'июнь, 2023', 
+                     'июль., 2023', 'авг., 2023', 'сент., 2023', 
+                     'окт., 2023', 'нояб., 2023', 'дек., 2023'];
+
+    var data = {
+        labels: labels,
+        datasets: [{
+          label: 'Задолженность',
+          data: debts_array,
+          backgroundColor: 'ForestGreen',
+        },{
+            label: 'Погашение задолженности',
+            data: payed_array,    
+            backgroundColor: 'FireBrick',
+          }
+        
+        ]
+      }
+  
+    new Chart(receipt_graph, {
+      type: 'bar',
+      data: data,
+      options: {
+
+        //plugin options
+        plugins:{
+
+            legend: {
+                display: true,
+                position: 'bottom',
+                align: 'center',
+                labels: {
+                   color: 'darkred',
+                   font: {
+                      weight: 'bold'
+                   },
+
+                }
+            },
+        },
+        //work with skale options
+        scales: {
+          y: {
+            beginAtZero: true
+          },
+          x: {
+            ticks: {
+                maxRotation: 35,
+                minRotation: 35
+            }
+          }
+        },
+        
+      }
+
+    });
+
+    //-------------------------------------------------------------
+    //debt_and_profit_graph
+    //-------------------------------------------------------------
+var statement_stat_dict = JSON.parse(document.getElementById('statement_stat_dict').textContent)
+income_array = []
+expense_array = []
+
+for(statement_month in statement_stat_dict){
+    income_array.push(statement_stat_dict[statement_month]['arrival'])
+    expense_array.push(statement_stat_dict[statement_month]['expense'])
+    }
+
+
+var debt_and_profit_graph = document.getElementById('debt_and_profit_graph');
+    var DATA_COUNT = 12;
+    var NUMBER_CFG = {count: DATA_COUNT, min: 0, max: 100};
+
+    var labels = ['янв., 2023', 'февр., 2023', 'март, 2023',
+                     'апр., 2023', 'май, 2023', 'июнь, 2023', 
+                     'июль., 2023', 'авг., 2023', 'сент., 2023', 
+                     'окт., 2023', 'нояб., 2023', 'дек., 2023'];
+
+    var data = {
+        labels: labels,
+        datasets: [{
+          label: 'Доход',
+          data: income_array,
+          backgroundColor: 'ForestGreen',
+        },{
+            label: 'Расход',
+            data: expense_array,
+            backgroundColor: 'FireBrick',
+          }
+        
+        ]
+      }
+  
+    new Chart(debt_and_profit_graph, {
+      type: 'bar',
+      data: data,
+      options: {
+
+        //plugin options
+        plugins:{
+
+            legend: {
+                display: true,
+                position: 'bottom',
+                align: 'center',
+                labels: {
+                   color: 'darkred',
+                   font: {
+                      weight: 'bold'
+                   },
+
+                }
+            },
+        },
+        //work with skale options
+        scales: {
+          y: {
+            beginAtZero: true
+          },
+          x: {
+            ticks: {
+                maxRotation: 35,
+                minRotation: 35
+            }
+          }
+        },
+        
+      }
+
+    });
+
+
+
+});
+</script>
+{% endblock content %}
