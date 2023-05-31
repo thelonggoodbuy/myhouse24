@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from .models import MainPage, SlideBlock, SeoBlock, AboutUsPage, Document, ServicesPage, ContactPage
+from .models import MainPage, SlideBlock, SeoBlock, AboutUsPage, Document, ServicesPage, ContactPage, AboutUsPage
 from .forms import MainPageUpdateForm, MainSliderFormset, RoundUsSliderFormset, SeoBlockForm,\
                     AboutUsPageUpdateForm, PhotoGalleryAboutUsSlideFormset,\
                     AdditionalPhotoGalleryAboutUsSlideFormset, DocumentsAboutUsFormset,\
@@ -16,7 +16,11 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 
 from django.http import HttpResponseRedirect
+from django.http import HttpResponse
 
+from django.http import JsonResponse
+from tempfile import NamedTemporaryFile
+from django.http import FileResponse
 
 class MainPageUpdateView(FormView):
 
@@ -343,3 +347,33 @@ class FrontMainPageView(TemplateView):
         context['contacts'] = ContactPage.objects.first()
         context['main_page_around'] = SlideBlock.objects.filter(target='main_page_around')
         return context
+    
+
+class FrontAboutUsView(TemplateView):
+    template_name = 'website/front_about_us.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['about_us_page'] = AboutUsPage.objects.first()
+        context['about_us_galery'] = SlideBlock.objects.filter(target='about_us_galery')
+        context['about_us_addition_galery'] = SlideBlock.objects.filter(target='about_us_addition_galery')
+        context['documents'] = Document.objects.all()
+        return context
+
+    def get(self, request, *args, **kwargs):
+        if self.request.is_ajax() and self.request.method == 'GET':
+            
+            file_id = self.request.GET['file_id']
+            current_document = Document.objects.get(id=file_id).file
+            with NamedTemporaryFile() as tmp:
+                stream = current_document.read()
+                response = HttpResponse(stream, content_type='image/jpeg')
+                print(response)
+                response['Content-Disposition'] = f'attachment; filename={current_document}'
+                return response
+        else:
+            return super().get(request, *args, **kwargs)
+        
+
+# class FrontAboutUsView(TemplateView):
+#     template_name = 'website/front_about_us.html'

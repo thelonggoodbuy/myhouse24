@@ -138,7 +138,7 @@
                 {% csrf_token %}
                 <h3 class="page-header">Услуги</h3>
 
-                <div class="row">
+                <div class="row" id="cell-row">
                     {{ utilities_formset.management_form }}
                     {% for utility_form in utilities_formset %}
                         {% for hidden in utility_form.hidden_fields %}
@@ -398,7 +398,8 @@ $("button[id='add_button']").click(function(){
     var current_form_container = $(this).closest("div[class='row']").prev()
     var form_index = $(current_form_container).find("input[id$='TOTAL_FORMS']").val()
     var new_form = $(current_form_container).find('#empty_form_container').html().replace(/__prefix__/g, form_index).replace(/__number__/g, (parseInt(form_index) + 1));
-    $(current_form_container).find('.row').append(new_form)
+
+    $(current_form_container).find('#cell-row').append(new_form)
     $(current_form_container).find("input[id$='TOTAL_FORMS']").val(parseInt(form_index) + 1)
     
     SummerFunc($(`textarea[name=utilities_formset-${form_index}-description]`))

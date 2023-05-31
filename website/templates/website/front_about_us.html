@@ -1,0 +1,200 @@
+{% extends "layout/website_base.html" %}
+{% load static %}
+
+{% block additionaly_css %}
+    <style>
+        {% comment %} .column-center {
+            margin-top: 5pt;
+        }
+        .transform-center-parent {
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        
+        .transform-center {
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .slideTitle {
+            width: 55%;
+            color: #fff;
+            font-size: 60px;
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            z-index: 5;
+            margin: auto;
+            transform: translateY(-50%);
+            text-align: center;
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+        } {% endcomment %}
+
+        {% comment %} .test-container {
+            max-height: 50px;
+          } {% endcomment %}
+        
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/summernote/summernote.min.css' %}">
+
+{% endblock additionaly_css %}
+{% block additionaly_js %}
+    <script src="{% static 'appartments/plugins/summernote/summernote.min.js' %}"></script>
+    <script src="{% static 'appartments/plugins/summernote/lang/summernote-ru-RU.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+
+ 
+{% endblock additionaly_js %}
+
+
+{% block content %}
+
+
+<div class="breadcrumbs margin-top-md">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <ol class="breadcrumb" style="background-color: #FFFFFF">
+                    <li><a href="{% url 'website:main_page' %}">Главная</a></li>
+                    <li class="active">О нас</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="about">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box clearfix">
+                    <div class="page-header">
+                        <h1>{{ about_us_page.title }}</h1>
+                    </div>
+                    <img src={{ about_us_page.director_photo.url }} style="width: 250px" class="img-responsive imgFloatRight" alt="">
+                    {{ about_us_page.short_description|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="gallery g1">
+    <div class="container">
+        <div class="row">
+            {% for about_us_image in about_us_galery %}
+                <div class="col-xs-12 col-sm-6 col-md-3 item">
+                    <a href="/upload/WebsiteAboutImage/159/image.png" class="big">
+                        {% comment %} <img src="/site/glide?path=%2Fupload%2FWebsiteAboutImage%2F159%2Fimage.png&amp;w=720&amp;h=250&amp;fit=crop" alt="" class="img-responsive img-thumbnail"> {% endcomment %}
+                        <img src="{{ about_us_image.image.url }}" alt="" class="img-responsive img-thumbnail">
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+<div class="about">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box clearfix">
+                    <div class="page-header">
+                        <h1>{{ about_us_page.addition_title }}</h1>
+                    </div>
+                    {{ about_us_page.addition_short_description|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="gallery g2">
+    <div class="container">
+        <div class="row">
+            {% for about_us_additional_image in about_us_addition_galery %}
+                <div class="col-xs-12 col-sm-6 col-md-3 item">
+                    <a href="/upload/WebsiteAboutImage/169/image.jpg" class="big">
+                        <img src={{ about_us_additional_image.image.url }} alt="" class="img-responsive img-thumbnail">
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+<div class="documents">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="page-header">
+                        <h3>Документы</h3>
+                    </div>
+                {% for document in documents %}
+                    <div class="media">
+                        <div class="media-left">
+                            <div class="media-object">
+                                {% comment %} <img src="http://myhouse24.avada-media.ua/site/glide?path=%2Fupload%2FWebsiteDocument%2F44%2Ffile44_202302051707.jpg&amp;w=32&amp;h=42&amp;fit=crop" alt=""> {% endcomment %}
+                                <p class="icon_paragraph"><i class="fa fa-file-pdf-o fa-3x"></i></p>
+                                <p class="prerender_paragraph"><img class="fa fa-3x pull-left" style="width:50px; hight:80px;" src="{{ document.file.url }}" alt=""></p>
+                            </div>
+                        </div>
+                        <div class="media-body">
+                        <h4 class="media-heading">{{ document.title }}</h4>
+                        <p class="file_title">{{ document.file }}</p>
+                        <a href="javascript:;" id="{{ document.id }}" class="download_link"><i class="fa fa-download" aria-hidden="true"></i> Скачать</a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<script>
+    $(function (){
+
+        $('p[class=file_title]').each(function(){
+            //console.log($(this))
+            var file_title_list = $(this).text().split(".");
+            var file_extension = file_title_list[file_title_list.length - 1];
+
+            if(file_extension == 'jpg' || file_extension == 'jpeg'){
+                $(this).closest('.media-body').prev().find('.icon_paragraph').hide()
+            } else {
+                $(this).closest('.media-body').prev().find('.prerender_paragraph').hide()
+            }
+        })
+
+    
+        $('a[class=download_link]').click(function(){
+            $.ajax({
+                url: "{% url 'website:front_about_us' %}",
+                data: {
+                    'file_id': $(this).attr('id')
+                },
+                dataType: 'json',
+                success:function(){
+                    console.log('sucess!')
+                    //$(role_field).attr('value', data['user_id'])
+                }
+            })
+        })
+
+    });
+</script>
+{% endblock content %}

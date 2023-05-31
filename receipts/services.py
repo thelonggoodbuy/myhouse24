@@ -213,6 +213,7 @@ def return_xlm_receipt(receipt_id, template_id):
         tmp.seek(0)
         stream = tmp.read()
         response = HttpResponse(stream, content_type='application/vnd.ms-excel')
+        print(response)
         response['Content-Disposition'] = f'attachment; filename=invoice_{receipt.number}_{receipt.payment_due.strftime("%d.%m.%Y")}.xlsx'
 
     return response
