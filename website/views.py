@@ -327,3 +327,19 @@ class ContactUpdateView(FormView):
         success_url = self.success_url
         messages.success(self.request, f"Изменения в страница 'контактов' внесены!")
         return HttpResponseRedirect(success_url)
+    
+
+    # ------------------------------------------------------------------------------------------------
+    # -------------------------------Front end logic--------------------------------------------------
+    # ------------------------------------------------------------------------------------------------
+
+class FrontMainPageView(TemplateView):
+    template_name = 'website/front_main_page.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['slide_block'] = SlideBlock.objects.filter(target='main_page_slider')
+        context['main_page_data'] = MainPage.objects.first()
+        context['contacts'] = ContactPage.objects.first()
+        context['main_page_around'] = SlideBlock.objects.filter(target='main_page_around')
+        return context

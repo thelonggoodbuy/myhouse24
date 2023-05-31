@@ -1,0 +1,190 @@
+{% extends "layout/website_base.html" %}
+{% load static %}
+
+{% block additionaly_css %}
+    <style>
+        {% comment %} .column-center {
+            margin-top: 5pt;
+        }
+        .transform-center-parent {
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        
+        .transform-center {
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .slideTitle {
+            width: 55%;
+            color: #fff;
+            font-size: 60px;
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            z-index: 5;
+            margin: auto;
+            transform: translateY(-50%);
+            text-align: center;
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+        } {% endcomment %}
+
+        {% comment %} .test-container {
+            max-height: 50px;
+          } {% endcomment %}
+        
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/summernote/summernote.min.css' %}">
+
+
+
+    {% comment %} <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet"> {% endcomment %}
+    {% comment %} <link href="{% static 'plugin/fontawesome_6.4.0/css/all.min.css' %}" rel="stylesheet" type="text/css"> {% endcomment %}
+{% endblock additionaly_css %}
+{% block additionaly_js %}
+    <script src="{% static 'appartments/plugins/summernote/summernote.min.js' %}"></script>
+    <script src="{% static 'appartments/plugins/summernote/lang/summernote-ru-RU.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+
+
+
+    {% comment %} <script src="{% static 'plugin/fontawesome_6.4.0/js/all.min.js' %}"></script> {% endcomment %}
+{% endblock additionaly_js %}
+
+
+
+{% comment %} {% block title %}
+    <title> О нас </title>
+{% endblock title %}
+
+
+
+{% block content-header %}
+    <h1> О нас </h1>
+{% endblock %} {% endcomment %}
+
+
+
+{% block content %}
+
+    <div class="test-container">
+        <div id="carouselTopBanner" class="carousel slide ml-5" data-ride="carousel">
+            <ol class="carousel-indicators">
+                {% for slide_obj in slide_block %}
+                    {% if forloop.first %}
+                        <li data-target="#myCarousel" data-slide-to={{ forloop.counter }} class="active"></li>
+                    {% else %}
+                        <li data-target="#myCarousel" data-slide-to={{ forloop.counter }}></li>
+                    {% endif %}
+                {% endfor %}
+            </ol>
+
+            <div class="carousel-inner">
+                {% for slide_obj in slide_block %}
+                    {% if forloop.first %}
+                        <div class="item active">
+                    {% else %}
+                        <div class="item">
+                    {% endif %}
+                            <img class="d-block logo_responsiv rounded d-block" src="{{ slide_obj.image.url }}">
+                            <div class="carousel-caption d-none d-md-block mx-auto vcenter" id="carousel_font_background">
+                                <h1 class="slideTitle" style="padding-bottom: 15em;">{{ main_page_data.title }}</h1>
+                            </div>
+                        </div>
+                        <a class="left carousel-control" href="#carouselTopBanner" data-slide="prev">
+                            <span class="glyphicon glyphicon-chevron-left"></span>
+                        </a>
+                        <a class="right carousel-control" href="#carouselTopBanner" data-slide="next">
+                            <span class="glyphicon glyphicon-chevron-right"></span>
+                        </a>
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+
+    <div class="info">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-sm-7 col-md-8">
+                    <div class="page-header">
+                        <h1>{{ main_page_data.title }}</h1>
+                    </div>
+                    <div class="box">
+                        <p>{{ main_page_data.short_descriptions|safe }}</p>
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <a href="javascript:;" class="btn btn-primary">Подробнее</a>
+                            </div>
+                            <div class="col-xs-8">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-5 col-md-4">
+                    <div class="page-header">
+                        <h1>Контакты</h1>
+                    </div>
+                    <div class="box">
+                        <p><i class="fa fa-user-circle"></i> {{contacts.title}}</p>
+                        <p><i class="fa fa-compass"></i> {{contacts.location}}</p>
+                        <p><i class="fa fa-map-marker"></i> {{contacts.address}}</p>
+                        <p><i class="fa fa-phone"></i> <a href="javascript:;">{{contacts.phone}}</a></p>
+                        <p><i class="fa fa-envelope"></i> <a href="javascript:;">{{contacts.email}}</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info">
+        <div class="container">
+            <div class="row row-eq-height">
+                <div class="col-xs-12">
+                    <div class="page-header">
+                        <h3>Рядом с нами</h3>
+                    </div>
+                </div>
+                {% comment %} -------------------------------------- {% endcomment %}
+                {% for around_us in main_page_around %}
+                    <div class="col-xs-12 col-sm-6 col-md-4 advantage-item">
+                        <div class="thumbnail">
+                            {% comment %} <img src="/site/glide?path=%2Fupload%2FWebsiteHomeFeature%2F1%2Fimage.jpeg&amp;w=1000&amp;h=600&amp;fit=crop" class="img-responsive" alt=""> {% endcomment %}
+                            <img src={{ around_us.image.url }} class="img-responsive" alt="">
+                            <div class="caption">
+                                <h3>{{ around_us.title }}</h3>
+                                {{ around_us.description|safe }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                {% comment %} -------------------------------------- {% endcomment %}
+            </div>
+        </div>
+    </div>
+
+
+
+<script>
+    $(function (){
+
+      //$('#carouselTopBanner').carousel({
+      //  interval: 1000
+      //});
+
+//      $('#carouselTopBanner').carousel({
+//        interval: {{ highest_banner_timescrolling }}
+//      });
+
+//      $('#carouselBannerPromoAndActions').carousel({
+//        interval: {{ banner_promo_and_news_timescrolling }}
+//      });
+
+    });
+</script>
+{% endblock content %}

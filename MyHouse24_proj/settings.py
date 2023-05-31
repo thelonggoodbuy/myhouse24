@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_cleanup.apps.CleanupConfig',
     'django_select2',
+    # 'fontawesomefree',
 
     'users.apps.UsersConfig',
     'appartments.apps.AppartmentsConfig',
