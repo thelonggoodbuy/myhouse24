@@ -1,0 +1,102 @@
+{% extends "layout/website_base.html" %}
+{% load static %}
+
+{% block additionaly_css %}
+    <style>
+       
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/summernote/summernote.min.css' %}">
+
+{% endblock additionaly_css %}
+{% block additionaly_js %}
+    <script src="{% static 'appartments/plugins/summernote/summernote.min.js' %}"></script>
+    <script src="{% static 'appartments/plugins/summernote/lang/summernote-ru-RU.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+
+ 
+{% endblock additionaly_js %}
+
+
+{% block content %}
+
+
+<div class="breadcrumbs margin-top-md">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <ol class="breadcrumb" style="background-color: #FFFFFF">
+                    <li><a href="{% url 'website:main_page' %}">Главная</a></li>
+                    <li class="active">Услуги</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="services">
+    <div class="container">
+
+        
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="page-header">
+                    <h1>Наши услуги</h1>
+                </div>
+            </div>
+        </div>
+
+        {% for utility in utilities%}
+            <div class="row">
+                <div class="col-xs-12 col-md-7">
+                    {% comment %} <img src="/site/glide?path=%2Fupload%2FWebsiteService%2F69%2Fimage.jpg&amp;w=720&amp;h=300&amp;fit=crop" class="img-responsive img-thumbnail" alt=""> {% endcomment %}
+                    <img src={{ utility.image.url }} class="img-responsive img-thumbnail" alt="">
+                </div>
+                <div class="col-xs-12 col-md-5">
+                    <div class="page-header">
+                        <h3>{{ utility.title }}</h3>
+                    </div>
+                    {{ utility.description|safe }}
+                </div>
+            </div>
+        {% endfor %}
+
+
+    </div>
+</div>
+
+
+
+<script>
+    $(function (){
+
+        $('p[class=file_title]').each(function(){
+            //console.log($(this))
+            var file_title_list = $(this).text().split(".");
+            var file_extension = file_title_list[file_title_list.length - 1];
+
+            if(file_extension == 'jpg' || file_extension == 'jpeg'){
+                $(this).closest('.media-body').prev().find('.icon_paragraph').hide()
+            } else {
+                $(this).closest('.media-body').prev().find('.prerender_paragraph').hide()
+            }
+        })
+
+    
+        $('a[class=download_link]').click(function(){
+            $.ajax({
+                url: "{% url 'website:front_about_us' %}",
+                data: {
+                    'file_id': $(this).attr('id')
+                },
+                dataType: 'json',
+                success:function(){
+                    console.log('sucess!')
+                }
+            })
+        })
+
+    });
+</script>
+{% endblock content %}

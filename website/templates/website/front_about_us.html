@@ -151,7 +151,7 @@
                         <div class="media-body">
                         <h4 class="media-heading">{{ document.title }}</h4>
                         <p class="file_title">{{ document.file }}</p>
-                        <a href="javascript:;" id="{{ document.id }}" class="download_link"><i class="fa fa-download" aria-hidden="true"></i> Скачать</a>
+                        <a href="{% url 'website:download_doc' document.id%}" id="{{ document.id }}" class="download_link"><i class="fa fa-download" aria-hidden="true"></i> Скачать</a>
                     </div>
                 {% endfor %}
             </div>
@@ -168,32 +168,32 @@
 <script>
     $(function (){
 
-        $('p[class=file_title]').each(function(){
-            //console.log($(this))
-            var file_title_list = $(this).text().split(".");
-            var file_extension = file_title_list[file_title_list.length - 1];
+//        $('p[class=file_title]').each(function(){
+//            //console.log($(this))
+//            var file_title_list = $(this).text().split(".");
+//            var file_extension = file_title_list[file_title_list.length - 1];
 
-            if(file_extension == 'jpg' || file_extension == 'jpeg'){
-                $(this).closest('.media-body').prev().find('.icon_paragraph').hide()
-            } else {
-                $(this).closest('.media-body').prev().find('.prerender_paragraph').hide()
-            }
-        })
+//            if(file_extension == 'jpg' || file_extension == 'jpeg'){
+//                $(this).closest('.media-body').prev().find('.icon_paragraph').hide()
+//            } else {
+//                $(this).closest('.media-body').prev().find('.prerender_paragraph').hide()
+//            }
+//        })
 
     
-        $('a[class=download_link]').click(function(){
-            $.ajax({
-                url: "{% url 'website:front_about_us' %}",
-                data: {
-                    'file_id': $(this).attr('id')
-                },
-                dataType: 'json',
-                success:function(){
-                    console.log('sucess!')
+//        $('a[class=download_link]').click(function(){
+//            $.ajax({
+//                url: "{% url 'website:front_about_us' %}",
+//                data: {
+//                    'file_id': $(this).attr('id')
+//                },
+//                dataType: 'json',
+//                success:function(){
+//                    console.log('sucess!')
                     //$(role_field).attr('value', data['user_id'])
-                }
-            })
-        })
+//                }
+//            })
+//        })
 
     });
 </script>

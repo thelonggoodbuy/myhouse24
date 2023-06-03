@@ -15,12 +15,14 @@ from django.urls import reverse_lazy
 
 from django.contrib import messages
 
-from django.http import HttpResponseRedirect
-from django.http import HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse
 
 from django.http import JsonResponse
 from tempfile import NamedTemporaryFile
 from django.http import FileResponse
+
+from django.shortcuts import get_object_or_404
+
 
 class MainPageUpdateView(FormView):
 
@@ -360,20 +362,32 @@ class FrontAboutUsView(TemplateView):
         context['documents'] = Document.objects.all()
         return context
 
-    def get(self, request, *args, **kwargs):
-        if self.request.is_ajax() and self.request.method == 'GET':
-            
-            file_id = self.request.GET['file_id']
-            current_document = Document.objects.get(id=file_id).file
-            with NamedTemporaryFile() as tmp:
-                stream = current_document.read()
-                response = HttpResponse(stream, content_type='image/jpeg')
-                print(response)
-                response['Content-Disposition'] = f'attachment; filename={current_document}'
-                return response
-        else:
-            return super().get(request, *args, **kwargs)
-        
 
-# class FrontAboutUsView(TemplateView):
-#     template_name = 'website/front_about_us.html'
+def download_doc_view(self, pk):
+    document = get_object_or_404(Document, pk=pk)
+    if document.file.name[-3:] == 'pdf':
+        content_type = 'application/pdf'
+    else:
+        content_type = 'image/jpg'
+    response = HttpResponse(document.file, content_type=content_type)
+    response['Content-Disposition'] = f'attachment; filename="{document.file.name}"'
+    return response
+
+
+class FrontUtilitiesView(TemplateView):
+    template_name = 'website/front_utilities.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['utilities'] = SlideBlock.objects.filter(target='services')
+        return context
+    
+
+class ContactsView(TemplateView):
+    template_name = 'website/front_contacts.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['contacts'] = ContactPage.objects.first()
+        context['main_page_data'] = MainPage.objects.first()
+        return context

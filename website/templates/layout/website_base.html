@@ -69,9 +69,10 @@
                     <ul class="nav navbar-nav navbar-right">
                         <li class=""><a href="{% url 'website:main_page' %}">Главная<span class="sr-only"></span></a></li>
                         <li class=""><a href="{% url 'website:front_about_us' %}">О нас</a></li>
-                        <li class=""><a href="Javascript:;">Услуги</a></li>
+                        <li class=""><a href="{% url 'website:front_utilities' %}">Услуги</a></li>
                         {% comment %} <li><a href="Javascript:;">Условия приобретения</a></li> {% endcomment %}
-                        <li class=""><a href="/contact">Контакты</a></li>
+                        <li class=""><a href="{% url 'website:front_contacts' %}">Контакты</a></li>
+                        
                         <li><a href="Javascript:;"><i class="fa fa-sign-in"></i>   Вход</a></li>
                     </ul>
                 </div>

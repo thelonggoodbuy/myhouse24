@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import MainPageUpdateView, AboutUsUpdateView, UtilitiesUpdateView,\
                     TariffUpdateView, ContactUpdateView,\
-                    FrontMainPageView, FrontAboutUsView
+                    FrontMainPageView, FrontAboutUsView, FrontUtilitiesView, ContactsView, download_doc_view
 
 
 
@@ -20,4 +20,8 @@ urlpatterns = [
     # front end logic
     path('main_page/', FrontMainPageView.as_view(), name='main_page'),
     path('front_about_us/', FrontAboutUsView.as_view(), name='front_about_us'),
+    path('front_utilities/', FrontUtilitiesView.as_view(), name='front_utilities'),
+    path('front_contacts/', ContactsView.as_view(), name="front_contacts"),
+
+    path('download_doc/<int:pk>', download_doc_view, name='download_doc'),
 ]

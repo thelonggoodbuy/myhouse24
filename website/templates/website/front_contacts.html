@@ -1,0 +1,86 @@
+{% extends "layout/website_base.html" %}
+{% load static %}
+
+{% block additionaly_css %}
+    <style>
+       
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/summernote/summernote.min.css' %}">
+
+{% endblock additionaly_css %}
+{% block additionaly_js %}
+    <script src="{% static 'appartments/plugins/summernote/summernote.min.js' %}"></script>
+    <script src="{% static 'appartments/plugins/summernote/lang/summernote-ru-RU.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+
+ 
+{% endblock additionaly_js %}
+
+
+{% block content %}
+
+
+<div class="breadcrumbs margin-top-md">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <ol class="breadcrumb" style="background-color: #FFFFFF">
+                    <li><a href="{% url 'website:main_page' %}">Главная</a></li>
+                    <li class="active">Контакты</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% comment %} <iframe width="100%" height="400" src="{{ main_page_data.map_code }}"></iframe> {% endcomment %}
+{% comment %} {{ main_page_data.map_code }} {% endcomment %}
+{% comment %} <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d23448.129294473125!2d30.202915948932056!3d50.51739806378702!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x472b322a9290dd75%3A0x5dec52bbf21fabcd!2z0IbRgNC_0ZbQvdGB0YzQutC40Lkg0LzRltGB0YzQutC40Lkg0L_QsNGA0Log0ZbQvNC10L3RliDQn9GA0LDQstC40LrQsA!5e0!3m2!1suk!2sua!4v1685713828954!5m2!1suk!2sua" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe> {% endcomment %}
+{% comment %} <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d23448.129294473125!2d30.202915948932056!3d50.51739806378702!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x472b322a9290dd75%3A0x5dec52bbf21fabcd!2z0IbRgNC_0ZbQvdGB0YzQutC40Lkg0LzRltGB0YzQutC40Lkg0L_QsNGA0Log0ZbQvNC10L3RliDQn9GA0LDQstC40LrQsA!5e0!3m2!1suk!2sua!4v1685713828954!5m2!1suk!2sua" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe> {% endcomment %}
+
+{% comment %} <iframe src='{{ main_page_data.map_code }}' width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe> {% endcomment %}
+
+<iframe width="100%" height="400" src="{{ main_page_data.map_code }}"></iframe>  
+
+
+
+{% comment %} <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d162329.88504049747!2d30.238066!3d50.526647!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x472b322a9290dd75%3A0x5dec52bbf21fabcd!2z0IbRgNC_0ZbQvdGB0YzQutC40Lkg0LzRltGB0YzQutC40Lkg0L_QsNGA0Log0ZbQvNC10L3RliDQn9GA0LDQstC40LrQsA!5e0!3m2!1suk!2sua!4v1685714888434!5m2!1suk!2sua" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe> {% endcomment %}
+
+<div class="contacts">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 col-sm-7 col-md-8">
+                <div class="page-header">
+                    <h1>{{ main_page_data.title }}</h1>
+                </div>
+                <div class="box">
+                    {{ main_page_data.short_descriptions|safe }}
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-5 col-md-4">
+                <div class="page-header">
+                    <h3>Контакты</h3>
+                </div>
+                <div class="box">
+                    <p><i class="fa fa-user-circle"></i>{{contacts.title}}</p>
+                    <p><i class="fa fa-compass"></i>{{contacts.location}}</p>
+                    <p><i class="fa fa-map-marker"></i>{{contacts.address}}</p>
+                    <p><i class="fa fa-phone"></i> <a href="javascript:;">{{contacts.phone}}</a></p>
+                    <p><i class="fa fa-envelope"></i> <a href="javascript:;">{{contacts.email}}</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(function (){
+
+
+
+    });
+</script>
+{% endblock content %}

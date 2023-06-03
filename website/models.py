@@ -26,7 +26,6 @@ class Document(models.Model):
     title = models.CharField(max_length=200, null=True, blank=True)
 
 
-
 class ServicesPage(models.Model):
     seo_block = models.OneToOneField('SeoBlock', on_delete=models.CASCADE, blank=True, null=True)
 
