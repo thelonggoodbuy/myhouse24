@@ -28,6 +28,7 @@ from django.db.models.functions import Concat
 from django.db.models import F, Q, CharField, Value, Case, When
 
 
+from receipts.models import Receipt, ReceiptCell
 from .tokens import account_activation_token
 from .models import User, Role, MessageToUser
 from django.contrib.messages.views import SuccessMessageMixin
@@ -40,7 +41,10 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from appartments.models import House, Section, Floor, Appartment
 
 
+from datetime import date, datetime
 import html2text
+import calendar
+
 
 
 
@@ -553,3 +557,129 @@ class MessageDeleteView(DeleteView):
         self.object.delete()
         messages.success(request, (f"Сообщение '{message_topic}' удалено."))
         return HttpResponseRedirect(success_url)
+    
+
+# ---------------------------------CABINET-LOGIC---------------------------------------------
+class ProfileDetailView(DetailView):
+    model = User
+    template_name = 'users/profile_detail.html'
+
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
+    
+from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
+
+class ProfileStatisticPerAppartment(DetailView):
+    model = Appartment
+    template_name = 'users/profile_statistic_per_appartment.html'
+    context_object_name = 'appartment'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        first_date = date(date.today().year, 1, 1)
+        last_date = date(date.today().year, 12, 31)
+        
+        all_receipts_list = list(Receipt.objects.filter(Q(from_date__gt=first_date) and Q(from_date__lt=last_date) and Q(appartment=self.object))\
+                                            .values("from_date", "total_sum",\
+                                                     "status", "payment_was_made", "id"))
+        
+        recieipt_stat_dict = {}
+        for month in (list(calendar.month_name))[1:]:
+            recieipt_stat_dict[month] = {'total_debd':0, 'total_payed':0}
+
+        for receipt in all_receipts_list:
+            receipt_month = receipt['from_date'].strftime("%B")
+            recieipt_stat_dict[receipt_month]['total_debd'] += receipt["total_sum"]
+            if receipt['payment_was_made'] == True and receipt['status'] == 'paid_for':
+                recieipt_stat_dict[receipt_month]['total_payed'] += receipt["total_sum"]
+        summ_consumption = 0.0
+
+        for consumption in recieipt_stat_dict.items():
+            summ_consumption += float(consumption[1]['total_debd'])
+
+        # print('=========================================================')
+        # print(all_receipts_list)
+        # print('=========================================================')
+
+        context['average_consumption_per_month'] = (summ_consumption)/12
+
+        # prev_month = ((date.today().replace(day=1) - timedelta(days=1)).month)
+        
+        # first_date_prev_month = date(date.today().month, prev_month, 1)
+        # first_date_prev_month = (date(date.today().month, prev_month, 1)).strftime("%Y-%m-%d")
+
+        # next_month = date.today().month + 1
+
+
+        # last_date_this_month = date(date.today().month, 12, 31)
+
+        # print(prev_month)
+        # print('=========================================================')
+        # # print(next_month)
+        # print(date.today().month) 
+        # print('=========================================================')
+
+        # all_receipts_cells = ReceiptCell.objects.filter().values(Q(receipt__from_date__gt=first_date)\
+        #                                                         and Q(receipt__from_date__lt=last_date)\
+        #                                                         and Q(receipt__appartment=self.object))
+
+        first_day_previous_month = ((datetime.today() - relativedelta(months=1)).replace(day=1)).date()
+        last_day_previous_month = ((datetime.today().replace(day=1)) - relativedelta(days=1)).date()
+        
+
+
+        all_receipts_cells = list(ReceiptCell.objects.filter(Q(receipt__from_date__gt=first_date)\
+                                                                and Q(receipt__from_date__lt=last_date)\
+                                                                and Q(receipt__appartment=self.object))\
+                                                        .values('utility_service__title', 'cost', 'receipt__from_date'))
+                                                                
+        
+        for receipt_cell in all_receipts_cells: receipt_cell['month'] = receipt_cell['receipt__from_date'].strftime("%B")
+
+
+        # print(all_receipts_cells)
+
+        all_month_per_utility = {}
+        previous_month_per_utility = {}
+        all_month_summ = {}
+
+        for month in (list(calendar.month_name))[1:]: all_month_summ[month] = 0
+
+        for receipt in all_receipts_cells:
+            if receipt['utility_service__title'] in all_month_per_utility:
+                all_month_per_utility[receipt['utility_service__title']] += receipt['cost']
+            else:
+                all_month_per_utility[receipt['utility_service__title']] = receipt['cost']
+                
+                    
+            if receipt['utility_service__title'] in previous_month_per_utility:
+                if (receipt['receipt__from_date'] > first_day_previous_month or receipt['receipt__from_date'] == first_day_previous_month) and\
+                (receipt['receipt__from_date'] < last_day_previous_month or receipt['receipt__from_date'] == last_day_previous_month):\
+                previous_month_per_utility[receipt['utility_service__title']] += receipt['cost']
+            else:
+                if (receipt['receipt__from_date'] > first_day_previous_month or receipt['receipt__from_date'] == first_day_previous_month) and\
+                (receipt['receipt__from_date'] < last_day_previous_month or receipt['receipt__from_date'] == last_day_previous_month):\
+                previous_month_per_utility[receipt['utility_service__title']] = receipt['cost']
+
+
+            if receipt['month'] in all_month_summ:
+                all_month_summ[receipt['month']] += receipt['cost']
+            else:
+                all_month_summ[receipt['month']] = receipt['cost']
+
+
+
+
+        # print((list(calendar.month_name))[1:])
+
+
+        context['all_month_per_utility'] = all_month_per_utility
+        context['previous_month_per_utility'] = previous_month_per_utility
+        context['all_month_summ'] = all_month_summ
+
+        # print(context)
+
+        return context

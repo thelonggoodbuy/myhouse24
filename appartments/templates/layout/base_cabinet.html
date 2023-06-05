@@ -172,75 +172,39 @@
                                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
                             </a>
                             <ul class="treeview-menu" style="display: block;">
-                                <li>
-                                    <a href="/cabinet/?flat_id=96">
-                                        <i class="fa fa-building-o"></i>  
-                                        <span>ЖК "Башня Чкалов", кв.3425</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/cabinet/?flat_id=103">
-                                        <i class="fa fa-building-o"></i>  
-                                        <span>ЖК "Башня Чкалов", кв.4</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/cabinet/?flat_id=105">
-                                        <i class="fa fa-building-o"></i>  
-                                        <span>ЖК "Альтаир 3", кв.10</span>
-                                    </a>
-                                </li>
+                                {% for appartment in user_data.appartments %}
+                                    <li>
+                                        <a href="{% url 'users:profile_statistic_per_appartment' pk=appartment.owning__id %}">
+                                            <i class="fa fa-building-o"></i>  
+                                            <span>{{ appartment.address }}</span>
+                                        </a>
+                                    </li>
+                                {% endfor %}
                             </ul>
                         </li>
 
                         <li class="treeview"><a href="#!"><i class="fa fa-files-o"></i>  <span>Квитанции</span> <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
                             <ul class="treeview-menu">
+                            {% for appartment in user_data.appartments %}
                                 <li>
-                                    <a href="/cabinet/invoice/index">
-                                        <i class="fa fa-files-o"></i>  
-                                        <span>Все квитанции</span>
+                                    <a href="javascript:;">
+                                        <i class="fa fa-building-o"></i>  
+                                        <span>{{ appartment.address }}</span>
                                     </a>
                                 </li>
-                                <li>
-                                    <a href="/cabinet/invoice/index?InvoiceSearch%5Bflat_id%5D=96">
-                                        <i class="fa fa-file-text-o"></i>  
-                                        <span>ЖК "Башня Чкалов", кв.3425</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/cabinet/invoice/index?InvoiceSearch%5Bflat_id%5D=103">
-                                        <i class="fa fa-file-text-o"></i>  
-                                        <span>ЖК "Башня Чкалов", кв.4</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/cabinet/invoice/index?InvoiceSearch%5Bflat_id%5D=105">
-                                        <i class="fa fa-file-text-o"></i>  
-                                        <span>ЖК "Альтаир 3", кв.10</span>
-                                    </a>
-                                </li>
+                            {% endfor %}
                             </ul>
                         </li>
                         <li class="treeview"><a href="/cabinet/tariff/index"><i class="fa fa-money"></i>  <span>Тарифы</span> <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
                             <ul class="treeview-menu">
+                            {% for appartment in user_data.appartments %}
                                 <li>
-                                    <a href="/cabinet/tariff/index?flat_id=96">
-                                        <i class="fa fa-file-text-o"></i>  
-                                        <span>ЖК "Башня Чкалов", кв.3425</span>
+                                    <a href="javascript:;">
+                                        <i class="fa fa-building-o"></i>  
+                                        <span>{{ appartment.address }}</span>
                                     </a>
                                 </li>
-                                <li>
-                                    <a href="/cabinet/tariff/index?flat_id=103">
-                                        <i class="fa fa-file-text-o"></i>  
-                                        <span>ЖК "Башня Чкалов", кв.4</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/cabinet/tariff/index?flat_id=105">
-                                        <i class="fa fa-file-text-o"></i>  
-                                        <span>ЖК "Альтаир 3", кв.10</span>
-                                    </a>
-                                </li>
+                            {% endfor %}
                             </ul>
                         </li>
                         <li class="active">

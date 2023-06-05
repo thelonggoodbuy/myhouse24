@@ -187,7 +187,7 @@
 {{ statement_stat_dict|json_script:'statement_stat_dict'}}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="{% static 'appartments/plugins/chartjs/chart.js' %}"></script>
+{% comment %} <script src="{% static 'appartments/plugins/chartjs/chart.js' %}"></script> {% endcomment %}
 
 <script>
 
@@ -206,7 +206,7 @@
         payed_array.push(receipt_statistics_per_month[receipt_month]['total_payed'])
     }
 
-
+    
 
     var receipt_graph = document.getElementById('receipt_graph');
     var DATA_COUNT = 12;

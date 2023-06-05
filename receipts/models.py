@@ -35,10 +35,8 @@ class Receipt(models.Model):
 class ReceiptCell(models.Model):
     receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE, blank=True, null=True, related_name='receipt_cells')
     utility_service = models.ForeignKey(UtilityService, on_delete=models.SET_NULL, blank=True, null=True)
-    # utility_service = models.ForeignKey(UtilityService, on_delete=models.SET_NULL, blank=True, null=True)
     consumption = models.DecimalField(max_digits=10, decimal_places=2)
     unit_of_measure = models.ForeignKey(UnitOfMeasure, on_delete=models.SET_NULL, blank=True, null=True)
-    # counter_readings = models.OneToOneField(CounterReadings, on_delete=models.SET_NULL, blank=True, null=True)
     cost_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
     cost = models.DecimalField(max_digits=10, decimal_places=2)
 

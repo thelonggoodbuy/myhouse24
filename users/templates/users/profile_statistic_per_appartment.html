@@ -1,0 +1,320 @@
+{% extends "layout/base_cabinet.html" %}
+{% block additionaly_css %}
+    <style>
+        .column-center {
+            margin-top: 5pt;
+        }
+    </style>
+    
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    {% comment %} <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/summernote/summernote.min.css' %}"> {% endcomment %}
+
+{% endblock additionaly_css %}
+{% block additionaly_js %}
+
+    {% comment %} <script src="{% static 'appartments/plugins/summernote/summernote.min.js' %}"></script>
+    <script src="{% static 'appartments/plugins/summernote/lang/summernote-ru-RU.js' %}"></script> {% endcomment %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    {% comment %} <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script> {% endcomment %}
+
+
+    
+{% endblock additionaly_js %}
+
+
+
+{% block content %}
+
+    <h3>Сводка - ЖК "{{ appartment.house.title }}", кв.{{ appartment.number }}</h3>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12 col-md-6 col-lg-4">
+                <div class="small-box bg-green">
+                    <div class="inner">
+                        <h3>{{ appartment.personal_account.balance }} грн</h3>
+                        <p>Баланс по квартире</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-money"></i>
+                    </div>
+                    <span class="small-box-footer">
+                        &nbsp;
+                    </span>
+                </div>
+            </div>
+            <div class="col-xs-12 col-md-6 col-lg-4">
+                <div class="small-box bg-blue">
+                    <div class="inner">
+                        <h3>{{ appartment.personal_account.number }}</h3>
+                        <p>Лицевой счет</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <span class="small-box-footer">
+                        &nbsp;
+                    </span>
+                </div>
+            </div>
+            <div class="col-xs-12 col-md-6 col-lg-4">
+                <div class="small-box bg-yellow">
+                    <div class="inner">
+                        <h3>{{ average_consumption_per_month }} грн</h3>
+                        <p>Средний расход за месяц</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-pie-chart"></i>
+                    </div>
+                    <span class="small-box-footer">
+                        &nbsp;
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-lg-6">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Диаграмма расходов за предыдущий месяц</h3>
+                    </div>
+                    <div class="box-body" id="previous_month_graph_is_data">
+                        <canvas id="previous_month_graph" style="height: 400px !important; width: 400px !important;"></canvas>
+                    </div>
+                    <div class="box-body" id="previous_month_graph_no_data">
+                        <div>Данных о расходах в предыдущий месяце в базе данных нет</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xs-12 col-lg-6">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Диаграмма расходов за год</h3>
+                    </div>
+                    <div class="box-body" id="current_year_graph_graph_is_data">
+                        <canvas id="current_year_graph_graph" style="height: 400px !important; width: 400px !important;"></canvas>
+                    </div>
+                    <div class="box-body" id="current_year_graph_graph_no_data">
+                        <div>Данных о расходах в текущем году в базе данных нет</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xs-12 col-lg-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Расходы по месяцам</h3>
+                    </div>
+                    <div class="box-body">
+                        <canvas id="expense_per_month" style="height: 350px !important;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    {{ previous_month_per_utility|json_script:'previous_month_per_utility' }}
+    {{ all_month_per_utility|json_script:'all_month_per_utility' }}
+    {{ all_month_summ|json_script:'all_month_summ' }}
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script  type="text/javascript">
+
+    $(document).ready(function () {
+
+        var previous_month_per_utility = JSON.parse(document.getElementById('previous_month_per_utility').textContent)
+        var all_month_per_utility = JSON.parse(document.getElementById('all_month_per_utility').textContent)
+        var all_month_summ = JSON.parse(document.getElementById('all_month_summ').textContent)
+
+        $("div[id$=no_data]").hide()
+
+        //previous month graph logic
+        var previous_month_graph = document.getElementById("previous_month_graph")     
+        var background_color_arr = ['Green', 'Red', 'Orange', 'Yellow',
+            'Maroon', 'Purple', 'Fuchsia', 'Lime', 'Olive', 'Yellow',
+            'Navy', 'Blue', 'Teal', 'Aqua']
+
+        prev_month_utility = []
+        prev_month_expense = []
+        colors = []
+
+        //console.log(previous_month_per_utility)
+
+        var sum_previous_month = Object.values(previous_month_per_utility).reduce((partialSum, a) => partialSum + Number(a), 0);
+        if (sum_previous_month == 0){
+            $('#previous_month_graph_is_data').hide()
+            $('#previous_month_graph_no_data').show()
+        }
+        //console.log(sum)
+
+
+        for(utility in previous_month_per_utility){
+            prev_month_utility.push(utility)
+            prev_month_expense.push(previous_month_per_utility[utility])
+        }
+
+        var data = {
+        labels: prev_month_utility,
+        datasets: [
+            {
+            label: 'Расход в грн.',
+            data: prev_month_expense,
+            backgroundColor: background_color_arr
+            }
+        ]
+        };
+    
+        // DONUT
+        var PreviousMounthGraph = new Chart(previous_month_graph, {
+            type: 'doughnut',
+            data: data,
+            options: {
+
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'bottom',
+                },
+              }
+
+            },
+          }
+        )
+//----------------------------------------------------------------------
+        var background_color_arr = ['Green', 'Red', 'Orange', 'Yellow',
+            'Maroon', 'Purple', 'Fuchsia', 'Lime', 'Olive', 'Yellow',
+            'Navy', 'Blue', 'Teal', 'Aqua']
+
+        var current_year_graph_graph = document.getElementById("current_year_graph_graph")   
+            //all_month_per_utility
+
+        this_year_utility = []
+        this_year_expense = []
+        //colors = []
+
+        for(utility in all_month_per_utility){
+
+            this_year_utility.push(utility)
+            this_year_expense.push(all_month_per_utility[utility])
+        }
+
+        var sum_all_month_per_utility = Object.values(all_month_per_utility).reduce((partialSum, a) => partialSum + Number(a), 0);
+        if (sum_all_month_per_utility == 0){
+            $('#current_year_graph_graph_is_data').hide()
+            $('#current_year_graph_graph_no_data').show()
+        }
+
+        var data = {
+        labels: this_year_utility,
+        datasets: [
+            {
+            label: 'Расход в грн.',
+            data: this_year_expense,
+            backgroundColor: background_color_arr
+            }
+        ]
+        };
+
+        // DONUT
+        var ThisYearGraph = new Chart(current_year_graph_graph, {
+            type: 'doughnut',
+            data: data,
+            options: {
+
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                position: 'bottom',
+                },
+            }
+
+        },
+    })
+
+
+//---------------------------------------------------------------------------
+//------------------------------Graph per month------------------------------
+//---------------------------------------------------------------------------    
+
+var all_month_summ = JSON.parse(document.getElementById('all_month_summ').textContent)
+
+expense_array = []
+
+for(statement_month in all_month_summ){
+    console.log(statement_month)
+    expense_array.push(all_month_summ[statement_month])
+    }
+
+console.log(expense_array)
+
+var expense_per_month = document.getElementById('expense_per_month');
+    
+
+    var labels = ['янв', 'февр', 'март',
+                'апр', 'май', 'июнь', 
+                'июль', 'авг', 'сент', 
+                'окт', 'нояб', 'дек'];
+
+    var data = {
+        labels: labels,
+        datasets: [{
+          label: 'Расход',
+          data: expense_array,
+          backgroundColor: 'Blue',
+        }]
+      }
+  
+    new Chart(expense_per_month, {
+      type: 'bar',
+      data: data,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        //plugin options
+        plugins:{
+
+            legend: {
+                display: true,
+                position: 'bottom',
+                align: 'center',
+                labels: {
+                   color: 'darkred',
+                   font: {
+                      weight: 'bold'
+                   },
+
+                }
+            },
+        },
+        //work with skale options
+        scales: {
+          y: {
+            beginAtZero: true
+          },
+        },
+        
+      }
+
+    });
+
+
+
+//---------------------------------------------------------------------------
+//-----------------------------END---------Graph per month-------------------
+//---------------------------------------------------------------------------
+
+
+    })
+
+</script>
+
+{% endblock content %}

@@ -2,7 +2,8 @@ from django.urls import path, re_path
 from .views import LoginSimpleUser, LoginAdminUser, LogOutUser, SignUpSimpleUser, ActivateAccount, \
                     AdminSettingsUsersListLogic, AdminSettingsUserCardView, AdminSettingsUsersDeleteView, AdmSettingsUsersUpdateView,\
                     AdminSettingsUsersRolesView, AppartmentsOwnersView,\
-                    PermissionDeniedView, MessagesListView, MessageCreateView, MessageDetailView, MessageDeleteView
+                    PermissionDeniedView, MessagesListView, MessageCreateView, MessageDetailView, MessageDeleteView,\
+                    ProfileDetailView, ProfileStatisticPerAppartment
                         # temp_funct_users_listlogic
 
 
@@ -46,4 +47,8 @@ urlpatterns = [
     path('message_detail/<int:pk>/', MessageDetailView.as_view(), name='message_detail'),
     # path('message_delete/', MessageDeleteView.as_view(), name="message_delete"),
     path('message_delete/<int:pk>/', MessageDeleteView.as_view(), name="message_delete"),
+
+    # urls for CABINET LOGIC
+    path('profile_detail/', ProfileDetailView.as_view(), name='profile_detail'),
+    path('profile_statistic_per_appartment/<int:pk>/', ProfileStatisticPerAppartment.as_view(), name="profile_statistic_per_appartment"),
 ]

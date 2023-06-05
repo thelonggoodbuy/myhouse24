@@ -1,0 +1,16 @@
+{% extends "layout/base_cabinet.html" %}
+
+
+
+
+{% block content %}
+
+    <h3>This is user</h3>
+    <p>Welcome, {{ user.id }}. Thanks for logging in.</p>
+    <p>Context processors data: {{ user_data }}</p>
+
+    <h3>Text dictionary</h3>
+    {% for appartment in user_data.appartments %}
+        <p>{{ appartment }}</p>
+    {% endfor %}
+{% endblock content %}

@@ -356,14 +356,14 @@ class AppartmentEditeView(UpdateView):
         if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'owner_marker':
             if self.request.GET.get('search'):
                 search_data = self.request.GET.get('search')
-                owners_data = list(User.objects.filter(full_name__icontains=search_data).values('id', 'full_name'))
+                owners_data = list(User.objects.filter(full_name__icontains=search_data).order_by('-id').values('id', 'full_name'))
                 for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
                 data = {'results': owners_data}
                 return JsonResponse(data)
 
         # select 2 all owners data
         if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('issue_marker') == 'all_owners_marker':
-            owners_data = list(User.objects.all().values('id', 'full_name'))
+            owners_data = list(User.objects.all().order_by('-id').values('id', 'full_name'))
             for owner_dict in owners_data: owner_dict['text'] = owner_dict.pop('full_name')
             data = {'results': owners_data}
             return JsonResponse(data)
