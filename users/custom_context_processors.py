@@ -18,7 +18,7 @@ def get_owning_data(request):
         user_data_dictionary['appartments'].append(user_dictionary)
 
 
-
+    # print(user_data_dictionary)
 
     # user_data = request.user.owning.all
     return {'user_data': user_data_dictionary}

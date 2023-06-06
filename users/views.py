@@ -3,6 +3,9 @@ import operator
 from functools import reduce
 from babel.dates import format_date, format_datetime
 
+
+from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
 from django.shortcuts import render, redirect
 # from django.views.generic import LoginView
 from django.contrib.auth.views import LoginView, LogoutView
@@ -568,8 +571,6 @@ class ProfileDetailView(DetailView):
         obj = self.request.user
         return obj
     
-from datetime import date, timedelta
-from dateutil.relativedelta import relativedelta
 
 class ProfileStatisticPerAppartment(DetailView):
     model = Appartment
@@ -600,47 +601,17 @@ class ProfileStatisticPerAppartment(DetailView):
         for consumption in recieipt_stat_dict.items():
             summ_consumption += float(consumption[1]['total_debd'])
 
-        # print('=========================================================')
-        # print(all_receipts_list)
-        # print('=========================================================')
-
         context['average_consumption_per_month'] = (summ_consumption)/12
-
-        # prev_month = ((date.today().replace(day=1) - timedelta(days=1)).month)
-        
-        # first_date_prev_month = date(date.today().month, prev_month, 1)
-        # first_date_prev_month = (date(date.today().month, prev_month, 1)).strftime("%Y-%m-%d")
-
-        # next_month = date.today().month + 1
-
-
-        # last_date_this_month = date(date.today().month, 12, 31)
-
-        # print(prev_month)
-        # print('=========================================================')
-        # # print(next_month)
-        # print(date.today().month) 
-        # print('=========================================================')
-
-        # all_receipts_cells = ReceiptCell.objects.filter().values(Q(receipt__from_date__gt=first_date)\
-        #                                                         and Q(receipt__from_date__lt=last_date)\
-        #                                                         and Q(receipt__appartment=self.object))
 
         first_day_previous_month = ((datetime.today() - relativedelta(months=1)).replace(day=1)).date()
         last_day_previous_month = ((datetime.today().replace(day=1)) - relativedelta(days=1)).date()
         
-
-
         all_receipts_cells = list(ReceiptCell.objects.filter(Q(receipt__from_date__gt=first_date)\
                                                                 and Q(receipt__from_date__lt=last_date)\
                                                                 and Q(receipt__appartment=self.object))\
                                                         .values('utility_service__title', 'cost', 'receipt__from_date'))
-                                                                
-        
+                                                                        
         for receipt_cell in all_receipts_cells: receipt_cell['month'] = receipt_cell['receipt__from_date'].strftime("%B")
-
-
-        # print(all_receipts_cells)
 
         all_month_per_utility = {}
         previous_month_per_utility = {}
@@ -670,16 +641,200 @@ class ProfileStatisticPerAppartment(DetailView):
             else:
                 all_month_summ[receipt['month']] = receipt['cost']
 
-
-
-
-        # print((list(calendar.month_name))[1:])
-
-
         context['all_month_per_utility'] = all_month_per_utility
         context['previous_month_per_utility'] = previous_month_per_utility
         context['all_month_summ'] = all_month_summ
 
-        # print(context)
+        return context
+
+
+
+
+
+class ProfileReceiptListView(TemplateView):
+    template_name = 'users/profile_receipt_list.html'
+
+    def get(self, request, *args, **kwargs):
+
+        if self.request.is_ajax() and self.request.method == 'GET' and request.GET.get('draw'):
+        
+            receipt_data_get_request = request.GET
+            #search logic 
+            Q_list = []
+
+            # number filtering
+            if request.GET.get('columns[1][search][value]'):
+                Q_list.append(Q(number__icontains=request.GET.get('columns[1][search][value]')))
+
+            # date range search
+            if request.GET.get('columns[2][search][value]'):
+                date = request.GET.get('columns[2][search][value]')
+                formated_date = datetime.strptime(date, '%d.%m.%Y')
+                Q_list.append(Q(to_date=formated_date))
+
+            # status filtering
+            if request.GET.get('columns[3][search][value]'):
+                print(request.GET.get('columns[3][search][value]'))
+                if request.GET.get('columns[3][search][value]') != 'all_status':
+                    Q_list.append(Q(status=request.GET.get('columns[3][search][value]')))
+
+            
+            # payment status filter
+            if request.GET.get('columns[4][search][value]'):
+                if request.GET.get('columns[4][search][value]') != 'all_payment_status':
+                    Q_list.append(Q(payment_was_made=request.GET.get('columns[4][search][value]')))
+
+
+
+            Q_list.append(Q(appartment__owner_user=request.user))
+
+            draw = int(receipt_data_get_request.get("draw"))
+            start = int(receipt_data_get_request.get("start"))
+            length = int(receipt_data_get_request.get("length"))
+
+            raw_data = Receipt.objects.filter(*Q_list)\
+                                    .order_by()\
+                                    .values('number', 'status', 'to_date',\
+                                            'total_sum', "id")
+
+            data = list(raw_data)
+            verbose_status_dict = Receipt.get_verbose_status_dict()
+
+            for receipt in data:  
+                verbose_status = ""
+                try: 
+                    verbose_status = verbose_status_dict[receipt['status']]
+                    receipt['status'] = verbose_status
+                except:
+                    receipt['status'] = ''
+          
+
+            # paginator here
+            paginator = Paginator(data, length)
+            page_number = start / length + 1
+            try:
+                obj = paginator.page(page_number).object_list
+            except PageNotAnInteger:
+                obj = paginator(1).object_list
+            except EmptyPage:
+                obj = paginator.page(1).object_list
+
+            total = len(data)
+            records_filter = total
+
+            response = {
+                'data': obj,
+                'draw': draw,
+                'recordsTotal:': total,
+                'recordsFiltered': records_filter,
+            }
+            return JsonResponse(response, safe=False)
+        
+        else:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
         return context
+
+
+class ProfileReceiptListPerAppartmentView(DetailView):
+    template_name = 'users/profile_receipt_list_per_appartment.html'
+    model = Appartment
+
+    def get(self, request, *args, **kwargs):
+
+        if self.request.is_ajax() and self.request.method == 'GET' and request.GET.get('draw'):
+            
+            receipt_data_get_request = request.GET
+            Q_list = []
+
+            Q_list.append(Q(appartment__id=self.get_object().id))
+
+
+            # number filtering
+            if request.GET.get('columns[1][search][value]'):
+                Q_list.append(Q(number__icontains=request.GET.get('columns[1][search][value]')))
+
+            # date range search
+            if request.GET.get('columns[2][search][value]'):
+                date = request.GET.get('columns[2][search][value]')
+                formated_date = datetime.strptime(date, '%d.%m.%Y')
+                Q_list.append(Q(to_date=formated_date))
+
+            # status filtering
+            if request.GET.get('columns[3][search][value]'):
+                print(request.GET.get('columns[3][search][value]'))
+                if request.GET.get('columns[3][search][value]') != 'all_status':
+                    Q_list.append(Q(status=request.GET.get('columns[3][search][value]')))
+
+            
+            # payment status filter
+            if request.GET.get('columns[4][search][value]'):
+                if request.GET.get('columns[4][search][value]') != 'all_payment_status':
+                    Q_list.append(Q(payment_was_made=request.GET.get('columns[4][search][value]')))
+
+
+
+            Q_list.append(Q(appartment__owner_user=request.user))
+
+            draw = int(receipt_data_get_request.get("draw"))
+            start = int(receipt_data_get_request.get("start"))
+            length = int(receipt_data_get_request.get("length"))
+
+            raw_data = Receipt.objects.filter(*Q_list)\
+                                    .order_by()\
+                                    .values('number', 'status', 'to_date',\
+                                            'total_sum', "id")
+
+            data = list(raw_data)
+            verbose_status_dict = Receipt.get_verbose_status_dict()
+
+            for receipt in data:  
+                verbose_status = ""
+                try: 
+                    verbose_status = verbose_status_dict[receipt['status']]
+                    receipt['status'] = verbose_status
+                except:
+                    receipt['status'] = ''
+          
+
+            # paginator here
+            paginator = Paginator(data, length)
+            page_number = start / length + 1
+            try:
+                obj = paginator.page(page_number).object_list
+            except PageNotAnInteger:
+                obj = paginator(1).object_list
+            except EmptyPage:
+                obj = paginator.page(1).object_list
+
+            total = len(data)
+            records_filter = total
+
+            response = {
+                'data': obj,
+                'draw': draw,
+                'recordsTotal:': total,
+                'recordsFiltered': records_filter,
+            }
+            return JsonResponse(response, safe=False)
+        
+        else:
+            # context = self.get_context_data(**kwargs)
+            # return self.render_to_response(context)
+            context = super().get(self, request, *args, **kwargs)
+            return context
+
+
+    def get_context_data(self, **kwargs):
+        print('===============================')
+        print(self.get_object())
+        print('===============================')
+        context = super().get_context_data(**kwargs)
+
+        return context
+
+

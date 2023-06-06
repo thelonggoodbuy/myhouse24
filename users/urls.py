@@ -3,7 +3,7 @@ from .views import LoginSimpleUser, LoginAdminUser, LogOutUser, SignUpSimpleUser
                     AdminSettingsUsersListLogic, AdminSettingsUserCardView, AdminSettingsUsersDeleteView, AdmSettingsUsersUpdateView,\
                     AdminSettingsUsersRolesView, AppartmentsOwnersView,\
                     PermissionDeniedView, MessagesListView, MessageCreateView, MessageDetailView, MessageDeleteView,\
-                    ProfileDetailView, ProfileStatisticPerAppartment
+                    ProfileDetailView, ProfileStatisticPerAppartment, ProfileReceiptListView, ProfileReceiptListPerAppartmentView
                         # temp_funct_users_listlogic
 
 
@@ -51,4 +51,7 @@ urlpatterns = [
     # urls for CABINET LOGIC
     path('profile_detail/', ProfileDetailView.as_view(), name='profile_detail'),
     path('profile_statistic_per_appartment/<int:pk>/', ProfileStatisticPerAppartment.as_view(), name="profile_statistic_per_appartment"),
+    path('profile_receipt_list/', ProfileReceiptListView.as_view(), name='profile_receipt_list'),
+    path('profile_receipt_list_per_appartment/', ProfileReceiptListPerAppartmentView.as_view(), name='profile_receipt_list_per_appartment'),
+    path('profile_receipt_list_per_appartment/<int:pk>/', ProfileReceiptListPerAppartmentView.as_view(), name='profile_receipt_list_per_appartment'),
 ]

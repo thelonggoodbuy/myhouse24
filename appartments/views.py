@@ -884,28 +884,6 @@ class CreteNewUser(CreateView):
     success_url = reverse_lazy('appartments:owners_list')
 
 
-    # def form_valid(self, form):
-    #     user = form.save(commit=False)
-    #     user.is_active = False
-    #     password = form.cleaned_data['password']
-    #     user.set_password(password)
-    #     user.save()
-
-    #     current_site = get_current_site(self.request)
-    #     subject = 'Activate You MySite Account'
-    #     message = render_to_string('email_templates/account_activation_email.html', {
-    #         'user': user,
-    #         'domain': current_site.domain,
-    #         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-    #         'token': account_activation_token.make_token(user),
-    #     })
-    #     # ******тут отправляю. можно добавить ссылку туда**********
-    #     user.email_user(subject, message)
-    #     print('Ваш профиль зарегистрирован, но не активирован. Пожалуйста подтвердите регистрацию через письмо полученное на почту.')
-    #     messages.info(self.request, ('Ваш профиль зарегистрирован, но не активирован. Пожалуйста подтвердите регистрацию через письмо полученное на почту.'))
-    #     return super(SignUpSimpleUser, self).form_valid(form)
-
-
     def form_invalid(self, form):
         if form.errors:
             for field, error in form.errors.items():

@@ -1,0 +1,218 @@
+{% extends "layout/base_cabinet.html" %}
+
+{% load static %}
+
+{% block title %}
+    <title>Квитанции на оплату</title>
+{% endblock title %}
+
+{% block content-header %}
+    <h1>Квитанции на оплату</h1>
+{% endblock %}
+
+{% block additionaly_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2/dist/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2-theme-bootstrap4/dist/select2-bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+{% endblock additionaly_css %}
+
+{% block additionaly_js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script src="{% static 'appartments/plugins/select2/dist/js/select2.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script src="{% static 'appartments/plugins/bootstrap-datepicker/js/locales/bootstrap-datepicker.ru.js' %}"></script>
+    {% comment %} <script src="{% static 'appartments/plugins/bootstrap-datepicker/js/locales/bootstrap-datepicker.ru.js' %}"></script> {% endcomment %}
+{% endblock additionaly_js %}
+
+
+{% block content %}
+
+        <section class="content">
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title"></h3>
+                            <div class="box-tools">
+                                <button class="btn btn-default btn-sm" id="clear_filters">
+                                    <span class="hidden-xs">Очистить</span><i class="fa fa-eraser visible-xs" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="w0" class="grid-view">
+                            <div class="box-body table-responsive no-padding">
+                                <table class="table table-bordered table-hover table-striped linkedRow" id="receipt_list_table">
+                                    <thead>
+                                        <tr id="order_links">
+                                            <th sort-index="1" id="number">№ квитанции</th>
+                                            <th sort-index="2" id="to_date">Дата</th>
+                                            <th sort-index="3" id="status">Статус</th>
+                                            <th sort-index="4" id="total_sum">Сумма (грн)</th>
+                                        </tr>
+                                        <tr class="filters">
+                                            <td>
+                                                <input colnumb="1" type="text" class="form-control" placeholder="" id="number">
+                                            </td>
+                                            <td>
+                                                <input colnumb="2" type="text" class="form-control" placeholder="" id="to_date_field">
+                                            </td>
+                                            <td>
+                                                <select colnumb="3" class="form-control" placeholder="" id="choose_status">
+                                                    <option id="all_status"></option>
+                                                    <option id="paid_for">Оплачена</option>
+                                                    <option id="partly">Частично</option>
+                                                    <option id="unpaid">Неоплачена</option>
+                                                </select>
+                                            </td>
+
+
+                                            <td>
+                                            </td>
+
+                                        </tr>
+                                    </thead>
+                                    
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                    </div>            
+                </div>
+            </div>
+        </div>
+        </section>
+
+
+
+<script>
+
+
+$(document).ready(function () {
+
+
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      };
+
+
+        var table = $('#receipt_list_table').DataTable({
+            "initComplete": function(){
+
+                //logic for input search element
+                $('.filters input').on('keyup change clear', function(){
+                                            var numb = $(this).attr("colnumb")
+                                            table.columns(numb).search(this.value).draw();
+                })
+
+                
+                //logic for select element            
+                $('.filters select').on('change', function(){
+                    var choosen_numb = $(this).attr("colnumb")
+                    var choosen_option = $(this).find(":selected").attr('id')
+                    table.columns(choosen_numb).search(choosen_option).draw();
+                })
+
+
+            },
+
+            "rowCallback": function(row, data){
+                if (data.status === "Оплачена") {
+                    $('td:eq(2)', row).wrapInner("<small class='label label-success my-3'></small>");
+                } else if (data.status === "Частично") {
+                    $('td:eq(2)', row).wrapInner("<small class='label label-warning'></small>");
+                } else if (data.status === "Неоплачена") {
+                    $('td:eq(2)', row).wrapInner("<small class='label label-danger'></small>");
+                }
+            },
+
+            "dom": "<<t>p>",
+            "processing": true,
+            "serverSide": true,
+            "pageLength": 50,
+            "ordering": false,
+            //"scrollX": true,
+            "ajax": {
+                "type": "GET",
+                "url": "{% url 'users:profile_receipt_list' %}",
+                "dataSrc": "data",
+                "dataType": "json",
+            },
+            "columns": [
+                {"data": "number", "name": "number", "width": "100pt"},
+                {"data": "to_date", "name": "to_date", "width": "100pt"},
+                {"data": "status", "name": "status", "width": "100pt"},
+                {"data": "total_sum", "name": "total_sum", "width": "100pt"},
+                ],
+//            "columnDefs": [
+//                {'orderable': false, targets: 0},
+//                {'orderable': false, targets: 1},
+//                {'orderable': false, targets: 2},
+//                {'orderable': false, targets: 3},
+//                {'orderable': false, targets: 4},
+//                {'orderable': false, targets: 5},
+//                {'orderable': false, targets: 6},
+//            ],
+            "rowId": 'id',
+            
+        });
+
+        
+
+    $("#to_date_field").datepicker({
+        format: "dd.mm.yyyy",
+        language: 'ru'
+    })
+
+
+    //reversion logic for row except links to send inviting, deleting and editing
+    table.on('click', 'tbody > tr > td', function () {
+        if(
+            $(this).find("div").attr("id") != "buttons_interaction"
+            )
+        {
+            var basic_url = "{% url 'receipts:receipt_detail' %}"
+            var url_index = table.row(this).id().toString();
+            document.location.href = basic_url + url_index;
+            //console.log(`Now you click in link ${url_index}`)
+        }
+    } );
+
+
+    table.on('click', '#delete_button', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        var receipt_number = $(this).closest("tr").find("td[class*='number']").text()
+        console.log(number)
+        $("#myDialog").text(`Удалить квитанцию ${receipt_number}?`).data('row_number', row_number).dialog("open");
+    })
+
+
+    table.on('click', '#edite_button', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        var basic_url = "{% url 'receipts:edit_receipt' %}"
+        document.location.href = basic_url + row_number;
+    })
+
+
+    });
+
+
+
+    
+</script>
+{% endblock content %}
