@@ -16,6 +16,8 @@
         <link rel="stylesheet" type="text/css" href="{% static 'users/css/style.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/plugins/toastr/build/toastr.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/plugins/DataTables/datatables.min.css'%}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/plugins/DataTables/DataTables-1.13.2/css/jquery.dataTables.min.css'%}">
+
         <link rel="stylesheet" type="text/css" href="{% static 'users/components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/components/Ionicons/css/ionicons.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'users/components/jvectormap/jquery-jvectormap.css' %}">
@@ -33,6 +35,8 @@
         <script type="text/javascript" src="{% static 'users/js/adminlte.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/plugins/toastr/build/toastr.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/plugins/DataTables/datatables.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/plugins/DataTables/DataTables-1.13.2/js/jquery.dataTables.min.js' %}"></script>
+
 
         <script type="text/javascript" src="{% static 'users/plugins/iCheck/icheck.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.js' %}"></script>
@@ -42,6 +46,9 @@
         <script type="text/javascript" src="{% static 'users/plugins/jvectormap/jquery-jvectormap-world-mill-en.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/components/jquery-slimscroll/jquery.slimscroll.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/components/chart.js/Chart.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/plugins/jquery-validation/dist/jquery.validate.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'users/plugins/jquery-validation/dist/additional-methods.min.js' %}"></script>
+
         <script type="text/javascript" src="{% static 'users/js/yii.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/js/main.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/js/custom.js' %}"></script>
@@ -183,8 +190,6 @@
                                 {% endfor %}
                             </ul>
                         </li>
-                        {% comment %} ================================================================== {% endcomment %}
-                        {% comment %} ================================================================== {% endcomment %}
                         <li class="treeview">
                             <a href="#!">
                                 <i class="fa fa-files-o"></i>  
@@ -211,13 +216,11 @@
                                 {% endfor %}
                             </ul>
                         </li>
-                        {% comment %} ================================================================== {% endcomment %}
-                        {% comment %} ================================================================== {% endcomment %}
                         <li class="treeview"><a href="/cabinet/tariff/index"><i class="fa fa-money"></i>  <span>Тарифы</span> <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
                             <ul class="treeview-menu">
                             {% for appartment in user_data.appartments %}
                                 <li>
-                                    <a href="{% url 'users:profile_template_list' appartment.owning__id %}">
+                                    <a href="{% url 'users:profile_tariff_list' appartment.owning__id %}">
                                         <i class="fa fa-building-o"></i>  
                                         <span>{{ appartment.address }}</span>
                                     </a>
@@ -225,12 +228,17 @@
                             {% endfor %}
                             </ul>
                         </li>
-                        <li class="active">
-                            <a href="/cabinet/message/index">
+                        {% comment %} ================================================================== {% endcomment %}
+                        {% comment %} ================================================================== {% endcomment %}
+                        <li>
+                            <a href="{% url 'users:profile_message_list' user.id %}">
+                            {% comment %} <a href="javascript:;"> {% endcomment %}
                                 <i class="fa fa-envelope-o"></i>  
                                 <span>Сообщения</span>
                             </a>
                         </li>
+                        {% comment %} ================================================================== {% endcomment %}
+                        {% comment %} ================================================================== {% endcomment %}
                         <li>
                             <a href="/cabinet/master-request/index">
                                 <i class="fa fa-wrench"></i>  

@@ -130,3 +130,4 @@ class MessageToUser(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="from_user", null=True, blank=True)
     to_users = models.ManyToManyField(User, related_name="to_users")
     message_target_type = models.CharField(max_length=200, choices=MESSAGE_TARGET, default='all_users')
+    read_by_user = models.ManyToManyField(User, related_name="readed_by_user")

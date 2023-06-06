@@ -388,9 +388,6 @@ class MessagesListView(TemplateView):
             if request.GET.get('search[value]'):
                 Q_list.append(Q(topic__icontains=request.GET.get('search[value]')))
 
-            
-
-                
 
             #search logic
             draw = int(account_data_get_request.get("draw"))
@@ -831,14 +828,11 @@ class ProfileReceiptListPerAppartmentView(DetailView):
 
 
     def get_context_data(self, **kwargs):
-        # print('===============================')
-        # print(self.get_object())
-        # print('===============================')
         context = super().get_context_data(**kwargs)
         return context
 
 
-class ProfileTemplateListView(DetailView):
+class ProfileTariffListView(DetailView):
     template_name = 'users/profile_tariff_cells_list.html'
     model = Appartment
 
@@ -850,3 +844,82 @@ class ProfileTemplateListView(DetailView):
         print(context)
 
         return context
+    
+
+
+class ProfileMessageListView(DetailView):
+    template_name = 'users/profile_messages_list.html'
+    model = User
+
+
+
+    def get(self, request, *args, **kwargs):        
+       # datatables serverside logic
+        if self.request.is_ajax() and self.request.method == 'GET' and request.GET.get('draw'):
+            # print('---------------------------------------')
+            # print(self.get_object().id)
+            Q_list = []
+            account_data_get_request = request.GET
+            if request.GET.get('search[value]'):
+                Q_list.append(Q(topic__icontains=request.GET.get('search[value]')))
+
+            Q_list.append(Q(to_users__id=self.get_object().id))
+            #search logic
+            draw = int(account_data_get_request.get("draw"))
+            start = int(account_data_get_request.get("start"))
+            length = int(account_data_get_request.get("length"))
+
+            raw_data = MessageToUser.objects.filter(*Q_list)\
+                                            .only('from_user__full_name', 'topic','text', 'date_time','id')\
+                                            .order_by('-id')\
+                                            .values('from_user__full_name', 'topic', 'text', 'date_time', 'id')
+
+
+            data = list({v['id']: v for v in list(raw_data)}.values())
+
+            for message in data:  
+                date_time = message['date_time']
+                formated_date_time = format_datetime(date_time, 'dd.MM.yyyy - HH:mm', locale='ru')
+                message['date_time'] = formated_date_time
+
+            paginator = Paginator(data, length)
+            page_number = start / length + 1
+            try:
+                obj = paginator.page(page_number).object_list
+            except PageNotAnInteger:
+                obj = paginator(1).object_list
+            except EmptyPage:
+                obj = paginator.page(1).object_list
+
+            total = len(data)
+            records_filter = total
+
+            response = {
+                'data': obj,
+                'draw': draw,
+                'recordsTotal:': total,
+                'recordsFiltered': records_filter,
+            }
+            return JsonResponse(response, safe=False)
+
+        else:
+            context = super().get(self, request, *args, **kwargs)
+            return context
+        
+
+    def post(self, request, **kwargs):
+        if request.POST.get('ajax_indicator') == 'delete_request':
+            test_list = request.POST.getlist('delete_list[]')
+            delete_set = MessageToUser.objects.filter(pk__in=test_list)
+            for message in delete_set:
+                if len(message.to_users.all()) == 1:
+                    message.delete()
+                else:
+                    message.to_users.remove(self.get_object())
+                    if message.read_by_user: message.read_by_user.remove(self.get_object())
+            response = 'You finished deleteting!'
+            return JsonResponse(response, safe=False)
+
+class ProfileMessageDetailView(DetailView):
+    template_name = 'users/profile_messages_list.html'
+    model = MessageToUser
