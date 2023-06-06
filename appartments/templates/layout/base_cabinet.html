@@ -217,7 +217,7 @@
                             <ul class="treeview-menu">
                             {% for appartment in user_data.appartments %}
                                 <li>
-                                    <a href="javascript:;">
+                                    <a href="{% url 'users:profile_template_list' appartment.owning__id %}">
                                         <i class="fa fa-building-o"></i>  
                                         <span>{{ appartment.address }}</span>
                                     </a>

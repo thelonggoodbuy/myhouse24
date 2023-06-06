@@ -1,0 +1,78 @@
+{% extends "layout/base_cabinet.html" %}
+
+{% load static %}
+
+{% block title %}
+    <title>Тариф</title>
+{% endblock title %}
+
+{% block content-header %}
+    {% comment %} <h1>{{  }}</h1> {% endcomment %}
+    <h1>Тарифы - "ЖК {{ appartment.title }}", кв.{{ appartment.number }}. Актуальный тариф "{{ appartment.tariff.title }}"</h1>
+{% endblock %}
+
+{% block additionaly_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2/dist/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2-theme-bootstrap4/dist/select2-bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+{% endblock additionaly_css %}
+
+{% block additionaly_js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script src="{% static 'appartments/plugins/select2/dist/js/select2.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script src="{% static 'appartments/plugins/bootstrap-datepicker/js/locales/bootstrap-datepicker.ru.js' %}"></script>
+    {% comment %} <script src="{% static 'appartments/plugins/bootstrap-datepicker/js/locales/bootstrap-datepicker.ru.js' %}"></script> {% endcomment %}
+{% endblock additionaly_js %}
+
+
+{% block content %}
+
+<section class="content">
+    <div class="box">
+        <div class="box-body">
+            <div class="table-responsive no-padding">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th style="min-width:250px">Услуга</th>
+                            <th style="min-width:150px">Ед. изм.</th>
+                            <th style="min-width:150px">Цена за ед., грн</th>
+                        </tr>
+                    </thead>
+                    <tbody> 
+                        {% for tariff_cell in  tariff_cells %}
+                        <tr>
+                            <td>{{ tariff_cell.utility_service.title }}</td>
+                            <td>{{ tariff_cell.utility_service.unit_of_measure.title }}</td>
+                            <td>{{ tariff_cell.curency}}</td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<script>
+
+
+$(document).ready(function () {
+
+
+
+    });
+
+
+
+    
+</script>
+{% endblock content %}

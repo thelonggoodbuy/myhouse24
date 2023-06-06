@@ -42,6 +42,7 @@ from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.list import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from appartments.models import House, Section, Floor, Appartment
+from utility_services.models import TariffCell
 
 
 from datetime import date, datetime
@@ -830,11 +831,22 @@ class ProfileReceiptListPerAppartmentView(DetailView):
 
 
     def get_context_data(self, **kwargs):
-        print('===============================')
-        print(self.get_object())
-        print('===============================')
+        # print('===============================')
+        # print(self.get_object())
+        # print('===============================')
         context = super().get_context_data(**kwargs)
-
         return context
 
 
+class ProfileTemplateListView(DetailView):
+    template_name = 'users/profile_tariff_cells_list.html'
+    model = Appartment
+
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tariff_cells'] = TariffCell.objects.filter(tariff=self.get_object().tariff)
+        print(context)
+
+        return context
