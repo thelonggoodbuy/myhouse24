@@ -120,6 +120,8 @@ $(document).ready(function () {
                 $('td:eq(1)', row).wrapInner(`<span style="color: #72afd2;"></span>`);
                 $('td:eq(2)', row).wrapInner(`<span><strong></strong> - ${reduction_text}</span>`);
 
+
+
             },
 
 
@@ -167,6 +169,15 @@ $(document).ready(function () {
 //                {'orderable': false, targets: 6},
 //            ],
             "rowId": 'id',
+            "createdRow": function( row, data, dataIndex ) {
+                //console.log(data)
+                if (data['had_been_readed'] == false){
+                $('td:eq(0)', row).css({'background-color':'#D0F5FA'})
+                $('td:eq(1)', row).css({'background-color':'#D0F5FA'})
+                $('td:eq(2)', row).css({'background-color':'#D0F5FA'})
+                $('td:eq(3)', row).css({'background-color':'#D0F5FA'})
+                }
+              }
             
         });
 
@@ -180,7 +191,7 @@ $(document).ready(function () {
             $(this).find("div").attr("id") != "buttons_interaction"
             )
         {
-            var basic_url = "{% url 'users:profile_message_list' %}" + user_number
+            var basic_url = "{% url 'users:profile_message_detail' %}"
             var url_index = table.row(this).id().toString();
             document.location.href = basic_url + url_index;
         }

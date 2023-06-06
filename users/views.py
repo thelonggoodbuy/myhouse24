@@ -877,10 +877,19 @@ class ProfileMessageListView(DetailView):
 
             data = list({v['id']: v for v in list(raw_data)}.values())
 
+            list_of_dict_readed_messages = list(self.get_object().readed_by_user.all().values('id'))
+            list_of_read_messages = [dictionary['id'] for dictionary in list_of_dict_readed_messages]
+
             for message in data:  
                 date_time = message['date_time']
                 formated_date_time = format_datetime(date_time, 'dd.MM.yyyy - HH:mm', locale='ru')
                 message['date_time'] = formated_date_time
+
+                if message['id'] in set(list_of_read_messages):
+                    message['had_been_readed'] = True
+                else:
+                    message['had_been_readed'] = False
+
 
             paginator = Paginator(data, length)
             page_number = start / length + 1
@@ -920,6 +929,38 @@ class ProfileMessageListView(DetailView):
             response = 'You finished deleteting!'
             return JsonResponse(response, safe=False)
 
+
+
 class ProfileMessageDetailView(DetailView):
-    template_name = 'users/profile_messages_list.html'
+    template_name = 'users/profile_messages_detail.html'
     model = MessageToUser
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if not self.object.read_by_user.all():
+            self.object.read_by_user.add(self.request.user)
+            self.object.save()
+
+        return context
+    
+
+class ProfileMessageDeleteView(SuccessMessageMixin, DeleteView):
+    model = MessageToUser
+    success_url = None
+    success_message = "Сообщение было удалено!"
+
+    def delete(self, request, *args, **kwargs):
+        self.success_url = reverse_lazy('users:profile_message_list', kwargs={'pk': self.request.user.id})
+        messages.success(self.request, self.success_message)
+        self.object = self.get_object()
+        to_users_set = self.object.to_users.all()
+        if len(to_users_set) == 1:
+            self.object.delete()
+        else:
+            self.object.to_users.remove(self.request.user)
+            if self.object.read_by_user: self.object.read_by_user.remove(self.request.user)        
+        success_url = self.get_success_url()
+
+        return HttpResponseRedirect(success_url)

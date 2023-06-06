@@ -27,44 +27,35 @@
             <div id="myDialog">
                 Content of the modal dialog box.
             </div>
+            <div class="box">
+                <div class="box-body no-padding">
+                    <div class="mailbox-read-info">
+                        <h3>{{ messagetouser.topic }}</h3>
+                        <h5>От: {{ messagetouser.from_user }}
+                            {% comment %} <span class="mailbox-read-time pull-right">06.08.2022 - 12:32</span> {% endcomment %}
+                            <span class="mailbox-read-time pull-right">{{ messagetouser.date_time|date:'d.m.Y - H:i' }}</span>
+                        </h5>
+                    </div>
+                    <div class="mailbox-read-message">
+                        <p>{{ messagetouser.text|safe }}</p>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    {% comment %} <a href="javascript:;" data-confirm="Удалить?" data-method="post"> {% endcomment %}
 
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="box">
-                        <div class="box-header with-border">
-                            <h3 class="box-title"></h3>
-                            <div class="box-tools pull-right">
-                                <div class="has-feedback">
-                                    <input type="text" name="search" class="form-control input-sm" id="search_input" placeholder="Поиск">
-                                    <span class="glyphicon glyphicon-search form-control-feedback"></span>
-                                    {% comment %} </form> {% endcomment %}
-                                </div>
-                            </div>
-                            <div class="mailbox-controls"> 
-                                <button type="button" class="btn btn-default btn-sm checkbox-toggle" id='choose_all_button'><i class="fa fa-square-o"></i></button>
-                                <button type="button" class="btn btn-default btn-sm delete-many" id='delete_checked_button'><i class="fa fa-trash-o"></i></button>
-                                <div class="pull-right"></div>
-                            </div>
-                        </div>
-                        
-                        <div id="w0" class="grid-view">
-                            <div class="box-body table-responsive no-padding">
-                                <table class="table table-bordered table-hover table-striped linkedRow" id="payment_item">
-                                    <thead>
-                                        <tr id="order_links">
-                                            <th>&nbsp;</th>
-                                            <th sort-index="0" id="title">От кого</th>
-                                            <th sort-index="1" id="type">Все</th>
-                                            <th>&nbsp;</th>
-                                        </tr>
-                                    </thead>
-                                    
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                    </div>            
+                        <form action="{% url 'users:profile_message_delete' pk=messagetouser.pk %}" method="POST">
+                            {% csrf_token %}
+                            <input class="btn btn-default btn-danger" type="submit" value="Delete"/>
+                          </form>                          
+
+                        {% comment %} <button type="button" class="btn btn-default">
+                            <i class="fa fa-trash-o"></i> Удалить
+                        </button> {% endcomment %}
+                    {% comment %} </a> {% endcomment %}
                 </div>
             </div>
+            
+
         </div>
         </section>
 
@@ -85,182 +76,6 @@
 
 $(document).ready(function () {
 
-
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== "") {
-          const cookies = document.cookie.split(";");
-          for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + "=")) {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-              break;
-            }
-          }
-        }
-        return cookieValue;
-      };
-
-
-        var PageURL = window.location.toString();
-        var user_number = PageURL.split('/').slice(-2, -1)[0]
-
-        console.log(user_number)
-
-        var table = $('#payment_item').DataTable({
-
-            "rowCallback": function(row, data){
-                if( (data.text).length > 35 ){
-                    var reduction_text = data.text.substring(0,35) + '...';
-                } else {
-                    var reduction_text = data.text
-                    }
-
-                $('td:eq(1)', row).wrapInner(`<span style="color: #72afd2;"></span>`);
-                $('td:eq(2)', row).wrapInner(`<span><strong></strong> - ${reduction_text}</span>`);
-
-            },
-
-
-            "dom": "<p<t>p>",
-            "processing": true,
-            "serverSide": true,
-            "pageLength": 50,
-            "ordering": false,
-            "pagingType": 'simple_numbers',
-            "language": {
-                "paginate": {
-                  "previous": "<",
-                  "next": ">"
-                }
-              },
-            //"scrollX": true,
-            "ajax": {
-                "type": "GET",
-                "url": "{% url 'users:profile_message_list' %}" + user_number,
-                "dataSrc": "data",
-                "dataType": "json",
-            },
-            "columns": [
-                {"data": "id", "width": "3%", render: function ( data, type, row, meta ) 
-                                                            { prerendered_last_cell = `<div id='buttons_interaction'>\
-                                                                                            <div class='col-xl-12'>\
-                                                                                                <input type='checkbox' class='iCheck-helper delete_checkbox' id='delete_${data}'>\
-                                                                                                </div>\
-                                                                                        </div>`;
-                                                                
-                                                                return prerendered_last_cell
-                                                                    }
-                                                                },
-                {"data": "from_user__full_name", "name": "from_user__full_name", "width": "40%"},
-                {"data": "topic", "width": "50%"},
-                {"data": "date_time", "name": "date_time", "width": "30%"},
-                ],
-//            "columnDefs": [
-//                {'orderable': false, targets: 0},
-//                {'orderable': false, targets: 1},
-//                {'orderable': false, targets: 2},
-//                {'orderable': false, targets: 3},
-//                {'orderable': false, targets: 4},
-//                {'orderable': false, targets: 5},
-//                {'orderable': false, targets: 6},
-//            ],
-            "rowId": 'id',
-            
-        });
-
-
-        $.fn.dataTable.ext.classes.sPageButton = 'button button-primary';
-        
-
-    //reversion logic for row except links to send inviting, deleting and editing
-    table.on('click', 'tbody > tr > td', function () {
-        if(
-            $(this).find("div").attr("id") != "buttons_interaction"
-            )
-        {
-            var basic_url = "{% url 'users:profile_message_list' %}" + user_number
-            var url_index = table.row(this).id().toString();
-            document.location.href = basic_url + url_index;
-        }
-    } );
-
-
-
-    $('#search_input').on('keyup', function(){
-        searched_data = $(this).val()
-        table.search(searched_data).draw()
-
-    })
-
-
-    
-
-    // delete and confirm display lofic
-    $("#myDialog").dialog({
-        autoOpen  : false,
-        modal     : true,
-        title     : "avadamedia.myhoise24",
-        buttons   : {
-                    'удалить' : function() {
-
-                        var delete_obj_arr = $(this).data('delete_obj_arr')
-
-                        $.ajax({
-                            url: "{% url 'users:profile_message_list' %}" + user_number + '/',
-                            type: "POST",
-                            headers: {
-                                "X-Request-With": "XMLHttpRequest",
-                                "X-CSRFToken": getCookie("csrftoken"),
-                            },
-                            data: {
-                                'ajax_indicator': 'delete_request',
-                                'delete_list': delete_obj_arr
-                            },
-                            dataType: "json",
-                            success: (data) => {
-                                console.log(data) 
-                                $('#payment_item').DataTable().ajax.reload();
-                                $(this).dialog('close');
-                                toastr.success('Сооющения успешно удалены!');
-                            }
-                        })
-                    },
-                    'отмена' : function() {
-                        $(this).dialog('close');
-                    }
-                }
-    });
-
-
-
-
-    $('#delete_checked_button').click(function(){
-    
-        var delete_obj_arr = []
-        $('input[id^=delete_]:checkbox:checked').each(function(){
-            var full_id = $(this).attr('id')
-            var delete_message_id = full_id.slice(7, full_id.length)
-            delete_obj_arr.push(delete_message_id)
-        })
-        if (delete_obj_arr.length != 0) {
-            console.log(delete_obj_arr)
-        $("#myDialog").text(`Удалить выбранные сообщения?`).data('delete_obj_arr', delete_obj_arr).dialog("open");
-        }
-    })
-
-
-    $('#choose_all_button').click(function(){
-        empty_checkboxes = $('input[id^=delete_]:not(:checked)')
-        if(empty_checkboxes.length != 0){
-            empty_checkboxes.each(function(){
-                $(this).prop('checked', true);
-            })
-        } else {
-            $('input[id^=delete_]').prop('checked', false);
-        }
-    });
 
     });
 

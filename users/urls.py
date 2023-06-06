@@ -4,7 +4,7 @@ from .views import LoginSimpleUser, LoginAdminUser, LogOutUser, SignUpSimpleUser
                     AdminSettingsUsersRolesView, AppartmentsOwnersView,\
                     PermissionDeniedView, MessagesListView, MessageCreateView, MessageDetailView, MessageDeleteView,\
                     ProfileDetailView, ProfileStatisticPerAppartment, ProfileReceiptListView, ProfileReceiptListPerAppartmentView,\
-                    ProfileTariffListView, ProfileMessageListView
+                    ProfileTariffListView, ProfileMessageListView, ProfileMessageDetailView, ProfileMessageDeleteView
                         # temp_funct_users_listlogic
 
 
@@ -58,5 +58,8 @@ urlpatterns = [
     path('profile_tariff_list/<int:pk>/', ProfileTariffListView.as_view(), name='profile_tariff_list'),
     path('profile_message_list/', ProfileMessageListView.as_view(), name='profile_message_list'),
     path('profile_message_list/<int:pk>/', ProfileMessageListView.as_view(), name='profile_message_list'),
+    path('profile_message_detail/', ProfileMessageDetailView.as_view(), name="profile_message_detail"),
+    path('profile_message_detail/<int:pk>/', ProfileMessageDetailView.as_view(), name="profile_message_detail"),
+    path('profile_message_delete/<int:pk>/', ProfileMessageDeleteView.as_view(), name="profile_message_delete"),
 
 ]
