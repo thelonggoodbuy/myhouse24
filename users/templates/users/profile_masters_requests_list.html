@@ -1,0 +1,197 @@
+{% extends "layout/base_cabinet.html" %}
+{% load static %}
+
+{% block title %}
+    <title> Сообщения </title>
+{% endblock title %}
+
+{% block content-header %}
+    <h1> Сообщения </h1>
+{% endblock %}
+
+{% block additionaly_css %}
+    {% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" /> {% endcomment %}
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2/dist/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2-theme-bootstrap4/dist/select2-bootstrap.min.css' %}">
+    {% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" /> {% endcomment %}
+{% endblock additionaly_css %}
+
+
+{% block content %}
+
+
+        <section class="content">
+
+            <div id="myDialog">
+                Content of the modal dialog box.
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="pull-right margin-bottom">
+                        <a class="btn btn-success" href="{% url 'masters_services:masters_requests_create' %}">добавить заявку</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title"></h3>
+                            <div class="box-tools">
+                                <button class="btn btn-default btn-sm" id="clear_filters">
+                                    <span class="hidden-xs">Очистить</span><i class="fa fa-eraser visible-xs" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="w0" class="grid-view">
+                            <div class="box-body table-responsive no-padding">
+                                <table class="table table-bordered table-hover table-striped linkedRow" id="master_request_table">
+                                    <thead>
+                                        <tr id="order_links">
+                                            <th sort-index="0" id="№_appartment">№ заявки</th>
+                                            <th sort-index="1" id="master_type">Тип мастера</th>
+                                            <th sort-index="2" id="description">Описание</th>
+                                            <th sort-index="3" id="date_and_time">Удобное время</th>
+                                            <th sort-index="4" id="status">Статус</th>
+                                            <th>&nbsp;</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                    </div>            
+                </div>
+            </div>
+        </div>
+        </section>
+
+
+    {% block additionaly_js %}
+        {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script> {% endcomment %}
+        <script src="{% static 'appartments/plugins/select2/dist/js/select2.min.js' %}"></script>
+        <script src="{% static 'appartments/plugins/bootstrap-datepicker/js/locales/bootstrap-datepicker.ru.js' %}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    {% endblock additionaly_js %}
+
+
+<script>
+
+$(document).ready(function () {
+
+
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      };
+
+
+      var PageURL = window.location.toString();
+      var user_number = PageURL.split('/').slice(-2, -1)[0]
+
+
+        var table = $('#master_request_table').DataTable({
+
+            "rowCallback": function(row, data){
+                if (data.status === "выполнена") {
+                    $('td:eq(4)', row).wrapInner("<small class='label label-success my-3'></small>");
+                } else if (data.status === "в работе") {
+                    $('td:eq(4)', row).wrapInner("<small class='label label-warning'></small>");
+                } else if (data.status === "новая") {
+                    $('td:eq(4)', row).wrapInner("<small class='label label-primary'></small>");
+                }
+            },
+
+            "dom": "<<t>p>",
+            "processing": true,
+            "serverSide": true,
+            "pageLength": 50,
+            "ordering": false,
+            "ajax": {
+                "type": "GET",
+                "url": "{% url 'users:profile_masters_request_list_view' %}" + user_number,
+                "dataSrc": "data",
+                "dataType": "json",
+            },
+            "columns": [
+                {"data": "id", "name": "id"},
+                {"data": "master_type", "name": "master_type"},
+                {"data": "description", "name": "description"},
+                {"data": "date_and_time", "name": "date_and_time"},
+                {"data": "status", "name": "status"},
+                {"data": "id", render: function ( data, type, row, meta ) 
+                                        { prerendered_last_cell = "<div id='buttons_interaction'>\
+                                                    <div class='col=12'>\
+                                                        <a class='btn btn-default btn-sm' title='Удалить' data-toggle='tooltip' id='delete_button'>\
+                                                            <i class='fa fa-trash'></i>\
+                                                        </a>\
+                                                        </div>\
+                                                    </div>";
+                                            
+                                            return prerendered_last_cell
+                                        }
+                },
+                ],
+            "rowId": 'id',
+            
+        });
+
+
+
+    // delete and confirm display lofic
+    $("#myDialog").dialog({
+        autoOpen  : false,
+        modal     : true,
+        title     : "avadamedia.myhoise24",
+        buttons   : {
+                    'удалить сообщение' : function() {
+                        var textValue = $('#myTextBox').val();
+                        var basic_url = "{% url 'users:profile_master_request_delete' %}"
+                        var row_number = $(this).data('row_number')
+                        document.location.href = basic_url + row_number;
+                    },
+                    'отмена' : function() {
+                        $(this).dialog('close');
+                    }
+                    }
+    });
+
+    table.on('click', '#delete_button', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        $("#myDialog").text(`Удалить сообщение № ${row_number}?`).data('row_number', row_number).dialog("open");
+    })
+
+
+//    table.on('click', 'tbody > tr > td', function () {
+//        if(
+//            $(this).find("div").attr("id") != "buttons_interaction"
+//            )
+//        {
+//            var basic_url = "{% url 'users:profile_message_detail' %}"
+//            var url_index = table.row(this).id().toString();
+//            document.location.href = basic_url + url_index;
+//        }
+//    });
+
+
+
+});
+
+
+
+    
+</script>
+{% endblock content %}

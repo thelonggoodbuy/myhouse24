@@ -4,7 +4,8 @@ from .views import LoginSimpleUser, LoginAdminUser, LogOutUser, SignUpSimpleUser
                     AdminSettingsUsersRolesView, AppartmentsOwnersView,\
                     PermissionDeniedView, MessagesListView, MessageCreateView, MessageDetailView, MessageDeleteView,\
                     ProfileDetailView, ProfileStatisticPerAppartment, ProfileReceiptListView, ProfileReceiptListPerAppartmentView,\
-                    ProfileTariffListView, ProfileMessageListView, ProfileMessageDetailView, ProfileMessageDeleteView
+                    ProfileTariffListView, ProfileMessageListView, ProfileMessageDetailView, ProfileMessageDeleteView,\
+                    ProfileMastersRequestListView, ProfileMasterRequestDeleteView
                         # temp_funct_users_listlogic
 
 
@@ -61,5 +62,11 @@ urlpatterns = [
     path('profile_message_detail/', ProfileMessageDetailView.as_view(), name="profile_message_detail"),
     path('profile_message_detail/<int:pk>/', ProfileMessageDetailView.as_view(), name="profile_message_detail"),
     path('profile_message_delete/<int:pk>/', ProfileMessageDeleteView.as_view(), name="profile_message_delete"),
+
+    path('profile_masters_request_list_view/', ProfileMastersRequestListView.as_view(), name="profile_masters_request_list_view"),
+    path('profile_masters_request_list_view/<int:pk>/', ProfileMastersRequestListView.as_view(), name="profile_masters_request_list_view"),
+
+    path('profile_master_request_delete/', ProfileMasterRequestDeleteView.as_view(), name="profile_master_request_delete"),
+    path('profile_master_request_delete/<int:pk>/', ProfileMasterRequestDeleteView.as_view(), name="profile_master_request_delete"),
 
 ]

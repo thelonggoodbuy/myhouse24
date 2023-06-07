@@ -240,7 +240,7 @@
                         {% comment %} ================================================================== {% endcomment %}
                         {% comment %} ================================================================== {% endcomment %}
                         <li>
-                            <a href="/cabinet/master-request/index">
+                            <a href="{% url 'users:profile_masters_request_list_view' user.id %}">
                                 <i class="fa fa-wrench"></i>  
                                 <span>Вызов мастера</span>
                             </a>

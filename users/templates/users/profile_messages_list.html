@@ -2,11 +2,11 @@
 {% load static %}
 
 {% block title %}
-    <title> Сообщения </title>
+    <title> Заявки мастера </title>
 {% endblock title %}
 
 {% block content-header %}
-    <h1> Сообщения </h1>
+    <h1> Заявки мастера </h1>
 {% endblock %}
 
 {% block additionaly_css %}
@@ -106,7 +106,7 @@ $(document).ready(function () {
         var PageURL = window.location.toString();
         var user_number = PageURL.split('/').slice(-2, -1)[0]
 
-        console.log(user_number)
+        //console.log(user_number)
 
         var table = $('#payment_item').DataTable({
 

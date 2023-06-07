@@ -43,6 +43,7 @@ from django.views.generic.list import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from appartments.models import House, Section, Floor, Appartment
 from utility_services.models import TariffCell
+from masters_services.models import MastersRequest
 
 
 from datetime import date, datetime
@@ -962,5 +963,91 @@ class ProfileMessageDeleteView(SuccessMessageMixin, DeleteView):
             self.object.to_users.remove(self.request.user)
             if self.object.read_by_user: self.object.read_by_user.remove(self.request.user)        
         success_url = self.get_success_url()
+
+        return HttpResponseRedirect(success_url)
+    
+
+
+class ProfileMastersRequestListView(DetailView):
+    template_name = 'users/profile_masters_requests_list.html'
+    model = User
+
+    def get(self, request, *args, **kwargs):
+        
+        # datatables serverside logic
+        if self.request.is_ajax() and self.request.method == 'GET' and request.GET.get('draw'):
+            masters_get_request = request.GET
+            Q_list = []
+            user_appartment = request.user.owning.all()
+            Q_list.append(Q(appartment__in=user_appartment))
+            draw = int(masters_get_request.get("draw"))
+            start = int(masters_get_request.get("start"))
+            length = int(masters_get_request.get("length"))
+            raw_data = MastersRequest.objects.annotate(date_and_time = ArrayAgg(Concat(
+                                                                                    F('date_work'),
+                                                                                    Value(':'),
+                                                                                    F('time_work'),
+                                                                                    output_field=CharField())
+                                                                                    ,distinct=True))\
+                                                                .filter(*Q_list)\
+                                                                .only('id', 'master_type', 'description',\
+                                                                       'status')\
+                                                                .order_by('id')\
+                                                                .values('id', 'date_and_time', 'master_type', 'description',\
+                                                                        'status')
+
+            data = list(raw_data)
+            request_dictionary = MastersRequest.get_request_to_dictionary()
+            status_deictionary = MastersRequest.get_status_dictionary()
+
+            for cell in data:
+        
+                worker_type = cell['master_type']
+                cell['master_type'] = request_dictionary[worker_type]
+                request_status = cell['status']
+                cell['status'] = status_deictionary[request_status]
+
+            # paginator here
+            paginator = Paginator(data, length)
+            page_number = start / length + 1
+            try:
+                obj = paginator.page(page_number).object_list
+            except PageNotAnInteger:
+                obj = paginator(1).object_list
+            except EmptyPage:
+                obj = paginator.page(1).object_list
+
+            total = len(data)
+            records_filter = total
+
+            response = {
+                'data': obj,
+                'draw': draw,
+                'recordsTotal:': total,
+                'recordsFiltered': records_filter,
+            }
+            return JsonResponse(response, safe=False)
+    
+
+        else:
+            context = super().get(self, request, *args, **kwargs)
+            return context
+        
+
+
+class ProfileMasterRequestDeleteView(SuccessMessageMixin, DeleteView):
+    model = MastersRequest
+    success_url = None
+    success_message = "Запрос к мастеру удален!"
+
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+
+
+    def delete(self, request, *args, **kwargs):
+
+        self.get_object().delete()
+        success_url = reverse_lazy('users:profile_masters_request_list_view', kwargs={'pk': self.request.user.id})        
+        messages.success(self.request, self.success_message)
 
         return HttpResponseRedirect(success_url)
