@@ -28,6 +28,10 @@
         <link rel="stylesheet" type="text/css" href="{% static 'users/components/font-awesome/css/font-awesome.min.css' %}">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 
+        {% block additionaly_css %}
+        {% endblock additionaly_css %}
+
+
         <script type="text/javascript" src="{% static 'users/components/jquery/dist/jquery.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}"></script>
@@ -48,6 +52,8 @@
         <script type="text/javascript" src="{% static 'users/components/chart.js/Chart.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/plugins/jquery-validation/dist/jquery.validate.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/plugins/jquery-validation/dist/additional-methods.min.js' %}"></script>
+
+
 
         <script type="text/javascript" src="{% static 'users/js/yii.js' %}"></script>
         <script type="text/javascript" src="{% static 'users/js/main.js' %}"></script>
@@ -173,13 +179,13 @@
                     
                     <ul class="sidebar-menu tree" data-widget="tree">
 
-                        <li class="treeview menu-open">
+                        <li class="treeview">
                             <a href="#!">
                                 <i class="fa fa-line-chart"></i>  
                                 <span>Сводка</span> 
                                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
                             </a>
-                            <ul class="treeview-menu" style="display: block;">
+                            <ul class="treeview-menu">
                                 {% for appartment in user_data.appartments %}
                                     <li>
                                         <a href="{% url 'users:profile_statistic_per_appartment' pk=appartment.owning__id %}">
@@ -199,7 +205,7 @@
                                 </span>
                             </a>
                             <ul class="treeview-menu">
-                                <li class="active">
+                                <li>
                                     <a href="{% url 'users:profile_receipt_list' %}">
                                         <i class="fa fa-files-o"></i>  
                                         <span>Все квитанции</span>

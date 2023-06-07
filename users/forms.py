@@ -11,7 +11,7 @@ from django.db.models import Q
 
 from .models import User, Role, MessageToUser
 from appartments.models import House, Section, Floor, Appartment
-
+from masters_services.models import MastersRequest
 
 
 
@@ -338,11 +338,67 @@ class MessageToUserForm(forms.ModelForm):
             for owner in owners:
                 message.to_users.add(owner)
 
-
         message.save()
         response = message
 
+        return response
+    
+
+
+class ProfileMastersRequestsCreateForm(forms.ModelForm):
+
+
+    class Meta:
+        model = MastersRequest
+        fields = ['master_type', 'appartment', 
+                  'date_work', 'time_work', 
+                  'description']
+        
+        labels = {"master_type": "Тип мастера",
+                    "appartment": "Квартира",
+                    "date_work": "Дата работы",
+                    "time_work": "Время работы",
+                    "description": "Описание"}
+
+        field_classes = {"master_type": forms.ChoiceField,
+                         "appartment": forms.ModelChoiceField,
+                        "date_work": forms.CharField,
+                         "description": forms.CharField}
         
 
+        widgets = {"master_type": forms.Select(attrs={"class": "form-control",
+                                                      "id": "master_type_field"}),
+                "appartment": forms.Select(attrs={"class": "form-control",
+                                    "id": "appartment_field"}),
+                "date_work": forms.TextInput(attrs={"class": "form-control",
+                                                       "id": "date_work_field"}),
+                "description": forms.Textarea(attrs={"class": "form-control",
+                                                            "id": "description_field",
+                                                            "rows": "8"})
+                    }
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(ProfileMastersRequestsCreateForm, self).__init__(*args, **kwargs)
+        self.fields['appartment'].queryset = Appartment.objects.filter(owner_user=self.user)
+        
+
+        # if self.instance.id:
+        #     self.initial['date_work'] = datetime.datetime.strptime(str(self.instance.date_work), "%Y-%m-%d").strftime("%d.%m.%Y")
+
+
+    def clean_date_work(self):
+        date_work = self.cleaned_data.get('date_work')
+        return datetime.datetime.strptime(date_work, "%d.%m.%Y").strftime("%Y-%m-%d")
+
+
+
+    def save(self, commit=True):
+        masters_request = super(ProfileMastersRequestsCreateForm, self).save(commit=False)
+
+        masters_request.status = 'new'
+
+        masters_request.save()
+        response = masters_request
 
         return response

@@ -54,7 +54,7 @@ import calendar
 
 
 from .forms import LoginSimpleUserForm, LoginAdminUserForm, SignUpSimpleUserForm, AdminSettingsUsersUpdateForm,\
-                    UsersRolesFormSet, AdminSettingsUsersRolesCellForm, MessageToUserForm
+                    UsersRolesFormSet, AdminSettingsUsersRolesCellForm, MessageToUserForm, ProfileMastersRequestsCreateForm
 
 
 
@@ -1051,3 +1051,37 @@ class ProfileMasterRequestDeleteView(SuccessMessageMixin, DeleteView):
         messages.success(self.request, self.success_message)
 
         return HttpResponseRedirect(success_url)
+
+
+
+
+
+class ProfileMastersRequestsCreateView(FormView):
+    template_name = "users/profile_masters_requests_create.html"
+    form_class = ProfileMastersRequestsCreateForm
+    success_url = None
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)     
+        context['masters_request_form'] = ProfileMastersRequestsCreateForm(user=self.request.user, prefix="masters_request_form")
+        return context
+    
+
+    def post(self, request, *args, **Kwargs):
+        masters_request_form = ProfileMastersRequestsCreateForm(request.POST, user=self.request.user, prefix="masters_request_form")
+        if masters_request_form.is_valid():
+            return self.form_valid(masters_request_form)
+        else:
+            if masters_request_form.errors:
+                for field, error in masters_request_form.errors.items():
+                    print(f'{field}: {error}')
+
+
+    def form_valid(self, masters_request_form):
+        masters_request_form.save()
+        success_url = self.success_url
+        messages.success(self.request, f"Запрос на услуги мастера создан!")
+        success_url = reverse_lazy('users:profile_masters_request_list_view', kwargs={'pk': self.request.user.id})
+        return HttpResponseRedirect(success_url)
+    

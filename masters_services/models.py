@@ -17,13 +17,13 @@ class MastersRequest(models.Model):
         ('have_done', 'выполнена'),
     )
     master_type = models.CharField(max_length=200, choices=REQUEST_TO)
-    master = models.ForeignKey(User, on_delete=models.CASCADE, related_name='masters_request')
+    master = models.ForeignKey(User, on_delete=models.CASCADE, related_name='masters_request', blank=True, null=True)
     appartment = models.ForeignKey(Appartment, on_delete=models.CASCADE)
     date_work = models.DateField()
     time_work = models.TimeField()
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=200, choices=MASTER_REQUEST_STATUS)
-    admin_comment = models.TextField()
+    admin_comment = models.TextField(blank=True, null=True)
 
     @classmethod
     def get_request_to_dictionary(cls):

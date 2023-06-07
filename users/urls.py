@@ -5,7 +5,7 @@ from .views import LoginSimpleUser, LoginAdminUser, LogOutUser, SignUpSimpleUser
                     PermissionDeniedView, MessagesListView, MessageCreateView, MessageDetailView, MessageDeleteView,\
                     ProfileDetailView, ProfileStatisticPerAppartment, ProfileReceiptListView, ProfileReceiptListPerAppartmentView,\
                     ProfileTariffListView, ProfileMessageListView, ProfileMessageDetailView, ProfileMessageDeleteView,\
-                    ProfileMastersRequestListView, ProfileMasterRequestDeleteView
+                    ProfileMastersRequestListView, ProfileMasterRequestDeleteView, ProfileMastersRequestsCreateView
                         # temp_funct_users_listlogic
 
 
@@ -69,4 +69,5 @@ urlpatterns = [
     path('profile_master_request_delete/', ProfileMasterRequestDeleteView.as_view(), name="profile_master_request_delete"),
     path('profile_master_request_delete/<int:pk>/', ProfileMasterRequestDeleteView.as_view(), name="profile_master_request_delete"),
 
+    path('profile_masters_requests_create/', ProfileMastersRequestsCreateView.as_view(), name="profile_masters_requests_create"),
 ]
