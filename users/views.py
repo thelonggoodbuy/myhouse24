@@ -1085,3 +1085,20 @@ class ProfileMastersRequestsCreateView(FormView):
         success_url = reverse_lazy('users:profile_masters_request_list_view', kwargs={'pk': self.request.user.id})
         return HttpResponseRedirect(success_url)
     
+
+
+
+class ProfileUserDetail(TemplateView):
+    template_name = 'users/profile_user_detail.html'
+    model = User
+
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)     
+        # owning_data = self.request.user.owning.all().objects.select_related('house__address', 'house__title', 'house__number')
+        owning_data = Appartment.objects.select_related('house')\
+                                        .filter(owner_user=self.request.user)
+        context['owning_data'] = owning_data
+        print(context)
+        return context

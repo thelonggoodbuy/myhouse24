@@ -1,0 +1,238 @@
+
+{% extends "layout/base_cabinet.html" %}
+{% load static %}
+
+
+{% block additionaly_css %}
+    {% comment %} {% for form in responsibilities_formset %}
+        {{ form.media.css }} 
+    {% endfor %} {% endcomment %}
+
+    {% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2/dist/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2-theme-bootstrap4/dist/select2-bootstrap.min.css' %}"> {% endcomment %}
+    {% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" /> {% endcomment %}
+
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/jquery-ui-1.13.2/jquery-ui.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/bootstrap3-datetimepicker/lib/css/bootstrap-datetimepicker.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/summernote/summernote.min.css' %}">
+
+
+    <style>
+        .column-center {
+            margin-top: 5pt;
+        }
+    </style>
+
+{% endblock additionaly_css %}
+
+
+
+{% block additionaly_js %}
+    {% comment %} {% for form in responsibilities_formset %}
+        {{ form.media.js }}
+    {% endfor %} {% endcomment %}
+
+    {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script> {% endcomment %}
+    <script src="{% static 'appartments/plugins/jquery-ui-1.13.2/jquery-ui.min.js' %}"></script>
+    {% comment %} <script src="{% static 'appartments/plugins/select2/dist/js/select2.min.js' %}"></script> {% endcomment %}
+    {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script> {% endcomment %}
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    {% comment %} <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script> {% endcomment %}
+    <script src="{% static 'appartments/plugins/bootstrap3-datetimepicker/package.js' %}"></script>
+    <script src="{% static 'appartments/plugins/bootstrap3-datetimepicker/lib/js/bootstrap-datetimepicker.min.js' %}"></script>
+    {% comment %} <script src="{% static 'appartments/plugins/summernote/summernote.min.js' %}"></script>
+    <script src="{% static 'appartments/plugins/summernote/lang/summernote-ru-RU.js' %}"></script> {% endcomment %}
+
+{% endblock additionaly_js %}
+
+
+{% block title %}
+    <title> профиль  </title>
+
+{% endblock title %}
+
+{% block content-header %}
+    
+    <h1> профиль </h1>
+    
+{% endblock %}
+
+{% block content %}
+
+
+
+
+<div class="row">
+
+    <div class="col-lg-3">
+        <div class="row">
+            <div class="col-md-6 col-lg-12">
+                <div class="box">
+                    <div class="box-body box-profile">
+                        {% if user.image %}
+                            <img class="profile-user-img img-responsive img-circle" src="{{ user.image }}" alt="Аватар">
+                        {% else %}
+                            <img class="profile-user-img img-responsive img-circle" src="{% static 'appartments/img/empty_image.jpeg' %}" alt="Аватар">
+                        {% comment %} "{% static 'appartments/img/empty_image.jpeg' %}" {% endcomment %}
+                        {% endif %}
+
+                        <h3 class="profile-username text-center">{{ user.full_name }}</h3>
+
+                        <p class="text-muted text-center">Владелец квартиры</p>
+
+                        <ul class="list-group list-group-unbordered">
+                            <li class="list-group-item">
+                                <span>Телефон</span>
+                                {% if user.phone %}
+                                    <span class="pull-right">{{ user.phone }}</span>
+                                {% else %}
+                                    <span class="pull-right">В профиле не указано</span>
+                                {% endif %}
+                            </li>
+                            <li class="list-group-item">
+                                <span>Viber</span>
+                                {% if user.viber %}
+                                    <span class="pull-right">{{ user.viber }}</span>
+                                {% else %}
+                                    <span class="pull-right">В профиле не указано</span>
+                                {% endif %}
+                            </li>
+                            <li class="list-group-item">
+                                <span>Telegram</span>
+                                {% if user.telegram %}
+                                    <span class="pull-right">{{ user.telegram }}</span>
+                                {% else %}
+                                    <span class="pull-right">В профиле не указано</span>
+                                {% endif %}
+                            </li>
+                            <li class="list-group-item">
+                                <span>Email</span>
+                                {% if user.email %}
+                                    <span class="pull-right">{{ user.email }}</span>
+                                {% else %}
+                                    <span class="pull-right">В профиле не указано</span>
+                                {% endif %}
+                            </li>
+                        </ul>
+
+                        <a href="/cabinet/user/update" class="btn btn-primary btn-block">Изменить</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-12">
+                <h3 class="page-header">Обо мне (заметки)</h3>
+                <div class="box">
+                    <div class="box-body box-profile">
+                        {% if user.description %}
+                            {{ user.description }}
+                        {% else %}
+                            В профиле не указано
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <!-- /.box-body -->
+        </div>
+    </div>
+
+    <div class="col-lg-9">
+        <h2 class="page-header">Мои квартиры</h2>
+        <div class="box">
+        {% for appartment in owning_data %}
+            <div class="box-header with-border">
+                <h3 class="box-title">Описание квартиры</h3>
+            </div>
+            <div class="box-body">
+                
+                <p>ЖК "{{ appartment.house.title }}". {{ appartment.house.address }} кв. {{appartment.number}}</p>
+                <div class="row">
+                    {% if appartment.house.main_image %}
+                        <div class="col-xs-12 col-md-6">
+                            <img src="{{ appartment.house.main_image.url }}" class="img-responsive largeImg margin-bottom-30" alt="">
+                        </div>
+                    {% else %}
+                        <div class="col-xs-12 col-md-6">
+                            {% comment %} <img src="http://myhouse24.avada-media.ua/site/glide?path=%2Fupload%2FHouse%2F1%2Fimage1.jpeg&amp;w=522&amp;h=350&amp;fit=crop" class="img-responsive largeImg margin-bottom-30" alt=""> {% endcomment %}
+                            <img src="{% static 'appartments/img/empty_image.jpeg' %}" class="img-responsive largeImg margin-bottom-30" alt="">
+                        </div>
+                    {% endif %}
+
+                    {% for house_image in appartment.house.addition_images.all %}
+                        {% if house_image.image %}
+                            <div class="col-xs-6 col-md-3">
+                                <img src="{{ house_image.image.url }}" class="img-responsive smallImg margin-bottom-30">
+                            </div>
+                        {% else%}
+                            <div class="col-xs-6 col-md-3">
+                                <img src="{% static 'appartments/img/empty_image.jpeg' %}" class="img-responsive smallImg margin-bottom-30">
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th colspan="2">Описание</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th style="min-width: 200px; font-weight:normal;">Название дома</th>
+                            <th style="font-weight:normal;">ЖК "{{ appartment.house.title }}"</th>
+                        </tr>
+                        <tr>
+                            <td>Адрес</td>
+                            <td>{{ appartment.house.address }}</td>
+                        </tr>
+                        <tr>
+                            <td>№ квартиры</td>
+                            <td>{{ appartment.number }}</td>
+                        </tr>
+                        <tr>
+                            <td>Площадь</td>
+                            <td>
+                                {{ appartment.area }}м<sup>2</sup>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Этаж</td>
+                            <td>{{ appartment.floor }}</td>
+                        </tr>
+                        <tr>
+                            <td>Секция</td>
+                            <td>{{ appartment.sections }}</td>
+                        </tr>
+                        <tr>
+                            <td>Лицевой счет</td>
+                            <td>{{ appartment.personal_account.number }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+            
+    </div>
+</div>
+
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#date_work_field').datepicker({
+            format: "dd.mm.yyyy",
+            language: 'ru'
+        })
+
+
+        $('#datetimepicker3').datetimepicker({
+            format: 'HH:mm'
+        });
+});
+</script>
+{% endblock content %}

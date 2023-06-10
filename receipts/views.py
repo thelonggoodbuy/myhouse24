@@ -25,6 +25,8 @@ from .services import return_pdf_receipt, return_xlm_receipt
 
 
 from decimal import Decimal
+from django.contrib.messages.views import SuccessMessageMixin
+
 
 
 from django.views.generic.base import TemplateView
@@ -142,6 +144,16 @@ class ReceiptListView(TemplateView):
             start = int(receipt_data_get_request.get("start"))
             length = int(receipt_data_get_request.get("length"))
 
+
+
+            if receipt_data_get_request.get('order[0][column]') != '':
+                number_column = receipt_data_get_request.get('order[0][column]')
+                order_column_task = receipt_data_get_request.get(f'columns[{number_column}][name]')
+                if receipt_data_get_request.get('order[0][dir]') == 'desc':
+                    order_column_task = f"-{order_column_task}"
+
+            if order_column_task == '': order_column_task = '-id'
+
             raw_data = Receipt.objects.annotate(appartments_address = ArrayAgg(Concat(F('appartment__number'),
                                                                                     Value(', '),
                                                                                     F('appartment__house__title'),
@@ -149,7 +161,7 @@ class ReceiptListView(TemplateView):
                                                                                     ,distinct=True))\
                                     .annotate(date_with_month_year = F('to_date'))\
                                     .filter(*Q_list)\
-                                    .order_by('-to_date')\
+                                    .order_by(order_column_task)\
                                     .values('number', 'status', 'to_date',\
                                             'date_with_month_year', 'appartments_address',\
                                             'appartment__owner_user__full_name',\
@@ -208,6 +220,30 @@ class ReceiptListView(TemplateView):
             context = self.get_context_data(**kwargs)
             return self.render_to_response(context)
         
+    def post(self, request, **kwargs):
+        if request.POST.get('ajax_indicator') == 'delete_receipt':
+            receipt_list = request.POST.getlist('delete_list[]')
+            delete_set = Receipt.objects.filter(pk__in=receipt_list)
+            general_statistics_object = GraphTotalStatistic.objects.first()
+            for receipt in delete_set:
+
+                if (receipt.status == "paid_for" or receipt.status == "partly") \
+                    and receipt.payment_was_made == True:
+                    general_statistics_object.total_balance -= receipt.total_sum
+                    general_statistics_object.total_fund_state -= receipt.total_sum
+                    receipt.appartment.personal_account.balance -= receipt.total_sum
+                    receipt.appartment.personal_account.save()
+                    general_statistics_object.total_debt = -(PersonalAccount.objects.filter(balance__lte=0)\
+                                                        .aggregate(Sum('balance'))['balance__sum'])
+                receipt.delete()
+
+            general_statistics_object.save()
+
+        response = 'You finished deleteting!'
+        return JsonResponse(response, safe=False)
+
+
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['general_statistics'] = GraphTotalStatistic.objects.first()
@@ -392,6 +428,52 @@ class AddReceiptView(TemplateView):
         messages.success(self.request, f"Квитанция создана!")
         return HttpResponseRedirect(success_url)
     
+from .forms import ReceiptCellForm
+from django import forms
+import random
+
+
+class ReceiptCopyView(AddReceiptView):
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        receipt_instance = Receipt.objects.get(id=self.kwargs['pk'])
+        initial_list_of_dictionary = []
+        for receipt_cell in receipt_instance.receipt_cells.all():
+            init_dict = {}
+            init_dict['utility_service'] = receipt_cell.utility_service
+            init_dict['consumption'] = receipt_cell.consumption
+            init_dict['unit_of_measure'] = receipt_cell.unit_of_measure
+            init_dict['cost_per_unit'] = receipt_cell.cost_per_unit
+            init_dict['cost'] = receipt_cell.cost
+            initial_list_of_dictionary.append(init_dict)
+
+        receipt_instance.pk = None
+        # receipt_instance.number = None
+        receipt_instance.number = random.randint(10000000000 , 99999999999)
+        while Receipt.objects.filter(number=receipt_instance.number):
+            receipt_instance.number = random.randint(10000000000 , 99999999999)
+
+        context['main_form'] = AddReceiptForm(instance=receipt_instance, prefix='main_form')
+        initial_object = receipt_instance.appartment
+        initial_utility_form_dict = {"house": initial_object.house,
+                                    "section": initial_object.sections,
+                                    "personal_account": initial_object.personal_account}
+        context['utility_form'] = UtilityReceiptForm(initial=initial_utility_form_dict, prefix='utility_form')
+        
+        CopyReceiptCellFormset = forms.inlineformset_factory(Receipt, ReceiptCell,
+                                                        form=ReceiptCellForm, 
+                                                        can_delete=True, 
+                                                        extra=len(initial_list_of_dictionary), 
+                                                        )  
+
+
+        context['receipt_cell_formset'] = CopyReceiptCellFormset(initial = initial_list_of_dictionary, prefix='receipt_cell_formset')
+        
+        return context
+        
+
 
 class ReceiptUpdateView(UpdateView):
     template_name = 'receipts/receipt_create.html'    
@@ -475,6 +557,10 @@ class ReceiptUpdateView(UpdateView):
         messages.success(self.request, f"Квитанция изменена!")
         return HttpResponseRedirect(success_url)
 
+
+   
+
+
 class ReceiptDeleteView(DeleteView):
 
     model = Receipt
@@ -495,10 +581,14 @@ class ReceiptDeleteView(DeleteView):
             self.object.appartment.personal_account.save()
             general_statistics_object.total_debt = -(PersonalAccount.objects.filter(balance__lte=0)\
                                                 .aggregate(Sum('balance'))['balance__sum'])
+            general_statistics_object.save()
+
         self.object.delete()
-        general_statistics_object.save()
         messages.success(request, (f'Квитанция {receipt_number}. Удалена. Данные о квитанции также удалены'))
         return HttpResponseRedirect(success_url)
+
+
+
 
 
 class ReceiptCardView(DetailView):
@@ -506,6 +596,7 @@ class ReceiptCardView(DetailView):
     template_name = "receipts/receipt_card.html"
     context_object_name = 'receipt'
     
+
 
 
 class ReceiptTemplateListView(FormView):

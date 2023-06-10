@@ -40,7 +40,7 @@
 
 {% block content %}
 
-<form method="post" enctype="multipart/form-data">
+<form method="post" enctype="multipart/form-data" id="receipt_form">
     <div class="row">
         <div class="col-xs-12 col-md-8 col-lg-7">
             <div class="box-body">
@@ -168,7 +168,6 @@
                     <div class="col-xs-12 col-sm-6">
                     </div>
                 </div>
-                {% comment %} ----------------------------------- {% endcomment %}
                 <table class="table table-bordered table-hover" id="utility_service_table">
                     <thead>
                         <tr>
@@ -180,7 +179,6 @@
                             <th style="width: 40px; min-width: 40px;"></th>
                         </tr>
                     </thead>
-                    {% comment %} ********************************************************************* {% endcomment %}
                     <tbody id="receipt_cell_formset_table">
                         {{ receipt_cell_formset.management_form }}
                         {% for receipt_cell_form in receipt_cell_formset %}
@@ -213,7 +211,6 @@
                             </tr>
                         {% endfor %}
 
-                        {% comment %} <div id="empty_form_container"> {% endcomment %}
                             <tr id="empty_form_container">
                                 <td>
                                     {{ receipt_cell_formset.empty_form.utility_service }}
@@ -237,8 +234,6 @@
                                     {{ receipt_cell_formset.empty_form.DELETE }}
                                 </td>
                             </tr>
-                        {% comment %} </div> {% endcomment %}
-                        
                     </tbody>
                     <tfoot>
                         <tr>
@@ -262,7 +257,6 @@
                         </tr>
                     </tfoot>
                 </table>
-                {% comment %} ----------------------------------- {% endcomment %}
                 <div class="row">
                     <div class="col-xs-11 text-right">
                         <div class="form-group">
@@ -328,7 +322,6 @@
                 data: {"ajax_indicator": "get_certain_house",
                         "current_house_number": house_number},
                 success: (data) => {
-//                    console.log(data)
                     var sections = data['sections']
                     var additional_sections_html = "<option value='empty_section'>Выберите секцию</option>"
                     for (section of sections){
@@ -347,7 +340,7 @@
         } else {
             $("#section_utility_field").not("option[value='']").empty().append("<option value='empty_section'>Выберите дом</option>")
             $("#appartment_field").not("option[value='']").empty().append("<option value='empty_appartment'>Выберите дом</option>")
-            $('#personal_account_utility_field').val('')
+            $('#personal_account_utility_field').val('').attr("disabled", true) 
         }
     })
 
@@ -378,7 +371,7 @@
 
             } else {
                 $("#house_utility_field").trigger('change')
-                $('#personal_account_utility_field').val('')
+                $('#personal_account_utility_field').val('').attr("disabled", true) 
                 
             }
         })
@@ -433,13 +426,12 @@
         })
 
 
+        $('#personal_account_utility_field').attr("disabled", true) 
+
+
         // personal account filter
         $("#appartment_field").on('change', function(){
             var appartment_number = $(this).find(":selected").val()
-            console.log('--------------------------')
-            console.log($(this))
-            console.log($(this).val())
-            console.log('--------------------------')
             $.ajax({
                 dataType: "json",
                 url: "{% url 'receipts:add_receipt' %}",
@@ -448,17 +440,13 @@
                 success: (data) => {
 
                     var personal_account_date = data['personal_account'][0]['number']
-                    $('#personal_account_utility_field').val(personal_account_date)
+                    $('#personal_account_utility_field').val(personal_account_date).attr("disabled", true) 
 
                     var basic_url = "{% url 'appartments:owner_detail' %}"
                     var additional_url = data['personal_account'][0]['appartment_account__owner_user__id']
                     var url = basic_url + additional_url
 
-                    console.log(data)
-                    //console.log(url)
-                    console.log(data['choosen_tariff'] != [])
                     if(data['choosen_tariff'][0]){
-                        console.log(data['choosen_tariff'][0]['id'])
                         
                         $('#tariff_field').find(`option[value=${data['choosen_tariff'][0]['id']}]`).prop('selected', true)
 
@@ -477,10 +465,11 @@
 
         
 
-
-
+        console.log($("#total_summ").val())
+        $("#price-total").html($("#total_summ").val())
         $("#empty_form_container").hide()
 
+        
         $("#utility_service_table").on('click', "button[id^='add']", function(){
             current_form_tab = $(this).closest('table')
             form_index = $(current_form_tab).find("input[id$='TOTAL_FORMS']").val()
@@ -550,8 +539,6 @@
                         },
                         dataType: 'json',
                         success:function(data){
-                              
-                            console.log(data)
 
                             for(var tariff_cell of data['counter_tariff_cell_data']){
                                 $('#add_simple_utility').trigger('click')
@@ -618,7 +605,6 @@
         $('input[id$=-DELETE]').hide()
 
         $(document).on('click', 'button[class*=remove-btn]', function(){
-            console.log('DELETE!!!!')
             $(this).next().attr('checked', true)
             
             var current_cost = $(this).closest('.utility_data_row').find('#cost_field').val()
@@ -638,8 +624,33 @@
         })
 
 
+        $("#receipt_form").validate({
+
+            validClass: "success",
+
+            highlight: function(element, errorClass, validClass) {
+                $(element).closest('.form-group').addClass("has-error").removeClass("has-success");
+          
+              },
+
+            unhighlight: function(element, errorClass, validClass) {
+                $(element).closest('.form-group').addClass("has-success").removeClass("has-error");
+          
+              },
+              
+
+    });
 
 
+    $("#id_main_form-payment_due, #id_main_form-from_date, #id_main_form-to_date").datepicker({
+        format: "dd.mm.yyyy",
+        language: 'ru'
+    })
+
+
+//id_main_form-payment_due
+//id_main_form-from_date
+//id_main_form-to_date
     
 });
 </script>
