@@ -21,7 +21,9 @@ from io import BytesIO, StringIO
 from django.template.loader import get_template
 from general_statistics.models import GraphTotalStatistic
 from .services import return_pdf_receipt, return_xlm_receipt
-
+from .forms import ReceiptCellForm
+from django import forms
+import random
 
 
 from decimal import Decimal
@@ -428,9 +430,7 @@ class AddReceiptView(TemplateView):
         messages.success(self.request, f"Квитанция создана!")
         return HttpResponseRedirect(success_url)
     
-from .forms import ReceiptCellForm
-from django import forms
-import random
+
 
 
 class ReceiptCopyView(AddReceiptView):
@@ -586,6 +586,9 @@ class ReceiptDeleteView(DeleteView):
         self.object.delete()
         messages.success(request, (f'Квитанция {receipt_number}. Удалена. Данные о квитанции также удалены'))
         return HttpResponseRedirect(success_url)
+
+
+
 
 
 

@@ -223,17 +223,6 @@ def return_xlm_receipt(receipt_id, template_id):
 
 
 
-
-
-
-
-
-# def return_pdf_receipt(receipt_id, template_id):
-#     pass
-# ***********************************************************************************************
-# ***********************************************************************************************
-# ***********************************************************************************************
-
 def return_xlm_list_of_statements():
     
     # my workbook
@@ -324,7 +313,102 @@ def return_xlm_list_of_statements():
         stream = tmp.read()
         response = HttpResponse(stream, content_type='application/vnd.ms-excel')
         print(response)
-        response['Content-Disposition'] = f'attachment; filename=Все_квитанции.xlsx'
+        response['Content-Disposition'] = f'attachment; filename=list_of_statements.xlsx'
 
     return response
 
+
+
+def return_xlm_statement_data(pk):
+    current_template = Workbook()
+    current_sheet = current_template.active
+
+    statement = Statement.objects.get(id=pk)
+
+    current_sheet.column_dimensions['A'].width = 60
+    current_sheet.column_dimensions['B'].width = 60
+
+    current_sheet[f'A1'] = 'Платеж'
+    current_sheet[f'A1'].alignment = Alignment(horizontal='center')
+    current_sheet[f'B1'] = f'#{ statement.number }'
+    current_sheet[f'B1'].alignment = Alignment(horizontal='center')
+    
+    current_sheet[f'A2'] = 'Дата'
+    current_sheet[f'A2'].alignment = Alignment(horizontal='center')
+    current_sheet[f'B2'] = statement.date
+    current_sheet[f'B2'].alignment = Alignment(horizontal='center')
+    
+    current_sheet[f'A3'] = 'Владелец квартиры'
+    current_sheet[f'A3'].alignment = Alignment(horizontal='center')
+    current_sheet[f'B3'] = statement.personal_account.appartment_account.owner_user.full_name
+    current_sheet[f'B3'].alignment = Alignment(horizontal='center')
+
+    current_sheet[f'A4'] = 'Лицевой счет'
+    current_sheet[f'A4'].alignment = Alignment(horizontal='center')
+    current_sheet[f'B4'] = statement.personal_account.number
+    current_sheet[f'B4'].alignment = Alignment(horizontal='center')
+
+    current_sheet[f'A5'] = 'Приход/расход'
+    current_sheet[f'A5'].alignment = Alignment(horizontal='center')
+    if statement.type_of_statement == 'arrival':
+        current_sheet[f'B5'] = 'Приход'
+    else:
+        current_sheet[f'B5'] = 'Расход'
+    current_sheet[f'B5'].alignment = Alignment(horizontal='center')
+
+    current_sheet[f'A6'] = 'Статус'
+    current_sheet[f'A6'].alignment = Alignment(horizontal='center')
+    if statement.checked == 'True':
+        current_sheet[f'B6'] = 'Проведен'
+    else:
+        current_sheet[f'B6'] = 'Не проведен'
+    current_sheet[f'B5'].alignment = Alignment(horizontal='center')
+
+    current_sheet[f'A6'] = 'Статья'
+    current_sheet[f'A6'].alignment = Alignment(horizontal='center')
+    if statement.type_of_paynent_item:
+        current_sheet[f'B6'] = statement.type_of_paynent_item.title
+    else:
+        current_sheet[f'B6'] = 'Не указана'
+    current_sheet[f'B6'].alignment = Alignment(horizontal='center')
+
+    current_sheet[f'A7'] = 'Квитанция'
+    current_sheet[f'A7'].alignment = Alignment(horizontal='center')
+
+    current_sheet[f'A8'] = 'Услуга'
+    current_sheet[f'A8'].alignment = Alignment(horizontal='center')
+    
+    current_sheet[f'A9'] = 'Сумма'
+    current_sheet[f'A9'].alignment = Alignment(horizontal='center')
+    current_sheet[f'B9'] = statement.summ
+    current_sheet[f'B9'].alignment = Alignment(horizontal='center')
+
+    current_sheet[f'A10'] = 'Валюта'
+    current_sheet[f'A10'].alignment = Alignment(horizontal='center')
+    current_sheet[f'B10'] = 'UAH'
+    current_sheet[f'B10'].alignment = Alignment(horizontal='center')
+
+    current_sheet[f'A11'] = 'Комментарий'
+    current_sheet[f'A11'].alignment = Alignment(horizontal='center')
+    current_sheet[f'B11'] = statement.comment
+    current_sheet[f'B11'].alignment = Alignment(horizontal='center')
+
+    current_sheet[f'A11'] = 'Менеджер'
+    current_sheet[f'A11'].alignment = Alignment(horizontal='center')
+    if statement.manager:
+        current_sheet[f'B11'] = statement.manager.full_name
+    else:
+        current_sheet[f'B11'] = 'Не указана'
+    current_sheet[f'B11'].alignment = Alignment(horizontal='center')
+
+
+
+    with NamedTemporaryFile() as tmp:
+        current_template.save(tmp.name)
+        tmp.seek(0)
+        stream = tmp.read()
+        response = HttpResponse(stream, content_type='application/vnd.ms-excel')
+        print(response)
+        response['Content-Disposition'] = f'attachment; filename=statements_{statement.number}.xlsx'
+
+    return response

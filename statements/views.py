@@ -1,6 +1,8 @@
 from django.shortcuts import render
 import operator
 from functools import reduce
+import random
+
 
 from babel.dates import format_date
 from django.db.models import Sum
@@ -11,7 +13,7 @@ from users.models import User
 from django.contrib import messages
 from django.http import HttpResponseRedirect, JsonResponse
 from general_statistics.models import GraphTotalStatistic
-from receipts.services import return_xlm_list_of_statements
+from receipts.services import return_xlm_list_of_statements, return_xlm_statement_data
 
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -21,6 +23,7 @@ from datetime import datetime
 from django.urls import reverse_lazy
 from general_statistics.models import GraphTotalStatistic
 from django.views.generic.edit import FormView, UpdateView, CreateView, DeleteView
+from django.views.generic.detail import DetailView
 
 
 # Create your views here.
@@ -421,19 +424,96 @@ def statemets_print_all(request):
     return response
 
 
+def statemets_print_current_statment(request, pk):
+    response = return_xlm_statement_data(pk)
+    return response
+
+
+class StatementDetailView(DetailView):
+    queryset = Statement.objects.select_related('personal_account__appartment_account__owner_user', 'type_of_paynent_item', 'manager').all()    
+    # model = Statement
+    template_name = "statements/statement_detail.html"
+    context_object_name = 'statement'
+
+
+
+class StatementArrivalCopyView(StatementArrivalCreateView):
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        statement_instance = Statement.objects.get(id=self.kwargs['pk'])
+        statement_instance.pk = None
+        statement_instance.number = random.randint(10000000000 , 99999999999)
+        while Statement.objects.filter(number=statement_instance.number):
+            statement_instance.number = random.randint(10000000000 , 99999999999)
+        context['statement_form'] = StatementArrivalCreateForm(instance=statement_instance, prefix="statement_form")
+        return context
+
+
+
+class StatementExpenseCopyView(StatementExpenseCreateView):
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        statement_instance = Statement.objects.get(id=self.kwargs['pk'])
+        statement_instance.pk = None
+        statement_instance.number = random.randint(10000000000 , 99999999999)
+        while Statement.objects.filter(number=statement_instance.number):
+            statement_instance.number = random.randint(10000000000 , 99999999999)
+        context['statement_form'] = StatementArrivalCreateForm(instance=statement_instance, prefix="statement_form")
+        return context
+
+
+
+# =====================================================================
+# ===================STATEMENT===DELETE================================
+# =====================================================================
+class ReceiptDeleteView(DeleteView):
+
+    model = Statement
+    success_url = reverse_lazy('statements:statements_list')
+    
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        total_statistic = GraphTotalStatistic.objects.first()
+
+        if self.object.checked == True :
+
+            if self.object.type_of_statement == "arrival":
+                self.object.personal_account.balance -= self.object.summ
+                total_statistic.total_fund_state -= self.object.summ
+                total_statistic.total_balance -= self.object.summ
+
+
+            elif self.object.type_of_statement == "expense":
+                self.object.personal_account.balance += self.object.summ
+                total_statistic.total_fund_state += self.object.summ
+                total_statistic.total_balance += self.object.summ
+
+        self.object.delete()
+
+        messages.success(request, (f'Ведомость. Удалена. Данные о квитанции также удалены'))
+        return HttpResponseRedirect(success_url)
+
+# =====================================================================
+# ============END====STATEMENT===DELETE================================
+# =====================================================================
+
+
 
 class PaymentItemList(TemplateView):
     template_name = 'statements/payment_item_list.html'
 
     def get(self, request, *args, **kwargs):
-
        # datatables serverside logic
         if self.request.is_ajax() and self.request.method == 'GET' and request.GET.get('draw'):
             account_data_get_request = request.GET
-
             #search logic 
             Q_list = []
-
             draw = int(account_data_get_request.get("draw"))
             start = int(account_data_get_request.get("start"))
             length = int(account_data_get_request.get("length"))

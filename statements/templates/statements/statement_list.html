@@ -452,17 +452,17 @@ $(document).ready(function () {
     } ); 
 
 
-        //reversion logic for row except links to send inviting, deleting and editing
-//    table.on('click', 'tbody > tr > td', function () {
-//        if(
-//            $(this).find("div").attr("id") != "buttons_interaction"
-//            )
-//        {
-//            var basic_url = "{% url 'appartments:appartment_detail' %}"
-//            var url_index = table.row(this).id().toString();
-//            document.location.href = basic_url + url_index;
-//        }
-//    } );
+
+    table.on('click', 'tbody > tr > td', function () {
+        if(
+            $(this).find("div").attr("id") != "buttons_interaction"
+            )
+        {
+            var basic_url = "{% url 'statements:statement_detail' %}"
+            var url_index = table.row(this).id().toString();
+            document.location.href = basic_url + url_index;
+        }
+    } );
 
 
     // delete and confirm display lofic

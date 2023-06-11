@@ -1,0 +1,181 @@
+
+{% extends "layout/base_crm.html" %}
+{% load static %}
+
+
+{% block additionaly_css %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.css }} 
+    {% endfor %}
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2/dist/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'appartments/plugins/select2-theme-bootstrap4/dist/select2-bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+
+    <style>
+        .column-center {
+            margin-top: 5pt;
+        }
+    </style>
+
+{% endblock additionaly_css %}
+
+
+
+{% block additionaly_js %}
+    {% for form in responsibilities_formset %}
+        {{ form.media.js }}
+    {% endfor %}
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script src="{% static 'appartments/plugins/select2/dist/js/select2.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+{% endblock additionaly_js %}
+
+
+{% block title %}
+    <title> Ведомость </title>
+
+{% endblock title %}
+
+{% block content-header %}
+    
+    <h1>Ведомость</h1>
+    
+{% endblock %}
+
+{% block content %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-xs-12 col-md-8 col-lg-7">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-5">
+                        <div class="input-group">
+                            <div class="input-group-addon">
+                                №
+                            </div>
+                            <input type="text" value="{{ statement.number }}" class="form-control" id="statement_number" disabled="disabled">
+                        </div>
+                    </div>
+
+                    <div class="col-xs-1 column-center">
+                        <strong><span>от</span></strong>
+                    </div>
+                    <div class="col-xs-5">
+                        
+                        <div class="input-group">
+                            <span class="input-group-addon" title="Выбрать дату">
+                                <i class="glyphicon glyphicon-calendar"></i>
+                            </span>
+                            <input type="text" value="{{ statement.date }}" class="form-control" id="date_field" disabled="disabled">
+                            
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="box">
+
+
+        <div class="box-header with-border">
+            {% if statement.type_of_statement == 'arrival' %}
+                <h3 class="box-title">Приходная ведомость</h3>
+            {% else %}
+                <h3 class="box-title">Расходная ведомость</h3>
+            {% endif %}
+            <div class="box-tools">
+                {% if statement.type_of_statement == 'arrival' %}
+                    <a href="{% url  'statements:statement_arrival_copy' statement.id %}" class="btn btn-default btn-sm">
+                        <span class="hidden-xs">Копировать</span><i class="fa fa-print visible-xs" aria-hidden="true"></i>
+                    </a>
+                {% else %}
+                    <a href="{% url  'statements:statement_expense_copy' statement.id %}" class="btn btn-default btn-sm">
+                        <span class="hidden-xs">Копировать</span><i class="fa fa-print visible-xs" aria-hidden="true"></i>
+                    </a>
+                {% endif %}
+
+                <a href="{% url 'statements:receipt_delete' statement.id %}" class="btn btn-default btn-sm" data-method="post" data-confirm="Вы уверены, что хотите удалить этот элемент?">
+                    <span class="hidden-xs">Удалить</span><i class="fa fa-envelope-o visible-xs" aria-hidden="true"></i>
+                </a>
+                <a href="{% url 'statements:statement_update' statement.id %}" class="btn btn-primary btn-sm">
+                    <span class="hidden-xs">Редактировать ведомость</span><i class="fa fa-pencil visible-xs" aria-hidden="true"></i>
+                </a>
+                <a href="{% url 'statements:statemets_print_all' statement.id %}" class="btn btn-default btn-sm">
+                    <span class="hidden-xs">Выгрузить в Excel</span><i class="fa fa-pencil visible-xs" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+
+
+        <div class="box-body">
+            <table class="table table-bordered table-striped table-view">
+                <tbody>
+                    <tr>
+                        <td>Владелец квартиры</td>
+                        <td><a href="{% url 'appartments:owner_detail' statement.personal_account.appartment_account.owner_user.id %}">{{ statement.personal_account.appartment_account.owner_user }}</a></td>
+                    </tr>
+                    <tr>
+                        <td>Лицевой счет</td>
+                        <td><a href="javascript:;">{{ statement.personal_account.number }}</a></td>
+                    </tr>
+                    <tr>
+                        <td>Статья</td>
+                        <td>{{ statement.type_of_paynent_item.title }}</td>
+                    </tr>
+                    <tr>
+                        <td>Квитанция</td>
+                        <td>{{ statement.type_of_paynent_item.receipt }}</td>
+                    </tr>
+                    <tr>
+                        <td>Услуга</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Менеджер</td>
+                        {% if statement.manager %}
+                            <td><a href="{% url 'users:admin_settings_users_card' statement.manager.id %}">{{ statement.manager.full_name }}</a></td>
+                        {% else %}
+                            <td>не указан</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        <td>Сумма</td>
+                        <td><span class="text-green">{{ statement.summ }}</span></td>
+                    </tr>
+                    <tr>
+                        <td>Комментарий</td>
+                        <td>{{ statement.comment }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+    </div>
+</div>
+
+</form>
+
+
+
+<script>
+
+    $(document).ready(function () {
+
+    
+});
+</script>
+{% endblock content %}
