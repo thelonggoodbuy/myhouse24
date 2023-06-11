@@ -32,7 +32,7 @@ from utility_services.models import Tariff
 
 from .forms import HouseEditeForm, HouseEditeFormSetImage, SectionEditeFormSet, FloorEditeFormSet, ResponsibilitiesEditeFormset,\
                     AppartmentEditeForm, OwnerUpdateForm, AppartmentTariffForm, AppartmentTariffForset, PersonalAccountCreateForm,\
-                    SendOwnderForm
+                    SendOwnderForm, AppartmentCreateForm
 from general_statistics.models import GraphTotalStatistic
 
 # view for testing role using
@@ -458,6 +458,44 @@ class AppartmentEditeView(UpdateView):
         return HttpResponseRedirect(success_url)
     
 
+
+class AppartmentCreateView(TemplateView):
+
+    model = Appartment
+    template_name = 'appartments/appartments_edit.html'
+    success_url = reverse_lazy('appartments:appartments_list')
+    form_class = AppartmentCreateForm
+
+
+
+    def post(self, request, *args, **Kwargs):
+        main_form = AppartmentCreateForm(request.POST, prefix='main_form')
+        if (main_form.is_valid()):
+            return self.form_valid(main_form)
+        else: 
+            return self.form_invalid(main_form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['main_form'] = AppartmentCreateForm(prefix='main_form')
+        return context
+
+    def form_valid(self, main_form):
+        main_form.save()
+        messages.success(self.request, 'Квартира создана')
+        success_url = self.success_url
+        return HttpResponseRedirect(success_url)
+
+
+    def form_invalid(self, main_form):
+        if main_form.errors:
+            for field, error in main_form.errors.items():
+                
+                error_text = f"{''.join(field).join(error)}"
+                messages.error(self.request, error_text)
+
+        success_url = self.success_url
+        return HttpResponseRedirect(success_url)
 
     # ------------------------------------------------------------------------
     # -------------------PERSONALE-ACCOUNT-CRUD-------------------------------

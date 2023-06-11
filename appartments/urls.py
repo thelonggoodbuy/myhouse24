@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import ReportView,\
                     HousesListView, HouseDeleteView, HouseEditeView, HouseDetailView,\
-                    AppartmentsListView, AppartmentsCardView, AppartmentDeleteView, AppartmentEditeView,\
+                    AppartmentsListView, AppartmentsCardView, AppartmentDeleteView, AppartmentEditeView, AppartmentCreateView,\
                     PersonalAccountsListView, PersonalAccountAddView, PersonalAccountEditeView, PersonalAccountDeleteView, personal_accounts_print_all,\
                     OwnersListView, OwnerCardView, OwnerEditeView, OwnerDeleteView, CreteNewUser, OwnerSendInvitation
 
@@ -24,6 +24,7 @@ urlpatterns = [
     # appartments CRUD
     path('appartments_list/', AppartmentsListView.as_view(), name="appartments_list"),
     path('appartment_detail/', AppartmentsCardView.as_view(), name="appartment_detail"),
+    path('appartment_create/', AppartmentCreateView.as_view(), name="appartment_create"),
     path('appartment_detail/<int:pk>', AppartmentsCardView.as_view(), name="appartment_detail"),
     path('appartment_delete/', AppartmentDeleteView.as_view(), name='appartment_delete'),
     path('appartment_delete/<int:pk>', AppartmentDeleteView.as_view(), name='appartment_delete'),
