@@ -26,4 +26,3 @@ def send_pdf_receipt(receipt_number, owner_fool_name, owner_email, path, context
     myPdf = pdfkit.from_string(html, False)
     reseipt_mail_object.attach(f"receipt_{receipt_number}.pdf", myPdf)
     reseipt_mail_object.send()
-    # return None

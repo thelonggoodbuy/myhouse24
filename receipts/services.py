@@ -27,7 +27,7 @@ from django.templatetags.static import static
 
 from django.core.mail import send_mail, EmailMessage
 
-
+from appartments.models import PersonalAccount
 
 
 
@@ -64,11 +64,7 @@ def return_pdf_receipt(receipt_id, template_id):
                                                  'cost'))
    
     template_path = 'pdf_templates/test_templates.html'
-    # prerendered_template = get_template(template_path)
-    # html = prerendered_template.render(context)
-    # myPdf = pdfkit.from_string(html, False)
-    # response = HttpResponse(myPdf, content_type='application/pdf')
-    # response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+
     send_pdf_receipt.delay(receipt.appartment.personal_account.number,
                     receipt.appartment.owner_user.full_name,
                     receipt.appartment.owner_user.email,
@@ -410,5 +406,85 @@ def return_xlm_statement_data(pk):
         response = HttpResponse(stream, content_type='application/vnd.ms-excel')
         print(response)
         response['Content-Disposition'] = f'attachment; filename=statements_{statement.number}.xlsx'
+
+    return response
+
+
+
+def return_xlm_statement_data():
+    current_template = Workbook()
+    current_sheet = current_template.active
+
+    personal_accounts = list(PersonalAccount.objects.select_related('appartment_account')\
+                                                    .all()\
+                                                    .values('number', 'status',\
+                                                            'appartment_account__house__title',\
+                                                            'appartment_account__sections__title',\
+                                                            'appartment_account__number',\
+                                                            'appartment_account__owner_user__full_name',\
+                                                            'balance'))
+
+    current_sheet.column_dimensions['A'].width = 60
+    current_sheet.column_dimensions['B'].width = 15
+    current_sheet.column_dimensions['C'].width = 25
+    current_sheet.column_dimensions['D'].width = 15
+    current_sheet.column_dimensions['E'].width = 15
+    current_sheet.column_dimensions['F'].width = 60
+    current_sheet.column_dimensions['G'].width = 15
+
+    current_sheet['A1'] = 'Лицевой счет'
+    current_sheet['A1'].alignment = Alignment(horizontal='center')
+    current_sheet['B1'] = 'Статус'
+    current_sheet['B1'].alignment = Alignment(horizontal='center')
+    current_sheet['C1'] = 'Дом'
+    current_sheet['C1'].alignment = Alignment(horizontal='center')
+    current_sheet['D1'] = 'Секция'
+    current_sheet['D1'].alignment = Alignment(horizontal='center')
+    current_sheet['E1'] = 'Квартира'
+    current_sheet['E1'].alignment = Alignment(horizontal='center')
+    current_sheet['F1'] = 'Владелец'
+    current_sheet['F1'].alignment = Alignment(horizontal='center')
+    current_sheet['G1'] = 'Остаток'
+    current_sheet['G1'].alignment = Alignment(horizontal='center')
+
+    current_row = 1 + 1
+
+    for account in personal_accounts:
+    
+        current_sheet[f'A{current_row}'] =  account['number']
+        current_sheet[f'A{current_row}'].alignment = Alignment(horizontal='center')
+
+        if account['status'] == 'active':
+            current_sheet[f'B{current_row}'] = 'Активный'
+        else:
+            current_sheet[f'B{current_row}'] = 'Неактивный'
+        current_sheet[f'B{current_row}'].alignment = Alignment(horizontal='center')
+
+        current_sheet[f'C{current_row}'] =  account['appartment_account__house__title']
+        current_sheet[f'C{current_row}'].alignment = Alignment(horizontal='center')
+
+        current_sheet[f'D{current_row}'] =  account['appartment_account__sections__title']
+        current_sheet[f'D{current_row}'].alignment = Alignment(horizontal='center')
+
+        current_sheet[f'E{current_row}'] =  account['appartment_account__number']
+        current_sheet[f'E{current_row}'].alignment = Alignment(horizontal='center')
+
+        current_sheet[f'F{current_row}'] = account['appartment_account__owner_user__full_name']
+        current_sheet[f'F{current_row}'].alignment = Alignment(horizontal='center')
+        
+        current_sheet[f'G{current_row}'] =  account['balance']
+        current_sheet[f'G{current_row}'].alignment = Alignment(horizontal='center')
+
+        current_row += 1
+    
+    
+
+    with NamedTemporaryFile() as tmp:
+        current_template.save(tmp.name)
+        tmp.seek(0)
+        stream = tmp.read()
+        response = HttpResponse(stream, content_type='application/vnd.ms-excel')
+        print(response)
+        response['Content-Disposition'] = f'attachment; filename=all_personal_accounts_data.xlsx'
 
     return response

@@ -44,8 +44,8 @@
                         </button>
                         <ul class="dropdown-menu">
                             <li><a href="{% url 'appartments:owner_create' %}">Добавить владельца квартиры</a></li>
-                            <li><a href="#">Отправить сообщение должникам</a></li>
-                            <li><a href="#">Отправить приглашение</a></li>
+                            <li><a href="{% url 'users:message_create' %}">Отправить сообщение должникам</a></li>
+                            <li><a href="{% url 'appartments:owner_send_invitation' %}">Отправить приглашение</a></li>
                         </ul>
                     </div>
                 </div>

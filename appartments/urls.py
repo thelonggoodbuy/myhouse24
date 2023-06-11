@@ -3,8 +3,8 @@ from django.urls import path
 from .views import ReportView,\
                     HousesListView, HouseDeleteView, HouseEditeView, HouseDetailView,\
                     AppartmentsListView, AppartmentsCardView, AppartmentDeleteView, AppartmentEditeView,\
-                    PersonalAccountsListView, PersonalAccountAddView, PersonalAccountEditeView,\
-                    OwnersListView, OwnerCardView, OwnerEditeView, OwnerDeleteView, CreteNewUser
+                    PersonalAccountsListView, PersonalAccountAddView, PersonalAccountEditeView, PersonalAccountDeleteView, personal_accounts_print_all,\
+                    OwnersListView, OwnerCardView, OwnerEditeView, OwnerDeleteView, CreteNewUser, OwnerSendInvitation
 
 
 app_name='appartments'
@@ -35,6 +35,10 @@ urlpatterns = [
     path('personal_accounts_create/', PersonalAccountAddView.as_view(), name="personal_accounts_create"),
     path('personal_accounts_edite/', PersonalAccountEditeView.as_view(), name="personal_accounts_edite"),
     path('personal_accounts_edite/<int:pk>', PersonalAccountEditeView.as_view(), name="personal_accounts_edite"),
+    path('personal_account_delete/', PersonalAccountDeleteView.as_view(), name="personal_account_delete"),
+    path('personal_account_delete/<int:pk>', PersonalAccountDeleteView.as_view(), name="personal_account_delete"),
+    path('personal_accounts_print_all/', personal_accounts_print_all, name="personal_accounts_print_all"),
+    # PersonalAccountDeleteView
 
     # owners CRUD
     path('owners_list/', OwnersListView.as_view(), name="owner_list"),
@@ -45,4 +49,5 @@ urlpatterns = [
     path('owner_delete/', OwnerDeleteView.as_view(), name="owner_delete"),
     path('owner_delete/<int:pk>', OwnerDeleteView.as_view(), name="owner_delete"),
     path('owner_create', CreteNewUser.as_view(), name="owner_create"),
+    path('owner_send_invitation/', OwnerSendInvitation.as_view(), name="owner_send_invitation"),
 ]

@@ -31,7 +31,6 @@
                 Content of the modal dialog box.
             </div>
 
-{% comment %} ------------------------------------------------------------------------------------------------------------------ {% endcomment %}
 
             <div class="row">
                 <div class="col-xs-12 col-lg-9">
@@ -40,7 +39,7 @@
                         <div class="col-xs-12 col-md-4">
                             <div class="small-box bg-green overflow-hidden">
                                 <div class="inner">
-                                    <h3>100 999.06 грн</h3>
+                                    <h3>{{ general_statistics.total_fund_state }} грн</h3>
                                     <p>Состояние кассы</p>
                                 </div>
                                 <div class="icon">
@@ -51,7 +50,7 @@
                         <div class="col-xs-12 col-md-4">
                             <div class="small-box bg-blue overflow-hidden">
                                 <div class="inner">
-                                    <h3>16 999.14 грн</h3>
+                                    <h3>{{ general_statistics.total_balance }} грн</h3>
                                     <p>Баланс по счетам</p>
                                 </div>
                                 <div class="icon">
@@ -62,7 +61,7 @@
                         <div class="col-xs-12 col-md-4">
                             <div class="small-box bg-red overflow-hidden">
                                 <div class="inner">
-                                    <h3>568 914.00 грн</h3>
+                                    <h3>{{ general_statistics.total_debt }} грн</h3>
                                     <p>Задолженность по счетам</p>
                                 </div>
                                 <div class="icon">
@@ -79,7 +78,7 @@
                         </button>
                         <ul class="dropdown-menu">
                             <li><a href="{% url 'appartments:personal_accounts_create' %}">Добавить лицевой счет</a></li>
-                            <li><a href="#">Выгрузить в Excel</a></li>
+                            <li><a href="{% url 'appartments:personal_accounts_print_all' %}">Выгрузить в Excel</a></li>
                         </ul>
                     </div>
                 </div>
@@ -420,28 +419,28 @@ $(document).ready(function () {
 
 
     // delete and confirm display lofic
-//    $("#myDialog").dialog({
-//        autoOpen  : false,
-//        modal     : true,
-//        title     : "avadamedia.myhoise24",
-//        buttons   : {
-//                    'удалить квартиру' : function() {
-//                        var textValue = $('#myTextBox').val();
-//                        var basic_url = "{% url 'appartments:appartment_delete' %}"
-//                        var row_number = $(this).data('row_number')
-//                        document.location.href = basic_url + row_number;
-//                    },
-//                    'отмена' : function() {
-//                        $(this).dialog('close');
-//                    }
-//                    }
-//    });
+    $("#myDialog").dialog({
+        autoOpen  : false,
+        modal     : true,
+        title     : "avadamedia.myhoise24",
+        buttons   : {
+                    'удалить квартиру' : function() {
+                        var textValue = $('#myTextBox').val();
+                        var basic_url = "{% url 'appartments:personal_account_delete' %}"
+                        var row_number = $(this).data('row_number')
+                        document.location.href = basic_url + row_number;
+                    },
+                    'отмена' : function() {
+                        $(this).dialog('close');
+                    }
+                    }
+    });
 
 
-//    table.on('click', '#delete_button', function(){
-//        var row_number = $(this).closest('tr').attr('id')
-//        $("#myDialog").text(`Удалить квартиру с id ${row_number}?`).data('row_number', row_number).dialog("open");
-//    })
+    table.on('click', '#delete_button', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        $("#myDialog").text(`Удалить лицевой счет?`).data('row_number', row_number).dialog("open");
+    })
 
 
     table.on('click', '#edite_button', function(){

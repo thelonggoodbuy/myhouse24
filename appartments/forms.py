@@ -228,14 +228,12 @@ class PersonalAccountCreateForm(forms.ModelForm):
         self.fields['number'].initial = new_number
         self.fields['house'].queryset = House.objects.all().distinct()
         self.fields['section'].queryset = Section.objects.all().distinct()
-        # self.fields['appartment'].queryset = Appartment.objects.filter(personal_account__isnull=True)
         self.fields['appartment'].queryset = Appartment.objects.all()
 
         if self.instance.id:
             self.fields['house'].initial = self.instance.appartment_account.house
             self.fields['section'].initial = self.instance.appartment_account.sections
-            self.fields['appartment'].queryset = Appartment.objects.filter()
-            # self.fields['appartment'].initial = self.instance.appartment_account
+            self.fields['appartment'].initial = self.instance.appartment_account.number
 
 
     RECEIPT_STATUS = (
@@ -263,7 +261,6 @@ class PersonalAccountCreateForm(forms.ModelForm):
     
 
     def save(self, commit=True):
-        
         current_form = super(PersonalAccountCreateForm, self).save(commit=False)
         current_form_cleaned = super(PersonalAccountCreateForm, self).clean()
         current_form.save()
@@ -394,3 +391,21 @@ class OwnerUpdateForm(forms.ModelForm):
                 "telegram", "email", "role",\
                 "status", "password", "confirm_password",\
                 "image", "id", "note",)
+
+from .tasks import send_invitation
+
+class SendOwnderForm(forms.Form):
+    phone = forms.CharField(required=False, label="Телефон",
+                            widget=forms.TextInput(attrs={'class': 'form-control',
+                                                            'placeholder': 'телефон'}))
+
+    email = forms.CharField(required=False, label="Email",
+                            widget=forms.TextInput(attrs={'class': 'form-control',
+                                                            'placeholder': 'фамилия'}))
+    
+    def send(self):
+
+        phone = self.cleaned_data['phone']
+        email = self.cleaned_data['email']
+        send_invitation.delay(phone, email)
+        return None

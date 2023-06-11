@@ -2,6 +2,8 @@ from copy import deepcopy
 import operator
 from functools import reduce
 from django import forms
+from general_statistics.models import GraphTotalStatistic
+
 
 
 from django.db import models
@@ -29,8 +31,9 @@ from users.models import User
 from utility_services.models import Tariff
 
 from .forms import HouseEditeForm, HouseEditeFormSetImage, SectionEditeFormSet, FloorEditeFormSet, ResponsibilitiesEditeFormset,\
-                    AppartmentEditeForm, OwnerUpdateForm, AppartmentTariffForm, AppartmentTariffForset, PersonalAccountCreateForm
-
+                    AppartmentEditeForm, OwnerUpdateForm, AppartmentTariffForm, AppartmentTariffForset, PersonalAccountCreateForm,\
+                    SendOwnderForm
+from general_statistics.models import GraphTotalStatistic
 
 # view for testing role using
 class ReportView(TemplateView):
@@ -601,6 +604,7 @@ class PersonalAccountsListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['general_statistics'] = GraphTotalStatistic.objects.first()
         context['houses'] = House.objects.all()
         return context
     # ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -618,17 +622,26 @@ class PersonalAccountAddView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_initial_appartment_data':
+            appartment_id = self.request.GET['current_appartment_number']
+            current_appartment = Appartment.objects.get(id=appartment_id)
+            choosen_house = current_appartment.house
+            choosen_section = current_appartment.sections
+            sections = list(Section.objects.filter(house=choosen_house).values('id'))
+            appartment = list(Appartment.objects.filter(sections=choosen_section).values('id'))
+            response = {'sections': sections, 'appartment': appartment}
+            return JsonResponse(response, safe=False)
+
         if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_certain_house':
             house_id = self.request.GET['current_house_number']
             house = House.objects.get(id=house_id)
-            print(house)
+            # print(house)
             sections = list(Section.objects.only('id', 'title').filter(house=house).values('id', 'title'))
-            # print(sections)
             q_list = []
             q_list.append(Q(house=house))
             q_list.append(Q(Q(personal_account__isnull=True)))
             appartments = list(Appartment.objects.filter(*q_list).values('id', 'number'))
-            print(appartments)
+            # print(appartments)
             response = {'sections': sections,
                         'appartments':appartments}
             return JsonResponse(response, safe=False)
@@ -637,10 +650,9 @@ class PersonalAccountAddView(TemplateView):
             sections_id = self.request.GET.get('current_sections_number')
             choosen_sections = Section.objects.get(id=sections_id)
             q_list = []
-            q_list.append(Q(sections=choosen_sections))
+            q_list.append(Q(sections__id=choosen_sections.id))
             q_list.append(Q(personal_account__isnull=True))
             appartments = list(Appartment.objects.filter(*q_list).values('id', 'number'))
-            print(appartments)
             response = {'appartments':appartments}
             return JsonResponse(response, safe=False)
 
@@ -710,6 +722,29 @@ class PersonalAccountEditeView(UpdateView):
         main_form.save()
         success_url = self.success_url
         messages.success(self.request, f"Изменения в лицевой счет внесены!")
+        return HttpResponseRedirect(success_url)
+    
+
+
+class PersonalAccountDeleteView(DeleteView):
+    model = PersonalAccount
+    success_url = reverse_lazy('appartments:personal_accounts_list')
+
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        personal_account_number = self.object.number
+        personal_account_sum = self.object.balance
+        success_url = self.get_success_url()
+        general_statistics = GraphTotalStatistic.objects.first()
+        if personal_account_sum < 0:
+            general_statistics.total_debt -= personal_account_sum
+        general_statistics.total_balance -= personal_account_sum
+        self.object.delete()
+
+        messages.success(request, (f"Лицевой счет '{personal_account_number}' удален."))
         return HttpResponseRedirect(success_url)
 
 
@@ -803,7 +838,7 @@ class OwnersListView(TemplateView):
                                             'status', 'current_balance')
 
             data = list(raw_data)
-            print(data)
+            # print(data)
             verbose_status_dict = User.get_verbose_status_dict()
 
             for owner in data:  
@@ -844,7 +879,56 @@ class OwnersListView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['houses'] = House.objects.all()
         return context
-    
+
+
+
+# from django.shortcuts import redirect
+# class OwnerSendInvitation(FormView):
+# def send_owner_invitaion(request):
+#     if request.method == "POST":
+#         send_form = SendOwnderForm(request.POST)
+#         if send_form.is_valid():
+#             send_form.send()
+#             messages.success(request, f'Приглашение отправлено!')
+#             return redirect('appartment:owner_list')
+#         else:
+#             send_form = SendOwnderForm()
+
+
+
+class OwnerSendInvitation(FormView):
+    form_class = SendOwnderForm
+    template_name = "appartments/owner_send_invitation.html"
+
+    def form_valid(self, send_form):
+        send_form.send()
+        messages.success(self.request, (f"Приглашение отправлено!"))
+        response = HttpResponseRedirect(reverse_lazy('appartments:owner_list'))
+        return response
+
+    def post(self, request, *args, **Kwargs):
+        send_form = SendOwnderForm(request.POST)
+        if send_form.is_valid():
+            return self.form_valid(send_form)
+        else:
+            if send_form.errors:
+                for field, error in send_form.errors.items():
+                    print(f'{field}: {error}')
+
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)     
+        context['send_form'] = SendOwnderForm()
+        return context
+
+
+
+
+from receipts.services import return_xlm_statement_data
+def personal_accounts_print_all(request):
+    response = return_xlm_statement_data()
+    return response
 
 class OwnerCardView(DetailView):
     queryset = User.objects.all()    

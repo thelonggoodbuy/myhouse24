@@ -28,13 +28,13 @@
 
 
 {% block title %}
-    <title> Новая лицевой счет </title>
+    <title> Лицевой счет </title>
 
 {% endblock title %}
 
 {% block content-header %}
     
-    <h1>Новая лицевой счет</h1>
+    <h1>Лицевой счет</h1>
     
 {% endblock %}
 
@@ -94,11 +94,19 @@
                     <div class="col-xs-12 col-sm-6">
                         <p>
                             <b>Владелец:</b> 
-                            <span id="user-fullname">не выбран</span>
+                            {% if main_form.instance.id and main_form.instance.appartment_account.owner_user %}
+                                <span id="user-fullname">{{ main_form.instance.appartment_account.owner_user.full_name }}</span>
+                            {% else %}
+                                <span id="user-fullname">не выбран</span>
+                            {% endif %}
                         </p>
                         <p>
-                            <b>Телефон:</b> 
-                            <span id="user-phone">не выбран</span>
+                            <b>Телефон:</b>
+                            {% if main_form.instance.id and main_form.instance.appartment_account.owner_user %}
+                                <span id="user-fullname">{{ main_form.instance.appartment_account.owner_user.phone }}</span>
+                            {% else %}
+                                <span id="user-phone">не выбран</span>
+                            {% endif %}
                         </p>
                     </div>
                     <div class="col-xs-12 col-sm-6">
@@ -115,13 +123,18 @@
             </div>
         </div>
 
-        
+
+{% comment %} 
+        {% if main_form.instance.id %}
+            <p>edit</p>
+        {% else %}
+            <p>new</p>
+        {% endif %}
+ {% endcomment %}
 
 
     </div>
-
-
-    </div>
+</div>
 
 </form>
 
@@ -130,8 +143,30 @@
 <script>
     $(document).ready(function () {
 
+
     $("#appartment_field > option").not("option[value='']").hide()
     $("#section_utility_field > option").not("option[value='']").hide()
+
+    var inital_appartment_val = $('#appartment_field').val()  
+    if(inital_appartment_val){
+        $.ajax({
+            dataType: "json",
+            url: "{% url 'appartments:personal_accounts_create' %}",
+            data: {"ajax_indicator": "get_initial_appartment_data",
+                    "current_appartment_number": inital_appartment_val},
+            success: (data) => {
+                console.log(data)
+                for (section of data['sections']){
+                    $(`#section_utility_field > option[value=${section['id']}]`).show()
+                }
+                for (appartment of data['appartment']){
+                    $(`#appartment_field > option[value=${appartment['id']}]`).show()
+                }
+            }
+        })
+    } 
+    
+
 
     $("#house_utility_field").on('change', function(){
         var house_number = $(this).find(":selected").val()
@@ -170,6 +205,9 @@
     $("#section_utility_field").on('change', function(){
 
         var section_number = $(this).find(":selected").val()
+        console.log('=================')
+        console.log(section_number)
+        console.log('=================')
         $('#user-fullname').html("<span> не выбран </span>")
         $('#user-phone').html("<span> не выбран </span>")
         if (section_number != 'empty_section'){
