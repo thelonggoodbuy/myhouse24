@@ -11,6 +11,7 @@ from users.models import User
 from django.contrib import messages
 from django.http import HttpResponseRedirect, JsonResponse
 from general_statistics.models import GraphTotalStatistic
+from receipts.services import return_xlm_list_of_statements
 
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -88,26 +89,29 @@ class StatementListView(TemplateView):
             start = int(statement_data_get_request.get("start"))
             length = int(statement_data_get_request.get("length"))
 
+
+            if statement_data_get_request.get('order[0][column]') != '' or order_column_task != None:
+                number_column = statement_data_get_request.get('order[0][column]')
+                order_column_task = statement_data_get_request.get(f'columns[{number_column}][name]')
+                if statement_data_get_request.get('order[0][dir]') == 'desc':
+                    order_column_task = f"-{order_column_task}"
+
+            if order_column_task == '' or order_column_task == None: order_column_task = '-id'
+
             raw_data = Statement.objects.filter(*Q_list)\
                                 .only('number', 'date', 'checked',\
                                     'type_of_paynent_item__title',\
                                     'personal_account__appartment_account__owner_user__full_name',
-                                    'personal_account__number', 'type_of_statement', 'summ')\
-                                .order_by()\
+                                    'personal_account__number', 'type_of_statement', 'summ', 'id')\
+                                .order_by(order_column_task)\
                                 .values('number', 'date', 'checked',\
                                         'type_of_paynent_item__title',\
                                         'personal_account__appartment_account__owner_user__full_name',
                                         'personal_account__number', 'type_of_statement', 'summ', 'id')
 
             data = list(raw_data)
-            # print(data)
-
-
-            # verbose_status_dict = PersonalAccount.get_verbose_status_dict()
-
 
             for statement in data:
-
                 simple_date = statement['date']
                 new_simple_date = format_date(simple_date, 'dd.MM.yyyy', locale='ru')
                 statement['date'] = new_simple_date
@@ -409,6 +413,13 @@ class StatementUpdateView(UpdateView):
         success_url = self.success_url
         messages.success(self.request, f"Изменения в ведомость внесены!")
         return HttpResponseRedirect(success_url)
+
+
+
+def statemets_print_all(request):
+    response = return_xlm_list_of_statements()
+    return response
+
 
 
 class PaymentItemList(TemplateView):

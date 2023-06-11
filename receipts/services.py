@@ -6,10 +6,11 @@ from xhtml2pdf import pisa
 from django.contrib.staticfiles import finders
 from babel.dates import format_date
 from openpyxl import load_workbook
-
+from statements.models import Statement
 from django.core.files import File
 
 from openpyxl.styles import Side, Border, Font, Alignment, NamedStyle
+from openpyxl import Workbook
 from xhtml2pdf import pisa
 from tempfile import NamedTemporaryFile
 
@@ -26,10 +27,14 @@ from django.templatetags.static import static
 
 from django.core.mail import send_mail, EmailMessage
 
-def return_pdf_receipt(receipt_id, template_id):
- 
 
-    
+
+
+
+
+
+def return_pdf_receipt(receipt_id, template_id):
+
     # --------------------------------------------------------------------
     # START context data logic
     # --------------------------------------------------------------------
@@ -168,11 +173,9 @@ def return_xlm_receipt(receipt_id, template_id):
                                                         right=Side(style='thick'), \
                                                         bottom=Side(style='thick'))
 
-        # counterpdf_receipt(receipt_id, template_id):
-#     pass
         current_row += 1
 
-    # total data logic 
+
     current_sheet.merge_cells(start_row=current_row,\
                                 start_column=1,\
                                 end_row=current_row+3,\
@@ -218,5 +221,110 @@ def return_xlm_receipt(receipt_id, template_id):
 
     return response
 
+
+
+
+
+
+
+
 # def return_pdf_receipt(receipt_id, template_id):
 #     pass
+# ***********************************************************************************************
+# ***********************************************************************************************
+# ***********************************************************************************************
+
+def return_xlm_list_of_statements():
+    
+    # my workbook
+    current_template = Workbook()
+    current_sheet = current_template.active
+
+    statements = list(Statement.objects.all().values('number', 'date', 'type_of_statement',\
+                                                    'type_of_paynent_item__title', 'summ',\
+                                                    'personal_account__appartment_account__owner_user__full_name',\
+                                                    'personal_account__number'))
+
+    current_row = 1
+    current_sheet[f'A{current_row}'] = '#'
+    current_sheet[f'A{current_row}'].alignment = Alignment(horizontal='center')
+    current_sheet[f'B{current_row}'] = 'Дата'
+    current_sheet[f'B{current_row}'].alignment = Alignment(horizontal='center')
+    current_sheet[f'C{current_row}'] = 'Приход/расход'
+    current_sheet[f'C{current_row}'].alignment = Alignment(horizontal='center')
+    current_sheet[f'D{current_row}'] = 'Статьи'
+    current_sheet[f'D{current_row}'].alignment = Alignment(horizontal='center')
+    current_sheet[f'E{current_row}'] = 'Квитанции'
+    current_sheet[f'E{current_row}'].alignment = Alignment(horizontal='center')
+    current_sheet[f'F{current_row}'] = 'Услуга'
+    current_sheet[f'F{current_row}'].alignment = Alignment(horizontal='center')
+    current_sheet[f'G{current_row}'] = 'Сумма'
+    current_sheet[f'G{current_row}'].alignment = Alignment(horizontal='center')
+    current_sheet[f'H{current_row}'] = 'Валюта'
+    current_sheet[f'H{current_row}'].alignment = Alignment(horizontal='center')
+    current_sheet[f'J{current_row}'] = 'Владелец'
+    current_sheet[f'J{current_row}'].alignment = Alignment(horizontal='center')
+    current_sheet[f'K{current_row}'] = 'Лицевой счет'
+    current_sheet[f'K{current_row}'].alignment = Alignment(horizontal='center')
+
+
+    current_sheet.column_dimensions['A'].width = 60
+    current_sheet.column_dimensions['B'].width = 40
+    current_sheet.column_dimensions['C'].width = 40
+    current_sheet.column_dimensions['D'].width = 40
+    current_sheet.column_dimensions['E'].width = 40
+    current_sheet.column_dimensions['F'].width = 10
+    current_sheet.column_dimensions['G'].width = 10
+    current_sheet.column_dimensions['H'].width = 10
+    current_sheet.column_dimensions['J'].width = 40
+    current_sheet.column_dimensions['K'].width = 40
+
+
+    current_row = 1 + 1
+
+    for statement_cell in statements:
+        # formating statements data
+        simple_type_of_statement = statement_cell['type_of_statement']
+        if simple_type_of_statement == 'arrival':
+            statement_cell['type_of_statement'] = 'Приход'
+        else:
+            statement_cell['type_of_statement'] = 'Расход'
+
+
+        current_sheet[f'A{current_row}'] =  statement_cell['number']
+        current_sheet[f'A{current_row}'].alignment = Alignment(horizontal='center')
+
+        current_sheet[f'B{current_row}'] =  str(statement_cell['date'])
+        current_sheet[f'B{current_row}'].alignment = Alignment(horizontal='center')
+
+        current_sheet[f'C{current_row}'] =  statement_cell['type_of_statement']
+        current_sheet[f'C{current_row}'].alignment = Alignment(horizontal='center')
+
+        current_sheet[f'D{current_row}'] =  statement_cell['type_of_paynent_item__title']
+        current_sheet[f'D{current_row}'].alignment = Alignment(horizontal='center')
+
+        current_sheet[f'G{current_row}'] =  statement_cell['summ']
+        current_sheet[f'G{current_row}'].alignment = Alignment(horizontal='center')
+
+        current_sheet[f'H{current_row}'] = 'UAH'
+        current_sheet[f'H{current_row}'].alignment = Alignment(horizontal='center')
+        
+        current_sheet[f'J{current_row}'] =  statement_cell['personal_account__appartment_account__owner_user__full_name']
+        current_sheet[f'J{current_row}'].alignment = Alignment(horizontal='center')
+
+        current_sheet[f'K{current_row}'] =  statement_cell['personal_account__number']
+        current_sheet[f'K{current_row}'].alignment = Alignment(horizontal='center')
+
+        current_row += 1
+
+    
+    with NamedTemporaryFile() as tmp:
+        current_template.save(tmp.name)
+        tmp.seek(0)
+        stream = tmp.read()
+        response = HttpResponse(stream, content_type='application/vnd.ms-excel')
+        print(response)
+        response['Content-Disposition'] = f'attachment; filename=Все_квитанции.xlsx'
+
+    return response
+

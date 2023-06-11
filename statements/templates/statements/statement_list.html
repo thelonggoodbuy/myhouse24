@@ -85,7 +85,7 @@
                         <ul class="dropdown-menu">
                             <li><a href="{% url 'statements:statement_arrival_create' %}">Создать приход</a></li>
                             <li><a href="{% url 'statements:statement_expense_create' %}">Создать расход</a></li>
-                            <li><a href="#">Выгрузить в Excel</a></li>
+                            <li><a href="{% url 'statements:statemets_print_all' %}">Выгрузить в Excel</a></li>
                         </ul>
                     </div>
                 </div>
@@ -110,7 +110,7 @@
                                     <thead>
                                         <tr id="order_links">
                                             <th sort-index="0" id="№_statement">№</th>
-                                            <th sort-index="1" id="date">Дата</th>
+                                            <th sort-index="1" id="date"><a id='order-link_1'>Дата</a></th>
                                             <th sort-index="2" id="status">Статус</th>
                                             <th sort-index="3" id="type_of_paynent_item">Тип платежа</th>
                                             <th sort-index="4" id="owner">Владелец</th>
@@ -248,7 +248,7 @@ $(document).ready(function () {
             "processing": true,
             "serverSide": true,
             "pageLength": 50,
-            "ordering": false,
+            "ordering": true,
             "ajax": {
                 "type": "GET",
                 "url": "{% url 'statements:statements_list' %}",
@@ -321,15 +321,17 @@ $(document).ready(function () {
                                         }
                 },
                 ],
-//            "columnDefs": [
-//                {'orderable': false, targets: 0},
-//                {'orderable': false, targets: 1},
-//                {'orderable': false, targets: 2},
-//                {'orderable': false, targets: 3},
-//                {'orderable': false, targets: 4},
-//                {'orderable': false, targets: 5},
-//                {'orderable': false, targets: 6},
-//            ],
+            "columnDefs": [
+                    {'orderable': false, targets: 0},
+                    {'orderable': false, targets: 1},
+                    {'orderable': false, targets: 2},
+                    {'orderable': false, targets: 3},
+                    {'orderable': false, targets: 4},
+                    {'orderable': false, targets: 5},
+                    {'orderable': false, targets: 6},
+                    {'orderable': false, targets: 7},
+                    {'orderable': false, targets: 8},
+            ],
             "rowId": 'id',
             
         });
@@ -358,17 +360,17 @@ $(document).ready(function () {
 
 
 
-//    var click_counter = 0
-//    $("a[id^='order-link']").on('click', function(){
-//        var col_numb = parseInt($(this).attr('id').replace('order-link_', ''))
-//        if (click_counter % 2 == 0){
-//            table.order([col_numb, 'asc']).draw();
-//            //console.log(table)
-//        } else {
-//            table.order([col_numb, 'desc']).draw();
-//        }
-//        click_counter++
-//    })
+    var click_counter = 0
+    $("a[id^='order-link']").on('click', function(){
+        var col_numb = parseInt($(this).attr('id').replace('order-link_', ''))
+        //console.log(col_numb)
+        if (click_counter % 2 == 0){
+            table.order([col_numb, 'asc']).draw();
+        } else {
+            table.order([col_numb, 'desc']).draw();
+        }
+        click_counter++
+    })
 
     //$('#choose_house')
 
@@ -432,22 +434,22 @@ $(document).ready(function () {
 
 
     //change row coursor
-//    table.on('mouseover', "a[id^='order-link']", function(){
-//        $(this).css('cursor','pointer')
-//        }
-//    )
+    table.on('mouseover', "a[id^='order-link']", function(){
+        $(this).css('cursor','pointer')
+        }
+    )
     
-//    table.on('mouseout', "a[id^='order-link']", function(){
-//        $(this).css('cursor','auto');
-//        }
-//    )
+    table.on('mouseout', "a[id^='order-link']", function(){
+        $(this).css('cursor','auto');
+        }
+    )
 
 
 
         //cleaning searh filters
-//    $('.box-header').on('click', '#clear_filters', function () {
-//        $("*[colnumb]").val('').change()
-//    } ); 
+    $('.box-header').on('click', '#clear_filters', function () {
+        $("*[colnumb]").val('').change()
+    } ); 
 
 
         //reversion logic for row except links to send inviting, deleting and editing
