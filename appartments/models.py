@@ -41,7 +41,7 @@ class Floor(models.Model):
 class Appartment(models.Model):
     number = models.PositiveSmallIntegerField()
     area = models.DecimalField(max_digits=7, decimal_places=2)
-    personal_account = models.OneToOneField('PersonalAccount', on_delete=models.SET_NULL, related_name="appartment_account", null=True, blank=True)
+    personal_account = models.OneToOneField('PersonalAccount', on_delete=models.SET_NULL, related_name="appartment_account", null=True, blank=True) #OneToOne
     house = models.ForeignKey(House, on_delete=models.CASCADE, related_name="related_appartment")
     sections = models.ForeignKey(Section, on_delete=models.SET_NULL, null=True, blank=True, related_name="related_appartment")
     floor = models.ForeignKey(Floor, on_delete=models.SET_NULL, null=True, blank=True, related_name="related_appartment")
@@ -51,7 +51,7 @@ class Appartment(models.Model):
 
     def __str__(self):
         # return f'{ self.house }: {self.sections}: {self.floor}: {self.number}'
-        return f'Квартира {self.number}'
+        return f'{self.number}'
     
     def get_model_fields(model):
         return model._meta.fields

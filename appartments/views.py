@@ -572,7 +572,7 @@ class PersonalAccountsListView(TemplateView):
                                 .only('number','status', 'appartment_account__number',\
                                        'appartment_account__house__title', 'appartment_account__sections__title',\
                                           'appartment_account__owner_user__full_name', 'balance')\
-                                .order_by()\
+                                .order_by('-id')\
                                 .values('number','status', 'appartment_account__number',\
                                          'appartment_account__house__title', 'appartment_account__sections__title',\
                                               'appartment_account__owner_user__full_name', 'balance', 'id')
@@ -737,13 +737,13 @@ class PersonalAccountAddView(TemplateView):
     
 
 class PersonalAccountEditeView(UpdateView):
-    template_name = 'appartments/personal_accounts_create.html'    
+    template_name = 'appartments/personal_accounts_create.html'
     form_class = PersonalAccountCreateForm
     model = PersonalAccount
-    success_url = reverse_lazy('appartments:personal_accounts_list')    
+    success_url = reverse_lazy('appartments:personal_accounts_list')
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)     
+        context = super().get_context_data(**kwargs)
         context['main_form'] = PersonalAccountCreateForm(instance=self.get_object(), prefix='main_form')
         return context
     

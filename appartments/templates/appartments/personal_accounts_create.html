@@ -76,9 +76,15 @@
                             {{ main_form.house }}                      
                         </div>
 
-                        <div class="form-group">
+                        {% comment %} <div class="form-group">
                             <label>{{ main_form.section.label }}</label>
                             {{ main_form.section }}                      
+                        </div> {% endcomment %}
+                        <div class="form-group">
+                            <label>Секции</label>
+                            <select class="form-control" id="section_utility_field">
+                                <option value="" selected="">Выберите...</option>                         
+                            </select>
                         </div>
 
                         <div class="form-group">

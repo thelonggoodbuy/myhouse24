@@ -295,13 +295,15 @@ class PersonalAccountCreateForm(forms.ModelForm):
             new_number = random.randint(10000000000 , 99999999999)
         self.fields['number'].initial = new_number
         self.fields['house'].queryset = House.objects.all().distinct()
-        self.fields['section'].queryset = Section.objects.all().distinct()
+        # self.fields['section'].queryset = Section.objects.all().distinct()
         self.fields['appartment'].queryset = Appartment.objects.all()
 
-        if self.instance.id:
+        try:
+        # if self.instance.id and self.instance.appartment_account.house:
             self.fields['house'].initial = self.instance.appartment_account.house
-            self.fields['section'].initial = self.instance.appartment_account.sections
-            self.fields['appartment'].initial = self.instance.appartment_account.number
+            self.fields['appartment'].initial = self.instance.appartment_account
+        except:
+            pass
 
 
     RECEIPT_STATUS = (
@@ -314,9 +316,9 @@ class PersonalAccountCreateForm(forms.ModelForm):
     house = forms.ModelChoiceField(label='Дом', required=False, queryset=None, empty_label='Выберите...',
                              widget=forms.Select(attrs={'class': 'form-control',
                                                         'id': 'house_utility_field'}))
-    section = forms.ModelChoiceField(label='Секция', required=False, queryset=None, empty_label='Выберите...',
-                             widget=forms.Select(attrs={'class': 'form-control',
-                                                        'id': 'section_utility_field'}))
+    # section = forms.ModelChoiceField(label='Секция', required=False, queryset=None, empty_label='Выберите...',
+    #                          widget=forms.Select(attrs={'class': 'form-control',
+    #                                                     'id': 'section_utility_field'}))
     appartment = forms.ModelChoiceField(label='Квартира', required=False, queryset=None, empty_label='Выберите...',
                              widget=forms.Select(attrs={'class': 'form-control',
                                                         'id': 'appartment_field'}))
@@ -334,6 +336,7 @@ class PersonalAccountCreateForm(forms.ModelForm):
         current_form.save()
     
         if current_form_cleaned['appartment']:
+            current_form_cleaned['appartment'].personal_account = None
             current_form_cleaned['appartment'].personal_account = current_form
             current_form_cleaned['appartment'].save()
 
