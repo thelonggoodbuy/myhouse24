@@ -295,11 +295,9 @@ class PersonalAccountCreateForm(forms.ModelForm):
             new_number = random.randint(10000000000 , 99999999999)
         self.fields['number'].initial = new_number
         self.fields['house'].queryset = House.objects.all().distinct()
-        # self.fields['section'].queryset = Section.objects.all().distinct()
-        self.fields['appartment'].queryset = Appartment.objects.all()
+        self.fields['appartment'].queryset = Appartment.objects.filter(personal_account=None)
 
         try:
-        # if self.instance.id and self.instance.appartment_account.house:
             self.fields['house'].initial = self.instance.appartment_account.house
             self.fields['appartment'].initial = self.instance.appartment_account
         except:
@@ -336,9 +334,14 @@ class PersonalAccountCreateForm(forms.ModelForm):
         current_form.save()
     
         if current_form_cleaned['appartment']:
-            current_form_cleaned['appartment'].personal_account = None
+            # current_form_cleaned['appartment'].personal_account = None
             current_form_cleaned['appartment'].personal_account = current_form
+            current_form.appartment_account = current_form_cleaned['appartment']
+            current_form.save()
             current_form_cleaned['appartment'].save()
+
+
+
 
 # ------------------------------------------------------------------------------------------
 # ----------------------------------OWNER-FORMS---------------------------------------------

@@ -6,6 +6,10 @@ from datetime import datetime
 from babel.dates import format_date
 from django.db.models import Max
 
+from django.contrib.postgres.aggregates import ArrayAgg, StringAgg
+from django.db.models.functions import Concat
+
+
 
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import DeleteView, FormView, UpdateView, CreateView
@@ -291,8 +295,8 @@ class CounterListView(TemplateView):
     def get(self, request, *args, **kwargs):
 
         Q_list = []
-        Q_list.append(Q(shown_in_counters=True))
-        Q_list.append(Q(last_readings__isnull=False))
+        # Q_list.append(Q(shown_in_counters=True))
+        # Q_list.append(Q(last_readings__isnull=False))
 
         if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('choosen_house') != None:
             house_data = House.objects.get(title=self.request.GET.get('choosen_house'))
@@ -302,25 +306,25 @@ class CounterListView(TemplateView):
         
         if request.GET.get('columns[0][search][value]'):
             if request.GET.get('columns[0][search][value]') != 'all_houses':
-                Q_list.append(Q(counter_reading__appartment__house__id=request.GET.get('columns[0][search][value]')))
+                Q_list.append(Q(appartment__house__id=request.GET.get('columns[0][search][value]')))
 
 
         if request.GET.get('columns[1][search][value]'):
             if request.GET.get('columns[1][search][value]') != 'empty_sect':
                 choosed_section = Section.objects.get(id=request.GET.get('columns[1][search][value]'))
-                Q_list.append(Q(counter_reading__appartment__sections=choosed_section))
+                Q_list.append(Q(appartment__sections=choosed_section))
 
 
         if request.GET.get('columns[2][search][value]'):
             if request.GET.get('columns[2][search][value]'):
                 number = request.GET.get('columns[2][search][value]')
-                Q_list.append(Q(counter_reading__appartment__number__icontains=number))
+                Q_list.append(Q(appartment__number__icontains=number))
 
 
         if request.GET.get('columns[3][search][value]'):
             if request.GET.get('columns[3][search][value]'):
                 title = request.GET.get('columns[3][search][value]')
-                Q_list.append(Q(title__icontains=title))
+                Q_list.append(Q(utility_service__title__icontains=title))
 
 
         # datatables serverside logic
@@ -342,29 +346,47 @@ class CounterListView(TemplateView):
     #                 order_column_task = f"-{order_column_task}"
 
             # raw_data = Tariff.objects.all()
-            raw_data = UtilityService.objects.annotate(last_readings=Min('counter_reading__date'))\
+            # F('utility_service__id'),
+            raw_data = CounterReadings.objects.annotate(counter_per_appartment = ArrayAgg(Concat(F('utility_service__id'),
+                                                                        Value('__'),
+                                                                        F('appartment__id'),
+                                                                        output_field=CharField())
+                                                                        ,distinct=True))\
                                         .filter(*Q_list)\
-                                        .only('counter_reading__appartment__house__title',\
-                                                'counter_reading__appartment__sections__title',\
-                                                'counter_reading__appartment__number',\
-                                                'title',\
-                                                'appartment__sections',\
-                                                # 'counter_reading__date',\
-                                                'unit_of_measure__title')\
+                                        .only('appartment__house__title',\
+                                                'appartment__sections__title',\
+                                                'appartment__number',\
+                                                'date',\
+                                                'utility_service__title',\
+                                                'utility_service__unit_of_measure__title')\
                                         .order_by()\
-                                        .values('counter_reading__appartment__house__title',\
-                                                'counter_reading__appartment__sections__title',\
-                                                'counter_reading__appartment__number',\
-                                                'title',\
-                                                'last_readings',\
-                                                'unit_of_measure__title',\
-                                                'counter_reading__appartment_id','id')
+                                        .values('counter_per_appartment',\
+                                                'appartment__house__title',\
+                                                'appartment__sections__title',\
+                                                'appartment__number',\
+                                                'date',\
+                                                'utility_service__title',\
+                                                'utility_service__unit_of_measure__title',\
+                                                'appartment__id','id')
 
-                                            # counter_reading__appartment__house__title',\
 
             data = list(raw_data)
             for counter in data:
-                print(counter)
+                counter['counter_per_appartment'] = counter['counter_per_appartment'][0]
+
+            lastes_data_dict = {}
+
+            for counter in data:
+
+                counter_per_appartment_key = counter['counter_per_appartment']
+
+                if counter_per_appartment_key not in lastes_data_dict:
+                    lastes_data_dict[counter_per_appartment_key] = counter
+
+                elif counter['date'] > lastes_data_dict[counter_per_appartment_key]['date']:
+                    lastes_data_dict[counter_per_appartment_key] = counter
+
+            data = list(lastes_data_dict.values())
 
     #         # paginator here
             paginator = Paginator(data, length)
@@ -398,17 +420,22 @@ class CounterListView(TemplateView):
         return context
     
 
+
+
+    
+
 class CounterReadingsPerAppartmentListView(TemplateView):
     template_name = "utility_services/counter_readings_per_appartment_list.html"
     appartment_id = None
+    utility_service_id = None
 
 
     def get(self, request, *args, **kwargs):
 
         Q_list = []
-        print(self.__class__.appartment_id)
-        Q_list.append(Q(counter__appartment__id=self.__class__.appartment_id))
         
+        Q_list.append(Q(appartment__id=self.__class__.appartment_id))
+        Q_list.append(Q(utility_service__id=self.__class__.utility_service_id))
         
 
         if request.GET.get('columns[0][search][value]'):
@@ -441,26 +468,26 @@ class CounterReadingsPerAppartmentListView(TemplateView):
 
         if request.GET.get('columns[4][search][value]'):
             if request.GET.get('columns[4][search][value]') != 'all_houses':
-                Q_list.append(Q(counter__appartment__house__id=request.GET.get('columns[4][search][value]')))
+                Q_list.append(Q(appartment__house__id=request.GET.get('columns[4][search][value]')))
 
 
         if request.GET.get('columns[5][search][value]'):
             if request.GET.get('columns[5][search][value]') != 'empty_sect':
                 choosed_section = Section.objects.get(id=request.GET.get('columns[5][search][value]'))
-                Q_list.append(Q(counter__appartment__sections=choosed_section))
+                Q_list.append(Q(appartment__sections=choosed_section))
 
 
         if request.GET.get('columns[6][search][value]'):
             if request.GET.get('columns[6][search][value]'):
                 number = request.GET.get('columns[6][search][value]')
-                Q_list.append(Q(counter__appartment__number__icontains=number))
+                Q_list.append(Q(appartment__number__icontains=number))
 
 
         if request.GET.get('columns[7][search][value]'):
             if request.GET.get('columns[7][search][value]') != 'all_counter':
                 if request.GET.get('columns[7][search][value]'):
                     counter_id = request.GET.get('columns[7][search][value]')
-                    Q_list.append(Q(counter__id=counter_id))
+                    Q_list.append(Q(utility_service__id=counter_id))
 
 
         if self.request.is_ajax() and self.request.method == 'GET':
@@ -473,31 +500,24 @@ class CounterReadingsPerAppartmentListView(TemplateView):
 
             raw_data = CounterReadings.objects\
                                 .annotate(date_with_month_year = F('date'))\
+                                .annotate(counter_per_appartment = ArrayAgg(Concat(F('utility_service__id'),
+                                                                        Value('__'),
+                                                                        F('appartment__id'),
+                                                                        output_field=CharField())
+                                                                        ,distinct=True))\
                                 .filter(*Q_list)\
-                                .only('id',\
-                                        'counter__appartment__id',\
-                                        'status',\
-                                        'date',\
-                                        'counter__appartment__house__id',\
-                                        'counter__appartment__house__title',\
-                                        'counter__appartment__sections',\
-                                        'counter__appartment__sections__title',\
-                                        'counter__appartment__number',\
-                                        'counter__id'
-                                        'counter__title',
-                                        'readings',
-                                        'counter__unit_of_measure__title')\
                                 .order_by()\
                                 .values('id',\
                                         'status',\
                                         'date',\
-                                        'counter__appartment__house__title',\
-                                        'counter__appartment__sections__title',\
-                                        'counter__appartment__number',\
-                                        'counter__title',
+                                        'appartment__house__title',\
+                                        'appartment__sections__title',\
+                                        'appartment__number',\
+                                        'utility_service__title',
                                         'readings',
-                                        'counter__unit_of_measure__title',\
-                                        'date_with_month_year')
+                                        'utility_service__unit_of_measure__title',\
+                                        'date_with_month_year',\
+                                        'counter_per_appartment')
 
 
             verbose_status_dict = CounterReadings.get_verbose_status_dict()
@@ -546,17 +566,21 @@ class CounterReadingsPerAppartmentListView(TemplateView):
             context = self.get_context_data(**kwargs)
             return self.render_to_response(context)
         
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, counter_per_appartment, **kwargs):
         context = super().get_context_data(**kwargs)
+        utility_service_id = counter_per_appartment.split('__')[0]
+        self.__class__.utility_service_id = utility_service_id
+        appartment_id = counter_per_appartment.split('__')[1]
+        self.__class__.appartment_id = appartment_id
+
         context['houses'] = House.objects.all()
-        self.__class__.appartment_id = list(Counter.objects.filter(id=self.kwargs['pk']).values('appartment__id'))[0]['appartment__id']
         context['appartment'] = Appartment.objects.get(id=self.__class__.appartment_id)        
-        context['counters'] = Counter.objects.all()
+        context['counters'] = UtilityService.objects.all()
         return context
 
 
 
-
+# ==================================ADDCOUNTERREADINGS====================================================================
 class AddCounterReadingsView(CreateView):
     template_name = 'utility_services/add_counter_readings.html'
     form_class = AddCounterReadingsForm
@@ -583,13 +607,13 @@ class AddCounterReadingsView(CreateView):
             print(self.request.GET.get('current_sections_number'))
             sections_id = self.request.GET.get('current_sections_number')
             choosen_sections = Section.objects.get(id=sections_id)
-            appartments = list(Appartment.objects.only('id', 'number').filter(sections=choosen_sections).values('id', 'number'))
+            appartments = list(Appartment.objects.only('id', 'number').filter(counter_reading__sections=choosen_sections).values('id', 'number'))
             response = {'appartments':appartments}
             return JsonResponse(response, safe=False)
         
         if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_counter_per_appartment':
             appartment_id = self.request.GET.get('appartment')
-            choosen_counter = list(Counter.objects.filter(appartment__id=appartment_id).values('id', 'title'))
+            choosen_counter = list(UtilityService.objects.filter(counter_reading__appartment__id=appartment_id).values('id', 'title'))
             response = {'counters': choosen_counter}
             return JsonResponse(response, safe=False)
         
@@ -599,8 +623,6 @@ class AddCounterReadingsView(CreateView):
     def post(self, request, *args, **Kwargs):
         request.POST._mutable=True
         del request.POST['section']
-        # del request.POST['appartment']
-        print(request.POST)
         tariff_reading_form = AddCounterReadingsForm(request.POST)
         print(tariff_reading_form)
         if tariff_reading_form.is_valid():
@@ -620,17 +642,98 @@ class AddCounterReadingsView(CreateView):
         return HttpResponseRedirect(success_url)
     
 
-class AddCounterReadingsPerCounterView(AddCounterReadingsView):
+# class AddCounterReadingsPerCounterView(AddCounterReadingsView):
+#     appartment_id = None
+#     utility_service_id = None
+
+#     def get_context_data(self, counter_per_appartment, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         utility_service_id = counter_per_appartment.split('__')[0]
+#         self.__class__.utility_service_id = utility_service_id
+#         appartment_id = counter_per_appartment.split('__')[1]
+#         self.__class__.appartment_id = appartment_id
+
+#         # initial_dict={'appartment' : 11}
+
+#         # context['tariff_reading_form'] = AddCounterReadingsForm(initial=initial_dict)
+#         context['tariff_reading_form'] = AddCounterReadingsForm()
+
+#         return context
+
+class AddCounterReadingsPerCounterView(CreateView):
+    template_name = 'utility_services/add_counter_readings.html'
+    form_class = AddCounterReadingsForm
+    model = CounterReadings
+    success_url = reverse_lazy('utility_services:counter_list')
+    appartment_id = None
+    utility_service_id = None
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        counter_number = self.kwargs['pk']
-        context['counter_number'] = counter_number
-        print(UtilityService.objects.get(id=counter_number))
-        current_counter = list(UtilityService.objects.filter(id=counter_number).values('title', \
-                                                                           'appartment__house__id', \
-                                                                            'appartment__sections__id', \
-                                                                            'appartment__id',\
-                                                                            'id'))
-        context['current_counter'] = current_counter       
+        initial_data = {}
+
+        appartment_id = self.kwargs['counter_per_appartment'].split('__')[1]
+        initial_data['appartment_id'] = appartment_id
+        house_id = House.objects.get(related_appartment__id = appartment_id).id
+        initial_data['house_id'] = appartment_id
+        sections = list(Section.objects.filter(house__id=house_id).values('id'))
+        sections_id_list = [section['id'] for section in sections]
+        initial_data['sections_id_list'] = sections_id_list
+
+        initial_data['utility_service_id'] = self.kwargs['counter_per_appartment'].split('__')[0]
+
+        context['tariff_reading_form'] = AddCounterReadingsForm()
+        context['initial_data'] = initial_data
         return context
+    
+
+    def get(self, request, *args, **kwargs):
+        
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_certain_house':
+            house_id = self.request.GET['current_house_number']
+            house = House.objects.get(id=house_id)
+            sections = list(Section.objects.only('id', 'title').filter(house=house).values('id', 'title'))
+            appartments = list(Appartment.objects.only('id', 'number').filter(house=house).values('id', 'number'))
+            response = {'sections': sections,
+                        'appartments':appartments}
+            return JsonResponse(response, safe=False)
+        
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_appartments_per_sections':
+
+            print(self.request.GET.get('current_sections_number'))
+            sections_id = self.request.GET.get('current_sections_number')
+            choosen_sections = Section.objects.get(id=sections_id)
+            appartments = list(Appartment.objects.only('id', 'number').filter(counter_reading__sections=choosen_sections).values('id', 'number'))
+            response = {'appartments':appartments}
+            return JsonResponse(response, safe=False)
+        
+        if self.request.is_ajax() and self.request.method == 'GET' and self.request.GET.get('ajax_indicator') == 'get_counter_per_appartment':
+            appartment_id = self.request.GET.get('appartment')
+            choosen_counter = list(UtilityService.objects.filter(counter_reading__appartment__id=appartment_id).values('id', 'title'))
+            response = {'counters': choosen_counter}
+            return JsonResponse(response, safe=False)
+        
+        else:
+            return super().get(request, *args, **kwargs)
+    
+    def post(self, request, *args, **Kwargs):
+        request.POST._mutable=True
+        del request.POST['section']
+        tariff_reading_form = AddCounterReadingsForm(request.POST)
+        print(tariff_reading_form)
+        if tariff_reading_form.is_valid():
+            
+            return self.form_valid(tariff_reading_form)
+        
+        else:
+            if tariff_reading_form.errors:
+                for field, error in tariff_reading_form.errors.items():
+                    print(f'{field}: {error}')
+
+        
+    def form_valid(self, tariff_reading_form):
+        tariff_reading_form.save()
+        success_url = self.success_url
+        messages.success(self.request, f"Показания счетчика обновлены!")
+        return HttpResponseRedirect(success_url)
+    

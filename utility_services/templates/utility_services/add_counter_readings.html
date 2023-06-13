@@ -137,24 +137,34 @@
 
 </form>
 
-{% comment %} {% if counter_number %}
-    {{ counter_number|json_script:'counter_number'}}
 
-    {% if current_counter %}
-        {{ current_counter|json_script:'current_counter'}}
-    {% endif %}
-{% endif %} {% endcomment %}
+
+{{ initial_data|json_script:'initial_data'}}
+
+
+
 
 <script>
     $(document).ready(function () {
 
-    $("#appartment_field").not("option[value='']").empty()
-//    $("#counter_field").not("option[value='']").empty().append("<option value='empty_counter'>Выберите квартиру</option>")
-
+    $("#appartment_field > option").not("option[value='']").hide()
 
     
+    //====================================================================
     
 
+    var initial_data = JSON.parse(document.getElementById('initial_data').textContent)
+
+    console.log(initial_data)
+
+
+    if(initial_data){
+        $(`option[value='${initial_data['appartment_id']}']`).show()
+        $("#appartment_field").val(`${initial_data['appartment_id']}`);
+        $("#counter_field").val(`${initial_data['utility_service_id']}`);
+    }
+    
+    //====================================================================
 
 
     $("#house_field").on('change', function(){

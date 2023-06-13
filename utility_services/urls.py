@@ -24,9 +24,10 @@ urlpatterns = [
     path('counter_list/', CounterListView.as_view(), name="counter_list"),
 
     path('counter_readings_per_appartment_list_view/', CounterReadingsPerAppartmentListView.as_view(), name="counter_readings_per_appartment_list_view"),
-    path('counter_readings_per_appartment_list_view/<int:pk>', CounterReadingsPerAppartmentListView.as_view(), name="counter_readings_per_appartment_list_view"),
+    path('counter_readings_per_appartment_list_view/<str:counter_per_appartment>', CounterReadingsPerAppartmentListView.as_view(), name="counter_readings_per_appartment_list_view"),
+    
     path('add_counter_readings/', AddCounterReadingsView.as_view(), name="add_counter_readings"),
 
     path('add_counter_readings_per_conter/', AddCounterReadingsPerCounterView.as_view(), name="add_counter_readings_per_counter"),
-    path('add_counter_readings_per_conter/<int:pk>', AddCounterReadingsPerCounterView.as_view(), name="add_counter_readings_per_counter"),
+    path('add_counter_readings_per_conter/<str:counter_per_appartment>', AddCounterReadingsPerCounterView.as_view(), name="add_counter_readings_per_counter"),
     ]

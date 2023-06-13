@@ -179,9 +179,9 @@ $(document).ready(function () {
                 "dataType": "json",
             },
             "columns": [
-                {"data": "counter_reading__appartment__house__title", "name": "counter_reading__appartment__house__title", "width": "650pt"},
-                {"data": "counter_reading__appartment__sections__title", "name": "counter_reading__appartment__sections__title", "width": "550pt"},
-                {"data": "counter_reading__appartment__number", "name": "counter_reading__appartment__number", "width": "100pt", render: function (data, type, row, meta) 
+                {"data": "appartment__house__title", "name": "appartment__house__title", "width": "650pt"},
+                {"data": "appartment__sections__title", "name": "appartment__sections__title", "width": "550pt"},
+                {"data": "appartment__number", "name": "appartment__number", "width": "100pt", render: function (data, type, row, meta) 
                                                                                         {if (data == null)
                                                                                             {return '(не задано)'
                                                                                         } else {
@@ -189,14 +189,14 @@ $(document).ready(function () {
                     }
                 }
                 },
-                {"data": "title", "name": "title", "width": "300pt", render: function (data, type, row, meta)
+                {"data": "utility_service__title", "name": "utility_service__title", "width": "300pt", render: function (data, type, row, meta)
                                                                                         {if (data == null)
                                                                                             {return '(не задано)'
                                                                                         } else {
                                                                                             return data}
                                                                                         }
                 },
-                {"data": "last_readings", "name": "last_readings", "width": "75pt", render: function (data, type, row, meta)
+                {"data": "date", "name": "date", "width": "75pt", render: function (data, type, row, meta)
                                                                                                                             {if (data == null)
                                                                                                                                 {return '(не задано)'
                                                                                                                             } else {
@@ -205,7 +205,7 @@ $(document).ready(function () {
                 },
                 
 
-                {"data": "unit_of_measure__title", "name": "unit_of_measure__title", "width": "75pt", render: function (data, type, row, meta) 
+                {"data": "utility_service__unit_of_measure__title", "name": "utility_service__unit_of_measure__title", "width": "75pt", render: function (data, type, row, meta) 
                                                                                         {if (data == null)
                                                                                             {return '(нет счета)'
                                                                                         } else {
@@ -215,10 +215,10 @@ $(document).ready(function () {
                 {"data": "", "width": "125pt", render: function ( data, type, row, meta ) 
                                         { prerendered_last_cell = "<div id='buttons_interaction'>\
                                                     <div class='col=12'>\
-                                                        <a class='btn btn-default btn-sm' id='add_counter_readings' href='#' title='Снять новое показание счетчика' data-toggle='tooltip'>\
+                                                        <a class='btn btn-default btn-sm' id='add_counter_readings' href='javascript:;' title='Снять новое показание счетчика' data-toggle='tooltip'>\
                                                             <i class='fa fa-dashboard'></i>\
                                                         </a>\
-                                                        <a class='btn btn-default btn-sm' href='#' title='Открыть историю показаний для счетчика' data-toggle='tooltip' id='delete_button'>\
+                                                        <a class='btn btn-default btn-sm' href='javascript:;' title='Открыть историю показаний для счетчика' data-toggle='tooltip' id='counter_history'>\
                                                             <i class='fa fa-eye'></i>\
                                                         </a>\
                                                         </div>\
@@ -237,7 +237,7 @@ $(document).ready(function () {
 //                {'orderable': false, targets: 5},
 //                {'orderable': false, targets: 6},
 //            ],
-            "rowId": 'id',
+            "rowId": 'counter_per_appartment',
             "createdRow": function( row, data, dataIndex ) {
                 $('td:eq(4)', row).css({'background-color':'#DFD5'})
                 $('td:eq(5)', row).css({'background-color':'#DFD5'})
@@ -324,16 +324,16 @@ $(document).ready(function () {
 
 
     //reversion logic for row except links to send inviting, deleting and editing
-    table.on('click', 'tbody > tr > td', function () {
-        if(
-            $(this).find("div").attr("id") != "buttons_interaction"
-            )
-        {
-            var basic_url = "{% url 'utility_services:counter_readings_per_appartment_list_view' %}"
-            var url_index = table.row(this).id().toString();
-            document.location.href = basic_url + url_index;
-        }
-    } );
+    //table.on('click', 'tbody > tr > td', function () {
+    //    if(
+    //        $(this).find("div").attr("id") != "buttons_interaction"
+    //        )
+    //    {
+    //        var basic_url = "{% url 'utility_services:counter_readings_per_appartment_list_view' %}"
+    //        var url_index = table.row(this).id().toString();
+    //        document.location.href = basic_url + url_index;
+    //    }
+    //} );
 
 
     // delete and confirm display lofic
@@ -364,8 +364,17 @@ $(document).ready(function () {
     table.on('click', '#add_counter_readings', function(){
         var row_number = $(this).closest('tr').attr('id')
         var basic_url = "{% url 'utility_services:add_counter_readings_per_counter' %}"
-        //document.location.href = basic_url + row_number;
+//        //document.location.href = basic_url + row_number;
         window.open(basic_url + row_number);
+    })
+
+    
+
+    table.on('click', '#counter_history', function(){
+        var row_number = $(this).closest('tr').attr('id')
+        var basic_url = "{% url 'utility_services:counter_readings_per_appartment_list_view' %}"
+        document.location.href = basic_url + row_number;
+        //window.open(basic_url + row_number);
     })
 
 
