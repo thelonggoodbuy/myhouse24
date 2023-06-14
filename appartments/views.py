@@ -5,7 +5,7 @@ from django import forms
 from general_statistics.models import GraphTotalStatistic
 
 
-
+from receipts.services import return_xlm_statement_data
 from django.db import models
 from django.shortcuts import render
 from django.urls import reverse_lazy
@@ -34,6 +34,8 @@ from .forms import HouseEditeForm, HouseEditeFormSetImage, SectionEditeFormSet, 
                     AppartmentEditeForm, OwnerUpdateForm, AppartmentTariffForm, AppartmentTariffForset, PersonalAccountCreateForm,\
                     SendOwnderForm, AppartmentCreateForm
 from general_statistics.models import GraphTotalStatistic
+from users.views import RolePassesTestMixin
+
 
 # view for testing role using
 class ReportView(TemplateView):
@@ -43,14 +45,17 @@ class ReportView(TemplateView):
 # ------------------------------------------------------------------
 # -----------------Houses CRUID-------------------------------------
 # ------------------------------------------------------------------
-class HousesListView(ListView):
+class HousesListView(RolePassesTestMixin, ListView):
+    needfull_permission = 'house_permission'
+    needfull_user_status = 'is_staff'
     model = House
     context_object_name = 'houses_list'
     template_name = 'appartments/houses_list.html'
 
 
-class HouseDeleteView(DeleteView):
-
+class HouseDeleteView(RolePassesTestMixin, DeleteView):
+    needfull_permission = 'house_permission'
+    needfull_user_status = 'is_staff'
     model = House
     success_url = reverse_lazy('appartments:houses_list')
 
@@ -67,7 +72,9 @@ class HouseDeleteView(DeleteView):
     
 
 
-class HouseEditeView(UpdateView):
+class HouseEditeView(RolePassesTestMixin, UpdateView):
+    needfull_permission = 'house_permission'
+    needfull_user_status = 'is_staff'
     form_class = HouseEditeForm
     model = House
     template_name = "appartments/house_edit.html"
@@ -160,7 +167,9 @@ class HouseEditeView(UpdateView):
         return HttpResponseRedirect(success_url)
     
 
-class HouseDetailView(DetailView):
+class HouseDetailView(RolePassesTestMixin, DetailView):
+    needfull_permission = 'house_permission'
+    needfull_user_status = 'is_staff'
     queryset = House.objects.select_related().all()
     template_name = "appartments/house_detail.html"
     context_object_name = 'house'
@@ -173,7 +182,9 @@ class HouseDetailView(DetailView):
 # ------------------------------------------------------------------
 # -----------------Appartments CRUID--------------------------------
 # ------------------------------------------------------------------
-class AppartmentsListView(TemplateView):
+class AppartmentsListView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'appartments_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'appartments/appartments_list.html'
 
     def get(self, request, *args, **kwargs):
@@ -321,14 +332,17 @@ class AppartmentsListView(TemplateView):
     
 
 
-class AppartmentsCardView(DetailView):
+class AppartmentsCardView(RolePassesTestMixin, DetailView):
+    needfull_permission = 'appartments_permission'
+    needfull_user_status = 'is_staff'
     queryset = Appartment.objects.select_related('personal_account', 'house', 'sections', 'floor', 'owner_user').all()    
     template_name = "appartments/appartments_card.html"
     context_object_name = 'appartment'
 
 
-class AppartmentDeleteView(DeleteView):
-
+class AppartmentDeleteView(RolePassesTestMixin, DeleteView):
+    needfull_permission = 'appartments_permission'
+    needfull_user_status = 'is_staff'
     model = Appartment
     success_url = reverse_lazy('appartments:appartments_list')
     
@@ -346,8 +360,9 @@ class AppartmentDeleteView(DeleteView):
         return HttpResponseRedirect(success_url)
     
 
-class AppartmentEditeView(UpdateView):
-
+class AppartmentEditeView(RolePassesTestMixin, UpdateView):
+    needfull_permission = 'appartments_permission'
+    needfull_user_status = 'is_staff'
     model = Appartment
     template_name = 'appartments/appartments_edit.html'
     success_url = reverse_lazy('appartments:appartments_list')
@@ -459,8 +474,9 @@ class AppartmentEditeView(UpdateView):
     
 
 
-class AppartmentCreateView(TemplateView):
-
+class AppartmentCreateView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'appartments_permission'
+    needfull_user_status = 'is_staff'
     model = Appartment
     template_name = 'appartments/appartments_edit.html'
     success_url = reverse_lazy('appartments:appartments_list')
@@ -501,7 +517,9 @@ class AppartmentCreateView(TemplateView):
     # -------------------PERSONALE-ACCOUNT-CRUD-------------------------------
     # ------------------------------------------------------------------------
 
-class PersonalAccountsListView(TemplateView):
+class PersonalAccountsListView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'accounts_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'appartments/personal_accounts_list.html'
 
     def get(self, request, *args, **kwargs):
@@ -646,7 +664,9 @@ class PersonalAccountsListView(TemplateView):
         context['houses'] = House.objects.all()
         return context
     # ---------------------------------------------------------------------------------------------------------------------------------------------
-class PersonalAccountAddView(TemplateView):
+class PersonalAccountAddView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'accounts_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'appartments/personal_accounts_create.html'    
     form_class = PersonalAccountCreateForm
     model = PersonalAccount
@@ -736,7 +756,9 @@ class PersonalAccountAddView(TemplateView):
         return HttpResponseRedirect(success_url)
     
 
-class PersonalAccountEditeView(UpdateView):
+class PersonalAccountEditeView(RolePassesTestMixin, UpdateView):
+    needfull_permission = 'accounts_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'appartments/personal_accounts_create.html'
     form_class = PersonalAccountCreateForm
     model = PersonalAccount
@@ -763,8 +785,9 @@ class PersonalAccountEditeView(UpdateView):
         return HttpResponseRedirect(success_url)
     
 
-
-class PersonalAccountDeleteView(DeleteView):
+class PersonalAccountDeleteView(RolePassesTestMixin, DeleteView):
+    needfull_permission = 'accounts_permission'
+    needfull_user_status = 'is_staff'
     model = PersonalAccount
     success_url = reverse_lazy('appartments:personal_accounts_list')
 
@@ -789,7 +812,9 @@ class PersonalAccountDeleteView(DeleteView):
     # ------------------------------------------------------------------------
     # -------------------APPARTMENT-OWNERS-CRUD-------------------------------
     # ------------------------------------------------------------------------
-class OwnersListView(TemplateView):
+class OwnersListView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'owners_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'appartments/owner_list.html'
 
     def get(self, request, *args, **kwargs):
@@ -919,22 +944,9 @@ class OwnersListView(TemplateView):
         return context
 
 
-
-# from django.shortcuts import redirect
-# class OwnerSendInvitation(FormView):
-# def send_owner_invitaion(request):
-#     if request.method == "POST":
-#         send_form = SendOwnderForm(request.POST)
-#         if send_form.is_valid():
-#             send_form.send()
-#             messages.success(request, f'Приглашение отправлено!')
-#             return redirect('appartment:owner_list')
-#         else:
-#             send_form = SendOwnderForm()
-
-
-
-class OwnerSendInvitation(FormView):
+class OwnerSendInvitation(RolePassesTestMixin, FormView):
+    needfull_permission = 'owners_permission'
+    needfull_user_status = 'is_staff'
     form_class = SendOwnderForm
     template_name = "appartments/owner_send_invitation.html"
 
@@ -963,27 +975,34 @@ class OwnerSendInvitation(FormView):
 
 
 
-from receipts.services import return_xlm_statement_data
+
 def personal_accounts_print_all(request):
     response = return_xlm_statement_data()
     return response
 
-class OwnerCardView(DetailView):
+
+
+class OwnerCardView(RolePassesTestMixin, DetailView):
+    needfull_permission = 'owners_permission'
+    needfull_user_status = 'is_staff'
     queryset = User.objects.all()    
     template_name = "appartments/owner_card.html"
     context_object_name = 'owner'
 
 
 
-class OwnerEditeView(UpdateView):
+class OwnerEditeView(RolePassesTestMixin, UpdateView):
+    needfull_permission = 'owners_permission'
+    needfull_user_status = 'is_staff'
     form_class = OwnerUpdateForm
     model = User
     template_name = 'appartments/owner_update.html'
     success_url = reverse_lazy('appartments:owners_list')
 
 
-class OwnerDeleteView(DeleteView):
-
+class OwnerDeleteView(RolePassesTestMixin, DeleteView):
+    needfull_permission = 'owners_permission'
+    needfull_user_status = 'is_staff'
     model = User
     success_url = reverse_lazy('appartments:owners_list')
 
@@ -999,8 +1018,9 @@ class OwnerDeleteView(DeleteView):
         return HttpResponseRedirect(success_url)
     
 
-class CreteNewUser(CreateView):
-
+class CreteNewUser(RolePassesTestMixin, CreateView):
+    needfull_permission = 'owners_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'appartments/owner_create.html'
     form_class = OwnerUpdateForm
     success_url = reverse_lazy('appartments:owners_list')

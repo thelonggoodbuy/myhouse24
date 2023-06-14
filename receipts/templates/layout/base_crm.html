@@ -168,99 +168,122 @@
             <div class="slimScrollDiv" style="position: relative; width: auto;">
                 <section class="sidebar" style="width: auto; height: 93px;">
                 
-                <ul class="sidebar-menu tree" data-widget="tree">
-                    <li class="active">
-                        <a href="{% url 'general_statistics:admin_general_statistics'%}">
-                            <i class="fa fa-line-chart"></i><span>Статистика</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'statements:statements_list' %}">
-                            <i class="fa fa-dollar"></i><span>Касса</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'receipts:receipt_list' %}">
-                            <i class="fa fa-files-o"></i><span>Квитанции на оплату</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'appartments:personal_accounts_list' %}">
-                            <i class="fa fa-credit-card"></i><span>Лицевые счета</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'appartments:appartments_list' %}">
-                            <i class="fa fa-key"></i><span>Квартиры</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'appartments:owner_list' %}">
-                            <i class="fa fa-users"></i><span>Владельцы квартир</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'appartments:houses_list' %}">
-                            <i class="fa fa-building"></i><span>Дома</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'users:message_list_view' %}">
-                            <i class="fa fa-envelope-o"></i><span>Сообщения</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'masters_services:masters_requests_list' %}">
-                            <i class="fa fa-wrench"></i><span>Заявки вызова мастера</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'utility_services:counter_list' %}">
-                            <i class="fa fa-dashboard"></i><span>Показания счетчиков</span>
-                        </a>
-                    </li>
-                    <li class="treeview">
-                        <a href="#">
-                            <i class="fa fa-desktop"></i>
-                            <span>Управление сайтом</span> 
-                            <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
-                        </a>
-                        <ul class="treeview-menu">
-                            <li>
-                                <a href="{% url 'website:main_page_update_view' %}">
-                                    <i class="fa fa-circle-o"></i><span>Главная страница</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{% url 'website:about_us_page_update_view' %}">
-                                    <i class="fa fa-circle-o"></i>  
-                                    <span>О нас</span>
-                                </a>
-                            </li>
 
-                            <li>
-                                <a href="{% url 'website:utilities_update_view' %}">
-                                    {% comment %} <a href="#"> {% endcomment %}
-                                    <i class="fa fa-circle-o"></i>
-                                    <span>Услуги</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{% url 'website:tariff_update_view' %}">
-                                    <i class="fa fa-circle-o"></i>  
-                                    <span>Тарифы</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{% url 'website:contact_update_view' %}">
-                                    <i class="fa fa-circle-o"></i>  
-                                    <span>Контакты</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                <ul class="sidebar-menu tree" data-widget="tree">
+                    {% if user.role.statistic_permission %}
+                        <li class="active">
+                            <a href="{% url 'general_statistics:admin_general_statistics'%}">
+                                <i class="fa fa-line-chart"></i><span>Статистика</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if user.role.fund_permission %}
+                        <li>
+                            <a href="{% url 'statements:statements_list' %}">
+                                <i class="fa fa-dollar"></i><span>Касса</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if user.role.receipt_permission %}
+                        <li>
+                            <a href="{% url 'receipts:receipt_list' %}">
+                                <i class="fa fa-files-o"></i><span>Квитанции на оплату</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if user.role.accounts_permission %}
+                        <li>
+                            <a href="{% url 'appartments:personal_accounts_list' %}">
+                                <i class="fa fa-credit-card"></i><span>Лицевые счета</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if user.role.appartments_permission %}
+                        <li>
+                            <a href="{% url 'appartments:appartments_list' %}">
+                                <i class="fa fa-key"></i><span>Квартиры</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if user.role.owners_permission %}
+                        <li>
+                            <a href="{% url 'appartments:owner_list' %}">
+                                <i class="fa fa-users"></i><span>Владельцы квартир</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if user.role.house_permission %}
+                        <li>
+                            <a href="{% url 'appartments:houses_list' %}">
+                                <i class="fa fa-building"></i><span>Дома</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if user.role.messages_permission %}
+                        <li>
+                            <a href="{% url 'users:message_list_view' %}">
+                                <i class="fa fa-envelope-o"></i><span>Сообщения</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if user.role.masters_request_permission %}
+                        <li>
+                            <a href="{% url 'masters_services:masters_requests_list' %}">
+                                <i class="fa fa-wrench"></i><span>Заявки вызова мастера</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if user.role.counter_permission %}
+                        <li>
+                            <a href="{% url 'utility_services:counter_list' %}">
+                                <i class="fa fa-dashboard"></i><span>Показания счетчиков</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if user.role.site_managing_permission %}
+                        <li class="treeview">
+                            <a href="javascript:;">
+                                <i class="fa fa-desktop"></i>
+                                <span>Управление сайтом</span> 
+                                <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li>
+                                    <a href="{% url 'website:main_page_update_view' %}">
+                                        <i class="fa fa-circle-o"></i><span>Главная страница</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'website:about_us_page_update_view' %}">
+                                        <i class="fa fa-circle-o"></i>  
+                                        <span>О нас</span>
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="{% url 'website:utilities_update_view' %}">
+                                        <i class="fa fa-circle-o"></i>
+                                        <span>Услуги</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'website:tariff_update_view' %}">
+                                        <i class="fa fa-circle-o"></i>  
+                                        <span>Тарифы</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'website:contact_update_view' %}">
+                                        <i class="fa fa-circle-o"></i>  
+                                        <span>Контакты</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    {% endif %}
+
                     <li class="treeview">
-                        <a href="#">
+                        <a href="javascript:;">
                             <i class="fa fa-cogs"></i>  
                             <span>Настройки системы</span> 
                             <span class="pull-right-container">
@@ -274,37 +297,46 @@
                                     <span>Статьи платежей</span>
                                 </a>
                             </li>
-                            <li>
-                                <a href="{% url 'utility_services:report_view' %}">
-                                    <i class="fa fa-briefcase"></i>  
-                                    <span>Услуги</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{% url 'utility_services:tariff_list' %}">
-                                    <i class="fa fa-money"></i>  
-                                    <span>Тарифы</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{% url 'users:adm_settings_users_roles' %}">
-                                    <i class="fa fa-users"></i>  
-                                    <span>Роли</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{% url 'users:admin_settings_users_list' %}">
-                                    <i class="fa fa-user-plus"></i>  
-                                    <span>Пользователи</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{% url 'receipts:requiside_update' %}">
-                                    <i class="fa fa-credit-card"></i>  
-                                    <span>Платежные реквизиты</span>
-                                </a>
-                            </li>
-                            
+                            {% if user.role.utility_services_permission %}
+                                <li>
+                                    <a href="{% url 'utility_services:report_view' %}">
+                                        <i class="fa fa-briefcase"></i>  
+                                        <span>Услуги</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% if user.role.tarif_permission %}
+                                <li>
+                                    <a href="{% url 'utility_services:tariff_list' %}">
+                                        <i class="fa fa-money"></i>  
+                                        <span>Тарифы</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% if user.role.role_section_permission %}
+                                <li>
+                                    <a href="{% url 'users:adm_settings_users_roles' %}">
+                                        <i class="fa fa-users"></i>  
+                                        <span>Роли</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% if user.role.users_sections_permission %}
+                                <li>
+                                    <a href="{% url 'users:admin_settings_users_list' %}">
+                                        <i class="fa fa-user-plus"></i>  
+                                        <span>Пользователи</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% if user.role.requisite_sections_permission %}
+                                <li>
+                                    <a href="{% url 'receipts:requiside_update' %}">
+                                        <i class="fa fa-credit-card"></i>  
+                                        <span>Платежные реквизиты</span>
+                                    </a>
+                                </li>
+                            {% endif %}
                         </ul>
                     </li>
                 </ul>        

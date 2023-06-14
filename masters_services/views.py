@@ -10,6 +10,7 @@ from django.db.models import F, Q, CharField, Value
 import operator
 from functools import reduce
 from django.http import HttpResponseRedirect
+from users.views import RolePassesTestMixin
 
 
 from users.models import User
@@ -21,7 +22,9 @@ from appartments.models import Appartment
 from .models import MastersRequest
 
 
-class MastersRequestsListView(TemplateView):
+class MastersRequestsListView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'masters_request_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'masters_services/masters_requests_list.html'
 
     def get(self, request, *args, **kwargs):
@@ -201,7 +204,9 @@ class MastersRequestsListView(TemplateView):
     
 
 
-class MastersRequestsCreateView(FormView):
+class MastersRequestsCreateView(RolePassesTestMixin, FormView):
+    needfull_permission = 'masters_request_permission'
+    needfull_user_status = 'is_staff'
     template_name = "masters_services/masters_requests_create.html"
     form_class = MastersRequestsCreateForm
     success_url = reverse_lazy('masters_services:masters_requests_list')
@@ -283,7 +288,9 @@ class MastersRequestsCreateView(FormView):
         return HttpResponseRedirect(success_url)
     
 
-class MastersRequestsEditeView(UpdateView):
+class MastersRequestsEditeView(RolePassesTestMixin, UpdateView):
+    needfull_permission = 'masters_request_permission'
+    needfull_user_status = 'is_staff'
     form_class = MastersRequestsCreateForm
     model = MastersRequest
     template_name = 'masters_services/masters_requests_create.html'
@@ -324,8 +331,9 @@ class MastersRequestsEditeView(UpdateView):
 
 
 
-class MastersRequestsDeleteView(DeleteView):
-
+class MastersRequestsDeleteView(RolePassesTestMixin, DeleteView):
+    needfull_permission = 'masters_request_permission'
+    needfull_user_status = 'is_staff'
     model = MastersRequest
     success_url = reverse_lazy('masters_services:masters_requests_list')
     

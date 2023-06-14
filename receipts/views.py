@@ -24,6 +24,7 @@ from .services import return_pdf_receipt, return_xlm_receipt
 from .forms import ReceiptCellForm
 from django import forms
 import random
+from users.views import RolePassesTestMixin
 
 
 from decimal import Decimal
@@ -48,7 +49,10 @@ class CRMReportView(TemplateView):
 
 
 
-class ReceiptListView(TemplateView):
+class ReceiptListView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'receipt_permission'
+    needfull_user_status = 'is_staff'
+
     template_name = 'receipts/receipt_list.html'
 
     def get(self, request, *args, **kwargs):
@@ -253,7 +257,10 @@ class ReceiptListView(TemplateView):
         return context
 
 
-class AddReceiptView(TemplateView):
+class AddReceiptView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'receipt_permission'
+    needfull_user_status = 'is_staff'
+    
     template_name = 'receipts/receipt_create.html'    
     form_class = AddReceiptForm
     model = Receipt
@@ -434,7 +441,7 @@ class AddReceiptView(TemplateView):
 
 
 class ReceiptCopyView(AddReceiptView):
-
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -475,7 +482,9 @@ class ReceiptCopyView(AddReceiptView):
         
 
 
-class ReceiptUpdateView(UpdateView):
+class ReceiptUpdateView(RolePassesTestMixin, UpdateView):
+    needfull_permission = 'receipt_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'receipts/receipt_create.html'    
     form_class = AddReceiptForm
     model = Receipt
@@ -561,8 +570,9 @@ class ReceiptUpdateView(UpdateView):
    
 
 
-class ReceiptDeleteView(DeleteView):
-
+class ReceiptDeleteView(RolePassesTestMixin, DeleteView):
+    needfull_permission = 'receipt_permission'
+    needfull_user_status = 'is_staff'
     model = Receipt
     success_url = reverse_lazy('receipts:receipt_list')
     
@@ -592,9 +602,9 @@ class ReceiptDeleteView(DeleteView):
 
 
 
-
-
-class ReceiptCardView(DetailView):
+class ReceiptCardView(RolePassesTestMixin, DetailView):
+    needfull_permission = 'receipt_permission'
+    needfull_user_status = 'is_staff'
     queryset = Receipt.objects.all()
     template_name = "receipts/receipt_card.html"
     context_object_name = 'receipt'
@@ -602,7 +612,9 @@ class ReceiptCardView(DetailView):
 
 
 
-class ReceiptTemplateListView(FormView):
+class ReceiptTemplateListView(RolePassesTestMixin, FormView):
+    needfull_permission = 'receipt_permission'
+    needfull_user_status = 'is_staff'
     form_class = ReceiptTemplateListForm
     template_name = "receipts/receipt_template_list.html"
 
@@ -627,7 +639,9 @@ class ReceiptTemplateListView(FormView):
 
 
 
-class ReceiptTemplateEditeView(FormView):
+class ReceiptTemplateEditeView(RolePassesTestMixin, FormView):
+    needfull_permission = 'receipt_permission'
+    needfull_user_status = 'is_staff'
     template_name = "receipts/receipt_template_edite.html"
     templates = ReceiptTemplate.objects.all()
     form_class = ReceiptTeplateEditeForm
@@ -667,7 +681,9 @@ class ReceiptTemplateEditeView(FormView):
 
 
     # requiside logic
-class RequisiteUpdateView(FormView):
+class RequisiteUpdateView(RolePassesTestMixin, FormView):
+    needfull_permission = 'requisite_sections_permission'
+    needfull_user_status = 'is_staff'
     model = Requisite
     template_name = "receipts/requiside_update.html"
     form_class = RequisiteUpdateForm

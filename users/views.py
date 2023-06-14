@@ -44,6 +44,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from appartments.models import House, Section, Floor, Appartment
 from utility_services.models import TariffCell
 from masters_services.models import MastersRequest
+# from users.views import RolePassesTestMixin
 
 
 from datetime import date, datetime
@@ -56,6 +57,36 @@ import calendar
 from .forms import LoginSimpleUserForm, LoginAdminUserForm, SignUpSimpleUserForm, AdminSettingsUsersUpdateForm,\
                     UsersRolesFormSet, AdminSettingsUsersRolesCellForm, MessageToUserForm, ProfileMastersRequestsCreateForm
 
+
+class RolePassesTestMixin(UserPassesTestMixin, LoginRequiredMixin):
+
+    def test_func(self):
+        # try to get needfull_user_status class field
+        if hasattr(self.__class__, 'needfull_user_status'):
+            needfull_user_status = self.__class__.needfull_user_status
+            if getattr(self.request.user, needfull_user_status) == False:
+                self.permission_denied_message = 'Вы не обладаете нужным статусом пользователя'
+                return False
+
+
+        # try to get needfull_permission class field
+        if hasattr(self.__class__, 'needfull_permission'):
+            needfull_permission = self.__class__.needfull_permission
+            try:
+                this_role_perm = self.request.user.role.return_permission_is(needfull_permission)
+                if this_role_perm == True:
+                    return True
+                else:
+                    self.permission_denied_message = "У вашей роли нет права работать с этими данными"
+                    return False
+            except AttributeError:
+                return False
+
+
+    def handle_no_permission(self):
+        error_text = self.get_permission_denied_message()
+        messages.error(self.request, error_text)
+        return redirect('users:permission_denied')
 
 
 
@@ -88,7 +119,7 @@ class LoginAdminUser(SuccessMessageMixin, LoginView):
     form_class = LoginAdminUserForm
 
     def get_success_url(self):
-        return reverse_lazy('receipts:crm_report_view')
+        return reverse_lazy('appartments:appartments_list')
 
     def form_invalid(self, form):
         messages.error(self.request,'Ошибка в адресе электронной почты или в пароле')
@@ -175,7 +206,9 @@ class LogOutUser(LogoutView):
 # *******************************Settings---->Users Logic********************************
 # ***************************************************************************************
 
-class AdminSettingsUsersListLogic(TemplateView):
+class AdminSettingsUsersListLogic(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'users_sections_permission'
+    needfull_user_status = 'is_staff'
     template_name = "users/admin_settings_users_list.html"
 
     def get(self, request, *args, **kwargs):
@@ -271,15 +304,17 @@ class AdminSettingsUsersListLogic(TemplateView):
         return context
 
 
-class AdminSettingsUserCardView(DetailView):
-
+class AdminSettingsUserCardView(RolePassesTestMixin, DetailView):
+    needfull_permission = 'users_sections_permission'
+    needfull_user_status = 'is_staff'
     queryset = User.objects.select_related('role').only('name', 'surname', 'role__name', 'phone', 'email', 'status')
     template_name = "users/admin_settings_user_card.html"
     context_object_name = 'user'
 
 
-class AdminSettingsUsersDeleteView(DeleteView):
-
+class AdminSettingsUsersDeleteView(RolePassesTestMixin, DeleteView):
+    needfull_permission = 'users_sections_permission'
+    needfull_user_status = 'is_staff'
     model = User
     success_url = reverse_lazy('users:admin_settings_users_list')
     
@@ -296,14 +331,18 @@ class AdminSettingsUsersDeleteView(DeleteView):
         return HttpResponseRedirect(success_url)
     
 
-class AdmSettingsUsersUpdateView(UpdateView):
+class AdmSettingsUsersUpdateView(RolePassesTestMixin, UpdateView):
+    needfull_permission = 'users_sections_permission'
+    needfull_user_status = 'is_staff'
     form_class = AdminSettingsUsersUpdateForm
     model = User
     template_name = 'users/admin_settings_user_update_data.html'
     success_url = reverse_lazy('users:admin_settings_users_list')
 
 
-class AdminSettingsUsersRolesView(FormView):
+class AdminSettingsUsersRolesView(RolePassesTestMixin, FormView):
+    needfull_permission = 'role_section_permission'
+    needfull_user_status = 'is_staff'
     model = Role
     template_name = "users/admin_settings_users_roles.html"
     success_url = reverse_lazy('users:adm_settings_users_roles')
@@ -333,36 +372,6 @@ class AdminSettingsUsersRolesView(FormView):
 # -----------------------------Appartments Owner-------------------------------------------
 # -----------------------------------------------------------------------------------------
 
-class RolePassesTestMixin(UserPassesTestMixin, LoginRequiredMixin):
-
-    def test_func(self):
-        # try to get needfull_user_status class field
-        if hasattr(self.__class__, 'needfull_user_status'):
-            needfull_user_status = self.__class__.needfull_user_status
-            if getattr(self.request.user, needfull_user_status) == False:
-                self.permission_denied_message = 'Вы не обладаете нужным статусом пользователя'
-                return False
-
-
-        # try to get needfull_permission class field
-        if hasattr(self.__class__, 'needfull_permission'):
-            needfull_permission = self.__class__.needfull_permission
-            try:
-                this_role_perm = self.request.user.role.return_permission_is(needfull_permission)
-                if this_role_perm == True:
-                    return True
-                else:
-                    self.permission_denied_message = "У вашей роли нет права работать с этими данными"
-                    return False
-            except AttributeError:
-                return False
-
-
-    def handle_no_permission(self):
-        error_text = self.get_permission_denied_message()
-        messages.error(self.request, error_text)
-        return redirect('users:permission_denied')
-
 
 class AppartmentsOwnersView(RolePassesTestMixin, TemplateView):
     template_name = "users/appartments_owners.html"
@@ -375,8 +384,9 @@ class PermissionDeniedView(TemplateView):
 
 
 # messages logic
-class MessagesListView(TemplateView):
-    
+class MessagesListView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'messages_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'users/messages_list.html'
 
     def get(self, request, *args, **kwargs):
@@ -472,8 +482,9 @@ class MessagesListView(TemplateView):
     
 
 
-class MessageCreateView(CreateView):
-
+class MessageCreateView(RolePassesTestMixin, CreateView):
+    needfull_permission = 'messages_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'users/message_create.html'
     form_class = MessageToUserForm
     success_url = reverse_lazy('users:message_list_view')
@@ -539,13 +550,17 @@ class MessageCreateView(CreateView):
     
 
 
-class MessageDetailView(DetailView):
+class MessageDetailView(RolePassesTestMixin, DetailView):
+    needfull_permission = 'messages_permission'
+    needfull_user_status = 'is_staff'
     model = MessageToUser
     template_name = "users/message_detail.html"
     context_object_name = 'message'
 
 
-class MessageDeleteView(DeleteView):
+class MessageDeleteView(RolePassesTestMixin, DeleteView):
+    needfull_permission = 'messages_permission'
+    needfull_user_status = 'is_staff'
     model = MessageToUser
     success_url = reverse_lazy('users:message_list_view')
     
@@ -968,7 +983,9 @@ class ProfileMessageDeleteView(SuccessMessageMixin, DeleteView):
     
 
 
-class ProfileMastersRequestListView(DetailView):
+class ProfileMastersRequestListView(RolePassesTestMixin, DetailView):
+    needfull_permission = 'masters_request_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'users/profile_masters_requests_list.html'
     model = User
 
@@ -1035,7 +1052,9 @@ class ProfileMastersRequestListView(DetailView):
         
 
 
-class ProfileMasterRequestDeleteView(SuccessMessageMixin, DeleteView):
+class ProfileMasterRequestDeleteView(RolePassesTestMixin, SuccessMessageMixin, DeleteView):
+    needfull_permission = 'masters_request_permission'
+    needfull_user_status = 'is_staff'
     model = MastersRequest
     success_url = None
     success_message = "Запрос к мастеру удален!"
@@ -1056,7 +1075,9 @@ class ProfileMasterRequestDeleteView(SuccessMessageMixin, DeleteView):
 
 
 
-class ProfileMastersRequestsCreateView(FormView):
+class ProfileMastersRequestsCreateView(RolePassesTestMixin, FormView):
+    needfull_permission = 'masters_request_permission'
+    needfull_user_status = 'is_staff'
     template_name = "users/profile_masters_requests_create.html"
     form_class = ProfileMastersRequestsCreateForm
     success_url = None

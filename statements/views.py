@@ -25,9 +25,14 @@ from general_statistics.models import GraphTotalStatistic
 from django.views.generic.edit import FormView, UpdateView, CreateView, DeleteView
 from django.views.generic.detail import DetailView
 
+from users.views import RolePassesTestMixin
+
+
 
 # Create your views here.
-class StatementListView(TemplateView):
+class StatementListView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'fund_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'statements/statement_list.html'
 
     def get(self, request, *args, **kwargs):
@@ -172,7 +177,9 @@ class StatementListView(TemplateView):
         return context
     
 
-class StatementCreateView(FormView):
+class StatementCreateView(RolePassesTestMixin, FormView):
+    needfull_permission = 'fund_permission'
+    needfull_user_status = 'is_staff'
     template_name = "statements/statement_create.html"
     form_class = StatementArrivalCreateForm
     success_url = reverse_lazy('statements:statements_list')
@@ -293,7 +300,7 @@ class StatementCreateView(FormView):
 
 
 class StatementArrivalCreateView(StatementCreateView):
-
+    
     def form_valid(self, statement_form):
         inst = statement_form.save()
         inst.type_of_statement = 'arrival'
@@ -337,7 +344,9 @@ class StatementExpenseCreateView(StatementCreateView):
         return HttpResponseRedirect(success_url)
     
 
-class StatementUpdateView(UpdateView):
+class StatementUpdateView(RolePassesTestMixin, UpdateView):
+    needfull_permission = 'fund_permission'
+    needfull_user_status = 'is_staff'
     template_name = "statements/statement_create.html"
     form_class = StatementArrivalCreateForm
     success_url = reverse_lazy('statements:statements_list')
@@ -429,7 +438,9 @@ def statemets_print_current_statment(request, pk):
     return response
 
 
-class StatementDetailView(DetailView):
+class StatementDetailView(RolePassesTestMixin, DetailView):
+    needfull_permission = 'fund_permission'
+    needfull_user_status = 'is_staff'
     queryset = Statement.objects.select_related('personal_account__appartment_account__owner_user', 'type_of_paynent_item', 'manager').all()    
     # model = Statement
     template_name = "statements/statement_detail.html"
@@ -468,8 +479,9 @@ class StatementExpenseCopyView(StatementExpenseCreateView):
 # =====================================================================
 # ===================STATEMENT===DELETE================================
 # =====================================================================
-class ReceiptDeleteView(DeleteView):
-
+class ReceiptDeleteView(RolePassesTestMixin, DeleteView):
+    needfull_permission = 'fund_permission'
+    needfull_user_status = 'is_staff'
     model = Statement
     success_url = reverse_lazy('statements:statements_list')
     
@@ -505,7 +517,9 @@ class ReceiptDeleteView(DeleteView):
 
 
 
-class PaymentItemList(TemplateView):
+class PaymentItemList(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'fund_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'statements/payment_item_list.html'
 
     def get(self, request, *args, **kwargs):
@@ -565,8 +579,9 @@ class PaymentItemList(TemplateView):
 
 
 
-class PaymentItemCreateView(CreateView):
-
+class PaymentItemCreateView(RolePassesTestMixin, CreateView):
+    needfull_permission = 'fund_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'statements/payment_item_create.html'
     form_class = PaymentItemCreateForm
     success_url = reverse_lazy('statements:payment_item_list')
@@ -590,8 +605,9 @@ class PaymentItemCreateView(CreateView):
     
 
 
-class PaymentItemUpdateView(UpdateView):
-
+class PaymentItemUpdateView(RolePassesTestMixin, UpdateView):
+    needfull_permission = 'fund_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'statements/payment_item_create.html'
     form_class = PaymentItemCreateForm
     model = PaymentItem
@@ -613,8 +629,9 @@ class PaymentItemUpdateView(UpdateView):
         context['item_form'] = PaymentItemCreateForm(instance=self.get_object(), prefix="payment_item_form")
         return context
     
-class PaymentItemDeleteView(DeleteView):
-
+class PaymentItemDeleteView(RolePassesTestMixin, DeleteView):
+    needfull_permission = 'fund_permission'
+    needfull_user_status = 'is_staff'
     model = PaymentItem
     success_url = reverse_lazy('statements:payment_item_list')
     

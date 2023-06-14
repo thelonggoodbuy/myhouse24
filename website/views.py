@@ -22,10 +22,13 @@ from tempfile import NamedTemporaryFile
 from django.http import FileResponse
 
 from django.shortcuts import get_object_or_404
+from users.views import RolePassesTestMixin
 
 
-class MainPageUpdateView(FormView):
 
+class MainPageUpdateView(RolePassesTestMixin, FormView):
+    needfull_permission = 'site_managing_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'website/main_page_update.html'
     form_class = MainPageUpdateForm
     model = MainPage
@@ -92,7 +95,9 @@ class MainPageUpdateView(FormView):
         return HttpResponseRedirect(success_url)
     
 
-class AboutUsUpdateView(FormView):
+class AboutUsUpdateView(RolePassesTestMixin, FormView):
+    needfull_permission = 'site_managing_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'website/about_us_page_update.html'
     form_class = AboutUsPageUpdateForm
     model = AboutUsPage
@@ -186,7 +191,9 @@ class AboutUsUpdateView(FormView):
     
 
 
-class UtilitiesUpdateView(FormView):
+class UtilitiesUpdateView(RolePassesTestMixin, FormView):
+    needfull_permission = 'site_managing_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'website/utilities_update.html'
     form_class = UtilitiesUpdateForm
     model = ServicesPage
@@ -246,7 +253,9 @@ class UtilitiesUpdateView(FormView):
         return HttpResponseRedirect(success_url)
     
 
-class TariffUpdateView(FormView):
+class TariffUpdateView(RolePassesTestMixin, FormView):
+    needfull_permission = 'site_managing_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'website/tariff_update.html'
     form_class = TariffPageUpdateForm
     model = TariffPage
@@ -294,7 +303,9 @@ class TariffUpdateView(FormView):
     
 
 
-class ContactUpdateView(FormView):
+class ContactUpdateView(RolePassesTestMixin, FormView):
+    needfull_permission = 'site_managing_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'website/contact_update.html'
     form_class = ContactUpdateForm
     model = ContactPage
@@ -339,7 +350,9 @@ class ContactUpdateView(FormView):
     # -------------------------------Front end logic--------------------------------------------------
     # ------------------------------------------------------------------------------------------------
 
-class FrontMainPageView(TemplateView):
+class FrontMainPageView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'site_managing_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'website/front_main_page.html'
 
     def get_context_data(self, **kwargs):
@@ -351,7 +364,9 @@ class FrontMainPageView(TemplateView):
         return context
     
 
-class FrontAboutUsView(TemplateView):
+class FrontAboutUsView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'site_managing_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'website/front_about_us.html'
 
     def get_context_data(self, **kwargs):
@@ -374,7 +389,9 @@ def download_doc_view(self, pk):
     return response
 
 
-class FrontUtilitiesView(TemplateView):
+class FrontUtilitiesView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'site_managing_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'website/front_utilities.html'
 
     def get_context_data(self, **kwargs):
@@ -383,7 +400,9 @@ class FrontUtilitiesView(TemplateView):
         return context
     
 
-class ContactsView(TemplateView):
+class ContactsView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'site_managing_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'website/front_contacts.html'
 
     def get_context_data(self, **kwargs):

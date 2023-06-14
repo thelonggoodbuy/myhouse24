@@ -8,7 +8,7 @@ from django.db.models import Max
 
 from django.contrib.postgres.aggregates import ArrayAgg, StringAgg
 from django.db.models.functions import Concat
-
+from users.views import RolePassesTestMixin
 
 
 from django.views.generic.base import TemplateView
@@ -22,6 +22,8 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.db.models import F, Q, OuterRef, Subquery, CharField, Value, Count, Sum, DecimalField
 from django.db.models import Min
 import locale
+from users.views import RolePassesTestMixin
+
 
 
 from .models import UnitOfMeasure, UtilityService, Tariff, TariffCell, CounterReadings
@@ -33,7 +35,9 @@ from .forms import HouseEditeFormSet, UtilityServiceEditeFormSet, TariffMainForm
 # --------------------------------------------------------------------------------------
 # ---------------------Utilities-and-measures-logic-------------------------------------
 # --------------------------------------------------------------------------------------
-class UtilityAndMeasuresUnitsEditeList(CreateView):
+class UtilityAndMeasuresUnitsEditeList(RolePassesTestMixin, CreateView):
+    needfull_permission = 'utility_services_permission'
+    needfull_user_status = 'is_staff'
 
     model = UtilityService
     fields = '__all__'
@@ -59,13 +63,7 @@ class UtilityAndMeasuresUnitsEditeList(CreateView):
 
     def form_valid(self, measures_units_formset, services_formset):
         measures_units_formset.save()
-        services_formset.save()
-        # for service in services_formset:
-        #     inst = service.save()
-        #     if inst.shown_in_counters == True:
-                
-        #     # else:
-        #         # 
+        services_formset.save() 
         success_url = self.success_url
         messages.success(self.request, f"Данные услугах и единицах измерения обновлены.")
         return HttpResponseRedirect(success_url)
@@ -92,7 +90,9 @@ class UtilityAndMeasuresUnitsEditeList(CreateView):
 # ---------------------Tariff-logic-----------------------------------------------------
 # --------------------------------------------------------------------------------------
 
-class TariffListView(TemplateView):
+class TariffListView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'tarif_permission'
+    needfull_user_status = 'is_staff'
     template_name = "utility_services/tariff_list.html"
 
     def get(self, request, *args, **kwargs):
@@ -142,7 +142,9 @@ class TariffListView(TemplateView):
             return self.render_to_response(context)
         
 
-class TariffEditeView(UpdateView):
+class TariffEditeView(RolePassesTestMixin, UpdateView):
+    needfull_permission = 'tarif_permission'
+    needfull_user_status = 'is_staff'
     form_class = TariffMainForm
     model = Tariff
     template_name = 'utility_services/tariff_edite.html'
@@ -194,7 +196,9 @@ class TariffEditeView(UpdateView):
         return HttpResponseRedirect(success_url)
 
 
-class TariffCreateView(CreateView):
+class TariffCreateView(RolePassesTestMixin, CreateView):
+    needfull_permission = 'tarif_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'utility_services/tariff_edite.html'
     form_class = TariffMainForm
     model = Tariff
@@ -241,8 +245,9 @@ class TariffCreateView(CreateView):
         return HttpResponseRedirect(success_url)
     
 
-class TariffDeleteView(DeleteView):
-
+class TariffDeleteView(RolePassesTestMixin, DeleteView):
+    needfull_permission = 'tarif_permission'
+    needfull_user_status = 'is_staff'
     model =  Tariff
     success_url = reverse_lazy('utility_services:tariff_list')
 
@@ -289,7 +294,13 @@ class TariffCopyView(TariffCreateView):
 # ------------------------------------------------------------------------
 # -----------------------------COUNTER-CRUD-------------------------------
 # ------------------------------------------------------------------------
-class CounterListView(TemplateView):
+
+
+
+
+class CounterListView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'counter_permission'
+    needfull_user_status = 'is_staff'
     template_name = "utility_services/counter_list.html"
 
     def get(self, request, *args, **kwargs):
@@ -420,11 +431,9 @@ class CounterListView(TemplateView):
         return context
     
 
-
-
-    
-
-class CounterReadingsPerAppartmentListView(TemplateView):
+class CounterReadingsPerAppartmentListView(RolePassesTestMixin, TemplateView):
+    needfull_permission = 'counter_permission'
+    needfull_user_status = 'is_staff'
     template_name = "utility_services/counter_readings_per_appartment_list.html"
     appartment_id = None
     utility_service_id = None
@@ -581,7 +590,9 @@ class CounterReadingsPerAppartmentListView(TemplateView):
 
 
 # ==================================ADDCOUNTERREADINGS====================================================================
-class AddCounterReadingsView(CreateView):
+class AddCounterReadingsView(RolePassesTestMixin, CreateView):
+    needfull_permission = 'counter_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'utility_services/add_counter_readings.html'
     form_class = AddCounterReadingsForm
     model = CounterReadings
@@ -642,25 +653,9 @@ class AddCounterReadingsView(CreateView):
         return HttpResponseRedirect(success_url)
     
 
-# class AddCounterReadingsPerCounterView(AddCounterReadingsView):
-#     appartment_id = None
-#     utility_service_id = None
-
-#     def get_context_data(self, counter_per_appartment, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         utility_service_id = counter_per_appartment.split('__')[0]
-#         self.__class__.utility_service_id = utility_service_id
-#         appartment_id = counter_per_appartment.split('__')[1]
-#         self.__class__.appartment_id = appartment_id
-
-#         # initial_dict={'appartment' : 11}
-
-#         # context['tariff_reading_form'] = AddCounterReadingsForm(initial=initial_dict)
-#         context['tariff_reading_form'] = AddCounterReadingsForm()
-
-#         return context
-
-class AddCounterReadingsPerCounterView(CreateView):
+class AddCounterReadingsPerCounterView(RolePassesTestMixin, CreateView):
+    needfull_permission = 'counter_permission'
+    needfull_user_status = 'is_staff'
     template_name = 'utility_services/add_counter_readings.html'
     form_class = AddCounterReadingsForm
     model = CounterReadings

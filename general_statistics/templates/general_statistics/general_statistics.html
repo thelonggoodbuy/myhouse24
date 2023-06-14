@@ -187,16 +187,11 @@
 {{ statement_stat_dict|json_script:'statement_stat_dict'}}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{% comment %} <script src="{% static 'appartments/plugins/chartjs/chart.js' %}"></script> {% endcomment %}
+
 
 <script>
 
     $(document).ready(function () {
-
-    //-------------------------------------------------------------
-    //receipt_graph
-    //-------------------------------------------------------------
-
 
     var receipt_statistics_per_month = JSON.parse(document.getElementById('receipt_statistics_per_month').textContent)
     debts_array = []

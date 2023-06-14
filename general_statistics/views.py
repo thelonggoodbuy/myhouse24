@@ -16,8 +16,13 @@ from datetime import date
 from django.db.models import Q
 
 
-class GeneralStatisticsView(TemplateView):
+from users.views import RolePassesTestMixin
+
+
+class GeneralStatisticsView(RolePassesTestMixin, TemplateView):
     template_name = "general_statistics/general_statistics.html"
+    needfull_permission = 'statistic_permission'
+    needfull_user_status = 'is_staff'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
