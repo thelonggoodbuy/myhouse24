@@ -186,7 +186,7 @@ $(document).ready(function () {
             $(this).find("div").attr("id") != "buttons_interaction"
             )
         {
-            var basic_url = "{% url 'receipts:receipt_detail' %}"
+            var basic_url = "{% url 'users:profile_receipt_detail' %}"
             var url_index = table.row(this).id().toString();
             document.location.href = basic_url + url_index;
             //console.log(`Now you click in link ${url_index}`)

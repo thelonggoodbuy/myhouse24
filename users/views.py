@@ -309,7 +309,7 @@ class AdminSettingsUserCardView(RolePassesTestMixin, DetailView):
     needfull_user_status = 'is_staff'
     queryset = User.objects.select_related('role').only('name', 'surname', 'role__name', 'phone', 'email', 'status')
     template_name = "users/admin_settings_user_card.html"
-    context_object_name = 'user'
+    context_object_name = 'user_object'
 
 
 class AdminSettingsUsersDeleteView(RolePassesTestMixin, DeleteView):
@@ -846,6 +846,38 @@ class ProfileReceiptListPerAppartmentView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+
+
+
+from receipts.models import ReceiptTemplate
+from receipts.services import cabinet_download_pdf_receipt, cabinet_download_pdf_receipt_for_printing
+# =================================WORK AREA=========================================
+
+class ProfileReceiptDetailView(DetailView):
+    queryset = Receipt.objects.all()
+    template_name = "users/profile_receipt_detail.html"
+    context_object_name = 'receipt'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print(self.object.id)
+        context['receipt_cells'] = ReceiptCell.objects.select_related('utility_service', 'unit_of_measure').filter(receipt=self.object)
+        return context
+
+
+
+
+def save_pdf_from_cabinet(request, pk):
+    return cabinet_download_pdf_receipt(pk)
+
+
+def return_pdf_from_cabinet_and_print(request, pk):
+    print('========!!!==================')
+    return cabinet_download_pdf_receipt_for_printing(pk)
+
+# ============================END==WORK=AREA=========================================
+
+
 
 
 class ProfileTariffListView(DetailView):

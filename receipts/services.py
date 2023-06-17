@@ -488,3 +488,112 @@ def return_xlm_statement_data():
         response['Content-Disposition'] = f'attachment; filename=all_personal_accounts_data.xlsx'
 
     return response
+
+
+
+
+def cabinet_download_pdf_receipt(receipt_id):
+
+    receipt = Receipt.objects.get(id=receipt_id)
+
+    print(receipt.number)
+
+    formated_month = format_date(receipt.from_date, 'LLLL Y', locale='ru')
+
+
+    requiste = Requisite.objects.first().company_title
+
+    context = {}
+
+    if receipt.appartment.personal_account: context['account_number'] = receipt.appartment.personal_account.number
+    if requiste: context['pay_company'] = requiste
+    if receipt.appartment.personal_account:
+        context['account_balance'] = receipt.appartment.personal_account.balance
+        context['total_debt'] = f'{-(receipt.appartment.personal_account.balance - receipt.total_sum)}'
+    context['invoice_number'] = receipt.number
+    context['invoice_date'] = receipt.payment_due.strftime("%d.%m.%Y")
+    context['invoice_address'] = f'{receipt.appartment.owner_user.full_name}, {receipt.appartment.house.address}, {receipt.appartment.number}'
+    context['total'] = receipt.total_sum
+    context['invoice_month'] = f'{formated_month}'
+    context['service_total'] = f'{receipt.total_sum}'
+
+
+    context['receipt_cells'] = list(ReceiptCell.objects.filter(receipt=receipt)\
+                                        .values('utility_service__title',\
+                                                 'cost_per_unit',
+                                                 'unit_of_measure__title',
+                                                 'consumption',
+                                                 'cost'))
+   
+    print(context)
+
+    template_path = 'pdf_templates/test_templates.html'
+
+    prerendered_template = get_template(template_path)
+    html = prerendered_template.render(context)
+    myPdf = pdfkit.from_string(html, False)
+
+    response = HttpResponse(myPdf, content_type='content_type=application/pdf')
+
+    response['Content-Disposition'] = f'attachment; filename=receipt_{receipt.number}.pdf'
+    
+
+    return response
+
+
+import subprocess
+
+def cabinet_download_pdf_receipt_for_printing(receipt_id):
+
+    receipt = Receipt.objects.get(id=receipt_id)
+
+    print(receipt.number)
+
+    formated_month = format_date(receipt.from_date, 'LLLL Y', locale='ru')
+
+
+    requiste = Requisite.objects.first().company_title
+
+    context = {}
+
+    if receipt.appartment.personal_account: context['account_number'] = receipt.appartment.personal_account.number
+    if requiste: context['pay_company'] = requiste
+    if receipt.appartment.personal_account:
+        context['account_balance'] = receipt.appartment.personal_account.balance
+        context['total_debt'] = f'{-(receipt.appartment.personal_account.balance - receipt.total_sum)}'
+    context['invoice_number'] = receipt.number
+    context['invoice_date'] = receipt.payment_due.strftime("%d.%m.%Y")
+    context['invoice_address'] = f'{receipt.appartment.owner_user.full_name}, {receipt.appartment.house.address}, {receipt.appartment.number}'
+    context['total'] = receipt.total_sum
+    context['invoice_month'] = f'{formated_month}'
+    context['service_total'] = f'{receipt.total_sum}'
+
+
+    context['receipt_cells'] = list(ReceiptCell.objects.filter(receipt=receipt)\
+                                        .values('utility_service__title',\
+                                                 'cost_per_unit',
+                                                 'unit_of_measure__title',
+                                                 'consumption',
+                                                 'cost'))
+   
+    print(context)
+
+    template_path = 'pdf_templates/test_templates.html'
+
+    prerendered_template = get_template(template_path)
+    html = prerendered_template.render(context)
+    myPdf = pdfkit.from_string(html, False)
+
+    response = HttpResponse(myPdf, content_type='content_type=application/pdf')
+    
+    response['Content-Disposition'] = f'print; filename=receipt_{receipt.number}.pdf'
+    # os.startfile(myPdf, "print")
+    # lpr =  subprocess.Popen(myPdf, stdin=subprocess.PIPE)
+    # lpr.stdin.write(myPdf)
+
+    # with open(myPdf, 'rb') as pdf:
+    #     response = HttpResponse(myPdf.read(), content_type='application/pdf')
+    #     response['Content-Disposition'] = 'inline;filename=mypdf.pdf'
+    
+
+    return response

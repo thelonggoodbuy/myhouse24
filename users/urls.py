@@ -5,7 +5,8 @@ from .views import LoginSimpleUser, LoginAdminUser, LogOutUser, SignUpSimpleUser
                     PermissionDeniedView, MessagesListView, MessageCreateView, MessageDetailView, MessageDeleteView,\
                     ProfileDetailView, ProfileStatisticPerAppartment, ProfileReceiptListView, ProfileReceiptListPerAppartmentView,\
                     ProfileTariffListView, ProfileMessageListView, ProfileMessageDetailView, ProfileMessageDeleteView,\
-                    ProfileMastersRequestListView, ProfileMasterRequestDeleteView, ProfileMastersRequestsCreateView, ProfileUserDetail
+                    ProfileMastersRequestListView, ProfileMasterRequestDeleteView, ProfileMastersRequestsCreateView, ProfileUserDetail,\
+                    ProfileReceiptDetailView, save_pdf_from_cabinet, return_pdf_from_cabinet_and_print
                         # temp_funct_users_listlogic
 
 
@@ -56,6 +57,13 @@ urlpatterns = [
     path('profile_receipt_list/', ProfileReceiptListView.as_view(), name='profile_receipt_list'),
     path('profile_receipt_list_per_appartment/', ProfileReceiptListPerAppartmentView.as_view(), name='profile_receipt_list_per_appartment'),
     path('profile_receipt_list_per_appartment/<int:pk>/', ProfileReceiptListPerAppartmentView.as_view(), name='profile_receipt_list_per_appartment'),
+    path('profile_receipt_detail/', ProfileReceiptDetailView.as_view(), name='profile_receipt_detail'),
+    path('profile_receipt_detail/<int:pk>/', ProfileReceiptDetailView.as_view(), name='profile_receipt_detail'),
+    #===================================================================
+    path('return_pdf_from_cabinet/<int:pk>', save_pdf_from_cabinet, name='return_pdf_from_cabinet'),
+
+    path('return_pdf_from_cabinet_and_print/<int:pk>', return_pdf_from_cabinet_and_print, name='return_pdf_from_cabinet_and_print'), 
+    #===================================================================
     path('profile_tariff_list/<int:pk>/', ProfileTariffListView.as_view(), name='profile_tariff_list'),
     path('profile_message_list/', ProfileMessageListView.as_view(), name='profile_message_list'),
     path('profile_message_list/<int:pk>/', ProfileMessageListView.as_view(), name='profile_message_list'),

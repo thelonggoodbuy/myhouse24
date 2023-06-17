@@ -1,5 +1,5 @@
-from users.models import User
-
+from users.models import User, MessageToUser
+from django.db.models import Q
 
 
 
@@ -18,8 +18,18 @@ def get_owning_data(request):
         user_data_dictionary['appartments'].append(user_dictionary)
 
 
-    # print(user_data_dictionary)
+    new_users_data = list(User.objects.filter(status='new').values('id', 'email', 'full_name'))
+    length_new_users_data = len(new_users_data)
 
-    # user_data = request.user.owning.all
-    return {'user_data': user_data_dictionary}
+    Q_list = []
+    Q_list.append(Q(to_users = request.user))
+    unreaded_messages = MessageToUser.objects.filter(to_users = request.user).exclude(read_by_user = request.user)
+    unreaded_messages_len = len(unreaded_messages)
+
+    context = {'user_data': user_data_dictionary,
+            'unreaded_messages': unreaded_messages,
+            'unreaded_messages_len': unreaded_messages_len,
+            'new_users_data': new_users_data,
+            'length_new_users_data': length_new_users_data}
+    return context
 

@@ -86,27 +86,25 @@
                     <ul class="nav navbar-nav">
                         <!-- Notifications -->
                         <li class="dropdown notifications-menu">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
                                 <i class="fa fa-bell"></i>
-                                {% comment %} <span class="label label-success">{{ list_messages|length }}</span> {% endcomment %}
-                                <span class="label label-success">5</span>
+                                <span class="label label-success">{{ unreaded_messages_len }}</span>
                             </a>
-    
                             <ul class="dropdown-menu">
-                                {% if list_messages %}
+                                {% if unreaded_messages %}
                                 <li>
                                     <ul class="menu">
-                                        {% for message in list_messages %}
+                                        {% for message in unreaded_messages %}
                                         <li>
-                                            <a href="{% url 'detail-message' message.id %}">
+                                            <a href="{% url 'users:profile_message_detail' message.id %}">
                                                 <h5>
-                                                    {{ message.sender }}
+                                                    {{ message.from_user }}
                                                     <small>
                                                         <i class="fa fa-clock-o"></i>
                                                         {{ message.datetime|date:"d E" }}
                                                     </small>
                                                 </h5>
-                                                <p>{{ message.topics }}</p>
+                                                <p>{{ message.topic }}</p>
                                             </a>
                                         </li>
                                         {% endfor %}
@@ -115,7 +113,7 @@
                                 {% else %}
                                 <li class="header">Нет новых сообщений</li>
                                 {% endif %}
-                                <li class="footer"><a href="#">Перейти в раздел сообщений</a></li>
+                                <li class="footer"><a href="{% url 'users:profile_message_list' user.id %}">Перейти в раздел сообщений</a></li>
                             </ul>
                         </li>
                         <!-- User Account -->
