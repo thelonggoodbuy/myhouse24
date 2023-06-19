@@ -23,8 +23,12 @@ def get_owning_data(request):
 
     Q_list = []
     Q_list.append(Q(to_users = request.user))
-    unreaded_messages = MessageToUser.objects.filter(to_users = request.user).exclude(read_by_user = request.user)
-    unreaded_messages_len = len(unreaded_messages)
+    if request.user.is_authenticated:
+        unreaded_messages = MessageToUser.objects.filter(to_users = request.user).exclude(read_by_user = request.user)
+        unreaded_messages_len = len(unreaded_messages)
+    else:
+        unreaded_messages = None
+        unreaded_messages_len = 0
 
     context = {'user_data': user_data_dictionary,
             'unreaded_messages': unreaded_messages,

@@ -2,7 +2,6 @@ import os
 from django.conf import settings
 from django.http import HttpResponse
 from django.template.loader import get_template
-from xhtml2pdf import pisa
 from django.contrib.staticfiles import finders
 from babel.dates import format_date
 from openpyxl import load_workbook
@@ -11,7 +10,6 @@ from django.core.files import File
 
 from openpyxl.styles import Side, Border, Font, Alignment, NamedStyle
 from openpyxl import Workbook
-from xhtml2pdf import pisa
 from tempfile import NamedTemporaryFile
 
 from .models import Receipt, ReceiptTemplate, ReceiptCell, Requisite
