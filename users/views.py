@@ -849,7 +849,7 @@ class ProfileReceiptListPerAppartmentView(DetailView):
 
 
 
-from receipts.models import ReceiptTemplate
+# from receipts.models import ReceiptTemplate
 from receipts.services import cabinet_download_pdf_receipt, cabinet_download_pdf_receipt_for_printing
 # =================================WORK AREA=========================================
 

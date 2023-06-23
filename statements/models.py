@@ -16,7 +16,7 @@ class Statement(models.Model):
     )
 
     number = models.PositiveBigIntegerField(unique=True)
-    date = models.DateField(default=timezone.now())
+    date = models.DateField()
     # checked_status = models.BooleanField()
     type_of_paynent_item  = models.ForeignKey('PaymentItem', on_delete=models.SET_NULL, null=True, blank=True)
     personal_account = models.ForeignKey(PersonalAccount, on_delete=models.SET_NULL, null=True, blank=True)

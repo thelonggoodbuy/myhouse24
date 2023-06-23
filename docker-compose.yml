@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   web:
-    build: ./
+    build: .
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./:/usr/src/MyHouse24/
@@ -11,32 +11,36 @@ services:
     env_file:
       - ./.env.dev
     depends_on:
-      - db 
+      - db
+    
+
 
   db:
-    image: postgres:13.0-alpine
+    image: postgres:15.3-alpine
+    # container_name: home_db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - ./.env.dev
 
-  redis:
-    image: redis:alpine
 
-  celery:
-    restart: always
-    build:
-      context: .
-    command: celery -A MyHouse24_proj worker -l info
-    volumes:
-      - ./:/usr/src/MyHouse24/
-    env_file:
-      - ./.env.dev
-    depends_on:
-      - db
-      - redis
-      - web
+  # redis:
+  #   image: redis:alpine
 
+
+  # celery:
+  #   restart: always
+  #   build:
+  #     context: .
+  #   command: celery -A MyHouse24_proj worker -l info
+  #   volumes:
+  #     - ./:/usr/src/MyHouse24/
+  #   env_file:
+  #     - ./.env.dev
+  #   depends_on:
+  #     - db
+  #     - redis
+  #     - web
 
 
 volumes:

@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from .models import Receipt, ReceiptCell, ReceiptTemplate
+from .models import Receipt, ReceiptCell\
+                        # , ReceiptTemplate
 
 
 
@@ -16,6 +17,6 @@ class UserAdmin(admin.ModelAdmin):
     list_filter = ('receipt',)
 
 
-@admin.register(ReceiptTemplate)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('name', 'receipt_template', 'is_default')
+# @admin.register(ReceiptTemplate)
+# class UserAdmin(admin.ModelAdmin):
+#     list_display = ('name', 'receipt_template', 'is_default')

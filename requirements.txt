@@ -36,7 +36,7 @@ pdfkit==1.0.0
 Pillow==9.4.0
 progressbar==2.5
 prompt-toolkit==3.0.38
-psycopg2==2.9.5
+psycopg2-binary==2.9.4
 
 pydub==0.25.1
 Pygments==2.15.1
