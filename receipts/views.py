@@ -38,10 +38,9 @@ from django.views.generic.edit import FormView, UpdateView, DeleteView
 from users.models import User
 from appartments.models import House, Section, Appartment, PersonalAccount
 from utility_services.models import Tariff, TariffCell, CounterReadings
-from .models import Receipt, ReceiptCell, Requisite\
-                            # , ReceiptTemplate
-from .forms import AddReceiptForm, UtilityReceiptForm, ReceiptCellFormset, RequisiteUpdateForm\
-                    # , ReceiptTemplateListForm, ReceiptTeplateEditeFormSet, ReceiptTeplateEditeForm, 
+from .models import Receipt, ReceiptCell, Requisite, ReceiptTemplate
+from .forms import AddReceiptForm, UtilityReceiptForm, ReceiptCellFormset, RequisiteUpdateForm,\
+                     ReceiptTemplateListForm, ReceiptTeplateEditeFormSet, ReceiptTeplateEditeForm 
 
 
 
@@ -615,69 +614,69 @@ class ReceiptCardView(RolePassesTestMixin, DetailView):
 
 
 class ReceiptTemplateListView(RolePassesTestMixin, FormView):
-    # needfull_permission = 'receipt_permission'
-    # needfull_user_status = 'is_staff'
-    # form_class = ReceiptTemplateListForm
-    # template_name = "receipts/receipt_template_list.html"
+    needfull_permission = 'receipt_permission'
+    needfull_user_status = 'is_staff'
+    form_class = ReceiptTemplateListForm
+    template_name = "receipts/receipt_template_list.html"
 
-    # def form_valid(self, form):
-    #     receipt_id = self.kwargs['pk']
-    #     template_id = form.cleaned_data['templates_list']
+    def form_valid(self, form):
+        receipt_id = self.kwargs['pk']
+        template_id = form.cleaned_data['templates_list']
 
-    #     if 'print_xls_doc' in self.request.POST:
-    #         response = return_xlm_receipt(receipt_id, template_id)
-    #         # return response
+        if 'print_xls_doc' in self.request.POST:
+            response = return_xlm_receipt(receipt_id, template_id)
+            # return response
 
-    #     elif 'send_to_email_pdf' in self.request.POST:
-    #         return_pdf_receipt(receipt_id, template_id)
-    #         response = HttpResponseRedirect(reverse('receipts:receipt_template_list_view', kwargs={'pk': receipt_id}))
-    #     return response
+        elif 'send_to_email_pdf' in self.request.POST:
+            return_pdf_receipt(receipt_id, template_id)
+            response = HttpResponseRedirect(reverse('receipts:receipt_template_list_view', kwargs={'pk': receipt_id}))
+        return response
 
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)     
-    #     receipt_id = self.kwargs['pk']
-    #     context['receipt_id'] = receipt_id
-    #     return context
-    pass
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)     
+        receipt_id = self.kwargs['pk']
+        context['receipt_id'] = receipt_id
+        return context
+    
 
 
 
 class ReceiptTemplateEditeView(RolePassesTestMixin, FormView):
-    # needfull_permission = 'receipt_permission'
-    # needfull_user_status = 'is_staff'
-    # template_name = "receipts/receipt_template_edite.html"
-    # templates = ReceiptTemplate.objects.all()
-    # form_class = ReceiptTeplateEditeForm
-    # success_url = reverse_lazy('receipts:receipt_template_edite_view')
+    needfull_permission = 'receipt_permission'
+    needfull_user_status = 'is_staff'
+    template_name = "receipts/receipt_template_edite.html"
+    templates = ReceiptTemplate.objects.all()
+    form_class = ReceiptTeplateEditeForm
+    success_url = reverse_lazy('receipts:receipt_template_edite_view')
 
 
-    # def post(self, request, *args, **Kwargs):
-    #     template_edit_formset = ReceiptTeplateEditeFormSet(request.POST,\
-    #                                                        request.FILES,\
-    #                                                         queryset=self.templates,\
-    #                                                         prefix="templates")
+    def post(self, request, *args, **Kwargs):
+        template_edit_formset = ReceiptTeplateEditeFormSet(request.POST,\
+                                                           request.FILES,\
+                                                            queryset=self.templates,\
+                                                            prefix="templates")
         
-    #     if template_edit_formset.is_valid():
-    #         return self.form_valid(template_edit_formset)
-    #     else:
-    #         if template_edit_formset.errors:
-    #             for receipt_form in template_edit_formset:
-    #                 for field, error in receipt_form.errors.items():
-    #                     print(f'{field}: {error}')
+        if template_edit_formset.is_valid():
+            return self.form_valid(template_edit_formset)
+        else:
+            if template_edit_formset.errors:
+                for receipt_form in template_edit_formset:
+                    for field, error in receipt_form.errors.items():
+                        print(f'{field}: {error}')
 
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)     
-    #     context['receipt_edit_formset'] = ReceiptTeplateEditeFormSet(queryset=self.templates,\
-    #                                                                 prefix="templates")
-    #     return context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)     
+        context['receipt_edit_formset'] = ReceiptTeplateEditeFormSet(queryset=self.templates,\
+                                                                    prefix="templates")
+        return context
     
 
-    # def form_valid(self, template_edit_formset):
-    #     template_edit_formset.save()
-    #     success_url = self.success_url
-    #     messages.success(self.request, f"Изменения в шаблоны внесены!")
-    #     return HttpResponseRedirect(success_url)
-    pass
+    def form_valid(self, template_edit_formset):
+        template_edit_formset.save()
+        success_url = self.success_url
+        messages.success(self.request, f"Изменения в шаблоны внесены!")
+        return HttpResponseRedirect(success_url)
+    
 
 
 

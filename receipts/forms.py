@@ -4,8 +4,7 @@ from django.db.models import Max
 import random
 
 
-from .models import Receipt, ReceiptCell, Requisite
-                                    # ,ReceiptTemplate
+from .models import Receipt, ReceiptCell, Requisite, ReceiptTemplate
 from appartments.models import Appartment
 from utility_services.models import Tariff, UtilityService, UnitOfMeasure
 from appartments.models import House
@@ -131,43 +130,48 @@ ReceiptCellFormset = forms.inlineformset_factory(Receipt,
                                                 min_num=0)
 
 
-# class ReceiptTemplateListForm(forms.Form):
+class ReceiptTemplateListForm(forms.Form):
 
-#     TEMPLATE_CHOICES = []
-#     DEFAULT_TEMPLATE = None
-#     receipts = ReceiptTemplate.objects.filter().order_by('id').values( 'id', 'name', 'is_default')
-#     for receipt in receipts:
-#         template_cell = (receipt['id'], receipt['name'])
-#         TEMPLATE_CHOICES.append(template_cell)
-#         if receipt['is_default'] == True: DEFAULT_TEMPLATE = receipt['id'] 
+    TEMPLATE_CHOICES = []
+    DEFAULT_TEMPLATE = None
+    try:
+        receipts = ReceiptTemplate.objects.filter().order_by('id').values( 'id', 'name', 'is_default')
+        for receipt in receipts:
+            template_cell = (receipt['id'], receipt['name'])
+            TEMPLATE_CHOICES.append(template_cell)
+            if receipt['is_default'] == True: DEFAULT_TEMPLATE = receipt['id'] 
+    except:
+        pass
+    # else:
+
 
     
-#     templates_list = forms.ChoiceField(required=True, label="Шаблон", choices=TEMPLATE_CHOICES, initial=DEFAULT_TEMPLATE,
-#                                             widget=forms.RadioSelect(attrs={'class': 'form-check-input'}))
+    templates_list = forms.ChoiceField(required=True, label="Шаблон", choices=TEMPLATE_CHOICES, initial=DEFAULT_TEMPLATE,
+                                            widget=forms.RadioSelect(attrs={'class': 'form-check-input'}))
     
 
 
-# class ReceiptTeplateEditeForm(forms.ModelForm):
+class ReceiptTeplateEditeForm(forms.ModelForm):
 
-#     name = forms.CharField(label='название шаблона', required=False,
-#                             widget=forms.TextInput(attrs={'class': 'form-control',
-#                                                             'id': 'template_name'}))
+    name = forms.CharField(label='название шаблона', required=False,
+                            widget=forms.TextInput(attrs={'class': 'form-control',
+                                                            'id': 'template_name'}))
     
-#     receipt_template = forms.FileField(label='Загрузить пользовательский шаблон', required=False)
+    receipt_template = forms.FileField(label='Загрузить пользовательский шаблон', required=False)
 
 
 
-#     class Meta:
-#         model = ReceiptTemplate
-#         fields = ('name', 'receipt_template', 'is_default')
+    class Meta:
+        model = ReceiptTemplate
+        fields = ('name', 'receipt_template', 'is_default')
 
 
 
-# ReceiptTeplateEditeFormSet = forms.modelformset_factory(model=ReceiptTemplate,
-#                                                         form=ReceiptTeplateEditeForm, 
-#                                                         can_delete=True, 
-#                                                         # extra=1
-#                                                         )
+ReceiptTeplateEditeFormSet = forms.modelformset_factory(model=ReceiptTemplate,
+                                                        form=ReceiptTeplateEditeForm, 
+                                                        can_delete=True, 
+                                                        extra=1
+                                                        )
 
 
 

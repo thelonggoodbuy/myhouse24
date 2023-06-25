@@ -24,23 +24,23 @@ services:
       - ./.env.dev
 
 
-  # redis:
-  #   image: redis:alpine
+  redis:
+    image: redis:alpine
 
 
-  # celery:
-  #   restart: always
-  #   build:
-  #     context: .
-  #   command: celery -A MyHouse24_proj worker -l info
-  #   volumes:
-  #     - ./:/usr/src/MyHouse24/
-  #   env_file:
-  #     - ./.env.dev
-  #   depends_on:
-  #     - db
-  #     - redis
-  #     - web
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A MyHouse24_proj worker -l info
+    volumes:
+      - ./:/usr/src/MyHouse24/
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+      - redis
+      - web
 
 
 volumes:
