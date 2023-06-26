@@ -350,9 +350,7 @@ class ContactUpdateView(RolePassesTestMixin, FormView):
     # -------------------------------Front end logic--------------------------------------------------
     # ------------------------------------------------------------------------------------------------
 
-class FrontMainPageView(RolePassesTestMixin, TemplateView):
-    needfull_permission = 'site_managing_permission'
-    needfull_user_status = 'is_staff'
+class FrontMainPageView(TemplateView):
     template_name = 'website/front_main_page.html'
 
     def get_context_data(self, **kwargs):
@@ -364,9 +362,7 @@ class FrontMainPageView(RolePassesTestMixin, TemplateView):
         return context
     
 
-class FrontAboutUsView(RolePassesTestMixin, TemplateView):
-    needfull_permission = 'site_managing_permission'
-    needfull_user_status = 'is_staff'
+class FrontAboutUsView(TemplateView):
     template_name = 'website/front_about_us.html'
 
     def get_context_data(self, **kwargs):
@@ -389,9 +385,7 @@ def download_doc_view(self, pk):
     return response
 
 
-class FrontUtilitiesView(RolePassesTestMixin, TemplateView):
-    needfull_permission = 'site_managing_permission'
-    needfull_user_status = 'is_staff'
+class FrontUtilitiesView(TemplateView):
     template_name = 'website/front_utilities.html'
 
     def get_context_data(self, **kwargs):
@@ -400,9 +394,7 @@ class FrontUtilitiesView(RolePassesTestMixin, TemplateView):
         return context
     
 
-class ContactsView(RolePassesTestMixin, TemplateView):
-    needfull_permission = 'site_managing_permission'
-    needfull_user_status = 'is_staff'
+class ContactsView(TemplateView):
     template_name = 'website/front_contacts.html'
 
     def get_context_data(self, **kwargs):

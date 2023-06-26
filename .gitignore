@@ -139,3 +139,6 @@ GitHub.sublime-settings
 .history
 
 pip_logs.py
+
+.env.prod
+.env.prod.db

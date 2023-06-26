@@ -73,7 +73,7 @@
                         {% comment %} <li><a href="Javascript:;">Условия приобретения</a></li> {% endcomment %}
                         <li class=""><a href="{% url 'website:front_contacts' %}">Контакты</a></li>
                         
-                        <li><a href="Javascript:;"><i class="fa fa-sign-in"></i>   Вход</a></li>
+                        <li><a href="{% url 'users:login_user' %}"><i class="fa fa-sign-in"></i>   Вход</a></li>
                     </ul>
                 </div>
             </div>
