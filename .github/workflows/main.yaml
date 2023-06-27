@@ -15,28 +15,28 @@ jobs:
         uses: actions/checkout@v1
       - name: Add enviroment variables to .env.prod
         run: |
-          echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env.dev
-          echo DEBUG=0 >> .env.dev
-          echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env.dev
-          echo EMAIL_SENDING_DEFAULT_FROM_EMAIL=${{ secrets.EMAIL_SENDING_DEFAULT_FROM_EMAIL }} >> .env.dev
-          echo EMAIL_SENDING_EMAIL_HOST=${{ secrets.EMAIL_SENDING_EMAIL_HOST }} >> .env.dev
-          echo EMAIL_SENDING_EMAIL_PORT=${{ secrets.EMAIL_SENDING_EMAIL_PORT }} >> .env.dev
-          echo EMAIL_SENDING_EMAIL_HOST_USER=${{ secrets.EMAIL_SENDING_EMAIL_HOST_USER }} >> .env.dev
-          echo EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} >> .env.dev
-          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.dev
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.dev
-          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.dev
-          echo POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} >> .env.dev
-          echo POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} >> .env.dev
-          echo DATABASE=postgres >> .env.dev
-          echo CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }} >> .env.dev
-          echo CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }} >> .env.dev
-          echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> .env.dev
+          echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env.prod
+          echo DEBUG=0 >> .env.prod
+          echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env.prod
+          echo EMAIL_SENDING_DEFAULT_FROM_EMAIL=${{ secrets.EMAIL_SENDING_DEFAULT_FROM_EMAIL }} >> .env.prod
+          echo EMAIL_SENDING_EMAIL_HOST=${{ secrets.EMAIL_SENDING_EMAIL_HOST }} >> .env.prod
+          echo EMAIL_SENDING_EMAIL_PORT=${{ secrets.EMAIL_SENDING_EMAIL_PORT }} >> .env.prod
+          echo EMAIL_SENDING_EMAIL_HOST_USER=${{ secrets.EMAIL_SENDING_EMAIL_HOST_USER }} >> .env.prod
+          echo EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} >> .env.prod
+          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.prod
+          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.prod
+          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.prod
+          echo POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} >> .env.prod
+          echo POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} >> .env.prod
+          echo DATABASE=postgres >> .env.prod
+          echo CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }} >> .env.prod
+          echo CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }} >> .env.prod
+          echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> .env.prod
       - name: Add enviroment variables to .env.prod.db
         run: |
-          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.dev.db
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.dev.db
-          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.dev.db
+          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> env.prod.db
+          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> env.prod.db
+          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> env.prod.db
       - name: Set environment variables
         run: |
           echo "WEB_IMAGE=$(echo ${{env.WEB_IMAGE}} )" >> $GITHUB_ENV
@@ -49,11 +49,11 @@ jobs:
         run: |
           docker pull ${{ env.WEB_IMAGE }} || true
           docker pull ${{ env.NGINX_IMAGE }} || true
-      - name: TESTING ENVIRONMENT
+      # - name: TESTING ENVIRONMENT
         # run: cat .env.dev
-        run: |
-          ls --all
-          $PWD
+        # run: |
+        #   ls --all
+        #   $PWD
       - name: Build images
         run: |
           docker-compose -f docker-compose.prod.yml build
