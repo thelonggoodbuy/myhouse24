@@ -51,8 +51,8 @@ services:
 
   nginx:
     build: ./nginx
-    cache_from:
-      - "${NGINX_IMAGE}"
+    # cache_from:
+    #   - "${NGINX_IMAGE}"
     image: "${NGINX_IMAGE}"
     volumes:
       - static_volume:/home/MyHouse24/web/staticfiles
