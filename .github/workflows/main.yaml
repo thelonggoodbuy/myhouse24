@@ -34,9 +34,9 @@ jobs:
           echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> .env.prod
       - name: Add enviroment variables to .env.prod.db
         run: |
-          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> env.prod.db
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> env.prod.db
-          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> env.prod.db
+          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.prod.db
+          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.prod.db
+          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.prod.db
       - name: Set environment variables
         run: |
           echo "WEB_IMAGE=$(echo ${{env.WEB_IMAGE}} )" >> $GITHUB_ENV
