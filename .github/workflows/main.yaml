@@ -15,6 +15,7 @@ jobs:
         uses: actions/checkout@v1
       - name: Add enviroment variables to .env.prod
         run: |
+          echo THIS IS START BUILDING...
           echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env.dev
           echo DEBUG=0 >> .env.dev
           echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env.dev
