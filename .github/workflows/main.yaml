@@ -50,7 +50,10 @@ jobs:
           docker pull ${{ env.WEB_IMAGE }} || true
           docker pull ${{ env.NGINX_IMAGE }} || true
       - name: TESTING ENVIRONMENT
-        run: cat .env.dev
+        # run: cat .env.dev
+        run: |
+          ls --all
+          $PWD
       - name: Build images
         run: |
           docker-compose -f docker-compose.prod.yml build
