@@ -5,8 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.prod
-      cache_from:
-        - "${WEB_IMAGE}"
+      # cache_from:
+      #   - "${WEB_IMAGE}"
     image: "${WEB_IMAGE}"
     command: gunicorn MyHouse24_proj.wsgi:application --bind 0.0.0.0:8000
     volumes:
