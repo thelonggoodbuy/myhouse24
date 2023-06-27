@@ -8,52 +8,52 @@ env:
 
 jobs:
   build:
-  name: Build Docker Image
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout master
-      uses: actions/checkout@v1
-    - name: Add enviroment variables to .env.prod
-      run: |
-        echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env.dev
-        echo DEBUG=0 >> .env.dev
-        echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env.dev
-        echo EMAIL_SENDING_DEFAULT_FROM_EMAIL=${{ secrets.EMAIL_SENDING_DEFAULT_FROM_EMAIL }} >> .env.dev
-        echo EMAIL_SENDING_EMAIL_HOST=${{ secrets.EMAIL_SENDING_EMAIL_HOST }} >> .env.dev
-        echo EMAIL_SENDING_EMAIL_PORT=${{ secrets.EMAIL_SENDING_EMAIL_PORT }} >> .env.dev
-        echo EMAIL_SENDING_EMAIL_HOST_USER=${{ secrets.EMAIL_SENDING_EMAIL_HOST_USER }} >> .env.dev
-        echo EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} >> .env.dev
-        echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.dev
-        echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.dev
-        echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.dev
-        echo POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} >> .env.dev
-        echo POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} >> .env.dev
-        echo DATABASE=postgres >> .env.dev
-        echo CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }} >> .env.dev
-        echo CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }} >> .env.dev
-        echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> .env.dev
-    - name: Add enviroment variables to .env.prod.db
-      run: |
-        echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.dev.db
-        echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.dev.db
-        echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.dev.db
-    - name: Set environment variables
-      run: |
-        echo "WEB_IMAGE=$(echo ${{env.WEB_IMAGE}} )" >> $GITHUB_ENV
-        echo "NGINX_IMAGE=$(echo ${{env.NGINX_IMAGE}} )" >> $GITHUB_ENV
-    - name: Log in to Guthub Packages
-      run: echo ${PERSONAL_ACCESS_TOKEN} | docker login ghcr.io -u ${{ secrets.NAMESPACE }} --password-stdin
-      env:
-        PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-    - name: Pull images
-      run: |
-        docker pull ${{ env.WEB_IMAGE }} || true
-        docker pull ${{ env.NGINX_IMAGE }} || true
-    - name: Build images
-      run: |
-        docker-compose -f docker-compose.ci.yml build
-    - name: Push images
-      run: |
-        docker push ${{ env.WEB_IMAGE }}
-        docker push ${{ env.NGINX_IMAGE }}
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v1
+      - name: Add enviroment variables to .env.prod
+        run: |
+          echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env.dev
+          echo DEBUG=0 >> .env.dev
+          echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env.dev
+          echo EMAIL_SENDING_DEFAULT_FROM_EMAIL=${{ secrets.EMAIL_SENDING_DEFAULT_FROM_EMAIL }} >> .env.dev
+          echo EMAIL_SENDING_EMAIL_HOST=${{ secrets.EMAIL_SENDING_EMAIL_HOST }} >> .env.dev
+          echo EMAIL_SENDING_EMAIL_PORT=${{ secrets.EMAIL_SENDING_EMAIL_PORT }} >> .env.dev
+          echo EMAIL_SENDING_EMAIL_HOST_USER=${{ secrets.EMAIL_SENDING_EMAIL_HOST_USER }} >> .env.dev
+          echo EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} >> .env.dev
+          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.dev
+          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.dev
+          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.dev
+          echo POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} >> .env.dev
+          echo POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} >> .env.dev
+          echo DATABASE=postgres >> .env.dev
+          echo CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }} >> .env.dev
+          echo CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }} >> .env.dev
+          echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> .env.dev
+      - name: Add enviroment variables to .env.prod.db
+        run: |
+          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.dev.db
+          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.dev.db
+          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.dev.db
+      - name: Set environment variables
+        run: |
+          echo "WEB_IMAGE=$(echo ${{env.WEB_IMAGE}} )" >> $GITHUB_ENV
+          echo "NGINX_IMAGE=$(echo ${{env.NGINX_IMAGE}} )" >> $GITHUB_ENV
+      - name: Log in to Guthub Packages
+        run: echo ${PERSONAL_ACCESS_TOKEN} | docker login ghcr.io -u ${{ secrets.NAMESPACE }} --password-stdin
+        env:
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      - name: Pull images
+        run: |
+          docker pull ${{ env.WEB_IMAGE }} || true
+          docker pull ${{ env.NGINX_IMAGE }} || true
+      - name: Build images
+        run: |
+          docker-compose -f docker-compose.ci.yml build
+      - name: Push images
+        run: |
+          docker push ${{ env.WEB_IMAGE }}
+          docker push ${{ env.NGINX_IMAGE }}
 
