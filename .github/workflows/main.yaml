@@ -101,6 +101,7 @@ jobs:
             source .env.prod.db
             docker login ghcr.io -u $NAMESPACE -p $PERSONAL_ACCESS_TOKEN
             ls --all
+            pwd
             docker pull $WEB_IMAGE
             docker pull $NGINX_IMAGE
             docker-compose -f docker-compose.prod.yml up -d
