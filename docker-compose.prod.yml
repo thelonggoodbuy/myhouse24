@@ -49,8 +49,10 @@ services:
       - web
 
   nginx:
-    build: ./nginx
-
+    # build: ./nginx
+    build:       
+      context: ./nginx
+      dockerfile: Dockerfile
     image: "${NGINX_IMAGE}"
     volumes:
       - static_volume:/home/MyHouse24/web/staticfiles
