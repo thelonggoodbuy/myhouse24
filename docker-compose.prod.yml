@@ -5,15 +5,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.prod
-      # cache_from:
-      #   - "${WEB_IMAGE}"
+
     image: "${WEB_IMAGE}"
     command: gunicorn MyHouse24_proj.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - static_volume:/home/MyHouse24/web/staticfiles
       - media_volume:/home/MyHouse24/web/media
-    # ports:
-    #   - 8000:8000
+
     expose:
       - 8000
     env_file:
@@ -27,8 +25,7 @@ services:
     image: postgres:13.0-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    # env_file:
-    #   - ./.env.prod.db
+
     env_file:
       - ./.env.prod
 
@@ -52,12 +49,9 @@ services:
       - web
 
   nginx:
-    build:
-     context: ./nginx
-     dockerfile: Dockerfile
-    # cache_from:
-    #   - "${NGINX_IMAGE}"
-    image: "${NGINX_IMAGE}"
+    build: ./nginx
+
+    # image: "${NGINX_IMAGE}"
     volumes:
       - static_volume:/home/MyHouse24/web/staticfiles
       - media_volume:/home/MyHouse24/web/media
