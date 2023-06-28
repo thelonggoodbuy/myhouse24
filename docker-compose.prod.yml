@@ -52,8 +52,9 @@ services:
       - web
 
   nginx:
-    build: ./nginx
-    #  context: ./nginx
+    build:
+     context: ./nginx
+     dockerfile: Dockerfile
     # cache_from:
     #   - "${NGINX_IMAGE}"
     image: "${NGINX_IMAGE}"
