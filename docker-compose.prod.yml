@@ -52,7 +52,8 @@ services:
       - web
 
   nginx:
-    build: ./nginx
+    build: 
+     context: ./nginx
     # cache_from:
     #   - "${NGINX_IMAGE}"
     image: "${NGINX_IMAGE}"
