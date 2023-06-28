@@ -95,6 +95,7 @@ jobs:
             cd /app
             source .env.prod
             echo ==============
+            cat .env.prod
             echo $NAMESPACE
             echo $PERSONAL_ACCESS_TOKEN
             echo ==============
