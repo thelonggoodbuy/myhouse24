@@ -32,11 +32,6 @@ jobs:
           echo CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }} >> .env.prod
           echo CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }} >> .env.prod
           echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> .env.prod
-      - name: Add enviroment variables to .env.prod.db
-        run: |
-          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.prod.db
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.prod.db
-          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.prod.db
       - name: Set environment variables
         run: |
           echo "WEB_IMAGE=$(echo ${{env.WEB_IMAGE}} )" >> $GITHUB_ENV
@@ -95,7 +90,7 @@ jobs:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
           scp  -o StrictHostKeyChecking=no -r ./.env.prod ./docker-compose.prod.yml root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/app
-          
+
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
             cd /app
             source .env.prod
