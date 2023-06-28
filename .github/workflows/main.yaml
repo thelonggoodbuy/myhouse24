@@ -17,7 +17,7 @@ jobs:
         run: |
           echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env.prod
           echo DEBUG=0 >> .env.prod
-          echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env.prod
+          echo ALLOWED_HOSTS="${{ secrets.ALLOWED_HOSTS }}" >> .env.prod
           echo EMAIL_SENDING_DEFAULT_FROM_EMAIL=${{ secrets.EMAIL_SENDING_DEFAULT_FROM_EMAIL }} >> .env.prod
           echo EMAIL_SENDING_EMAIL_HOST=${{ secrets.EMAIL_SENDING_EMAIL_HOST }} >> .env.prod
           echo EMAIL_SENDING_EMAIL_PORT=${{ secrets.EMAIL_SENDING_EMAIL_PORT }} >> .env.prod
@@ -62,7 +62,7 @@ jobs:
         run: |
           echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env.prod
           echo DEBUG=0 >> .env.prod
-          echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env.prod
+          echo ALLOWED_HOSTS="${{ secrets.ALLOWED_HOSTS }}" >> .env.prod
           echo EMAIL_SENDING_DEFAULT_FROM_EMAIL=${{ secrets.EMAIL_SENDING_DEFAULT_FROM_EMAIL }} >> .env.prod
           echo EMAIL_SENDING_EMAIL_HOST=${{ secrets.EMAIL_SENDING_EMAIL_HOST }} >> .env.prod
           echo EMAIL_SENDING_EMAIL_PORT=${{ secrets.EMAIL_SENDING_EMAIL_PORT }} >> .env.prod
