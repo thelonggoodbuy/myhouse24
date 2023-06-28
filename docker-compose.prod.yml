@@ -51,7 +51,7 @@ services:
   nginx:
     build: ./nginx
 
-    # image: "${NGINX_IMAGE}"
+    image: "${NGINX_IMAGE}"
     volumes:
       - static_volume:/home/MyHouse24/web/staticfiles
       - media_volume:/home/MyHouse24/web/media
