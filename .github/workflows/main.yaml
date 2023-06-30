@@ -110,6 +110,7 @@ jobs:
             cat .env.prod
             echo $WEB_IMAGE
             echo $NGINX_IMAGE
+            pwd
             echp ================
             docker-compose -f docker-compose.prod.yml up --build -d
           ENDSSH
