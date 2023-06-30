@@ -34,13 +34,6 @@ jobs:
           echo NAMESPACE=${{ secrets.NAMESPACE }} >> .env.prod
           echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> .env.prod
 
-
-          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.prod.db
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.prod.db
-          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.prod.db
-
-
-
       - name: Set environment variables
         run: |
           echo "WEB_IMAGE=$(echo ${{env.WEB_IMAGE}} )" >> $GITHUB_ENV
@@ -93,11 +86,6 @@ jobs:
           echo NAMESPACE=${{ secrets.NAMESPACE }} >> .env.prod
           echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> .env.prod
 
-
-          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.prod.db
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.prod.db
-          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.prod.db
-
       - name: Add the private SSH key to ssh-agent
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
@@ -115,7 +103,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
             cd /app
             source .env.prod
-            source .env.prod.db
+
             docker login ghcr.io -u $NAMESPACE -p $PERSONAL_ACCESS_TOKEN
             docker pull $WEB_IMAGE
             docker pull $NGINX_IMAGE
