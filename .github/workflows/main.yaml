@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Checkout master
         uses: actions/checkout@v1
-      - name: Add enviroment variables to .env.prod and .env.prod.db
+      - name: Add enviroment variables to .env.prod
         run: |
           echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env.prod
           echo DEBUG=0 >> .env.prod
