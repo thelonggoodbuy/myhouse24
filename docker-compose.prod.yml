@@ -49,14 +49,14 @@ services:
       - web
 
   nginx:
-    build: ./nginx
+    # build: ./nginx
     # build:       
     #   context: ./nginx
     #   dockerfile: Dockerfile
     image: "${NGINX_IMAGE}"
     volumes:
-      - static_volume:/home/app/web/staticfiles
-      - media_volume:/home/app/web/media
+      - static_volume:/usr/src/app/staticfiles
+      - media_volume:/usr/src/app/mediafiles
     ports:
       - 80:80
     depends_on:
