@@ -2,14 +2,16 @@ version: '3.8'
 
 services:
   web:
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.prod
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+
     image: "${WEB_IMAGE}"
     command: gunicorn MyHouse24_proj.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - static_volume:/home/MyHouse24/web/staticfiles
       - media_volume:/home/MyHouse24/web/media
+
     expose:
       - 8000
     env_file:
@@ -48,9 +50,9 @@ services:
 
   nginx:
     # build: ./nginx
-    # build:       
-    #   context: ./nginx
-    #   dockerfile: Dockerfile
+    build:       
+      context: ./nginx
+      dockerfile: Dockerfile.prod
     image: "${NGINX_IMAGE}"
     volumes:
       - static_volume:/home/MyHouse24/web/staticfiles
