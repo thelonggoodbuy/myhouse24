@@ -103,15 +103,11 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
             cd /app
             source .env.prod
-            echo ==============
-            cat .env.prod
-            echo ==============
             docker login ghcr.io -u $NAMESPACE -p $PERSONAL_ACCESS_TOKEN
-            echo ==============
-            echo $WEB_IMAGE
-            echo $NGINX_IMAGE
-            echo ==============
             docker pull $WEB_IMAGE
             docker pull $NGINX_IMAGE
+            echp ================
+            cat .env.prod
+            echp ================
             docker-compose -f docker-compose.prod.yml up --build -d
           ENDSSH
