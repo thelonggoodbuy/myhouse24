@@ -49,10 +49,10 @@ services:
       - web
 
   nginx:
-    # build: ./nginx
-    build:       
-      context: ./nginx
-      dockerfile: Dockerfile
+    build: ./nginx
+    # build:       
+    #   context: ./nginx
+    #   dockerfile: Dockerfile
     image: "${NGINX_IMAGE}"
     volumes:
       - static_volume:/home/app/web/staticfiles
