@@ -108,6 +108,8 @@ jobs:
             docker pull $NGINX_IMAGE
             echp ================
             cat .env.prod
+            echo $WEB_IMAGE
+            echo $NGINX_IMAGE
             echp ================
             docker-compose -f docker-compose.prod.yml up --build -d
           ENDSSH
