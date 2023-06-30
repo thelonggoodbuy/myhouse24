@@ -50,7 +50,7 @@ jobs:
           docker pull ${{ env.NGINX_IMAGE }} || true
       - name: Build images
         run: |
-          docker-compose -f docker-compose.prod.yml build
+          docker-compose -f docker-compose.ci.yml build
       - name: Push images
         run: |
           docker push ${{ env.WEB_IMAGE }}
@@ -106,11 +106,11 @@ jobs:
             docker login ghcr.io -u $NAMESPACE -p $PERSONAL_ACCESS_TOKEN
             docker pull $WEB_IMAGE
             docker pull $NGINX_IMAGE
-            echp ================
+            echo ================
             cat .env.prod
             echo $WEB_IMAGE
             echo $NGINX_IMAGE
             pwd
-            echp ================
+            echo ================
             docker-compose -f docker-compose.prod.yml up --build -d
           ENDSSH
