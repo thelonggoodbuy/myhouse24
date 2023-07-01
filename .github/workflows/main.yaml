@@ -29,7 +29,7 @@ jobs:
         run: |
           scp  -o StrictHostKeyChecking=no -r $(pwd) root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/app
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
-            cd /app
+            cd /app/myhouse24
             touch .env.prod
             echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env.prod
             echo DEBUG=0 >> .env.prod
@@ -60,5 +60,5 @@ jobs:
 
             docker login ghcr.io -u $NAMESPACE -p $PERSONAL_ACCESS_TOKEN
 
-            docker-compose -f myhouse24/docker-compose.prod.yml up --build -d
+            docker-compose -f docker-compose.prod.yml up --build -d
           ENDSSH
