@@ -140,5 +140,5 @@ GitHub.sublime-settings
 
 pip_logs.py
 
-# .env.prod
-# .env.prod.db
+.env.prod
+.env.prod.db
