@@ -113,5 +113,5 @@ jobs:
             echo $NGINX_IMAGE
             pwd
             echo ================
-            docker-compose -f docker-compose.prod.yml up --build -d
+            docker-compose -f myhouse24/docker-compose.prod.yml up --build -d
           ENDSSH
