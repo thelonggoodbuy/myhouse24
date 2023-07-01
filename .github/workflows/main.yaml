@@ -7,52 +7,52 @@ env:
   NGINX_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/nginx
 
 jobs:
-  build:
-    name: Build Docker Image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout master
-        uses: actions/checkout@v1
-      - name: Add enviroment variables to .env.prod
-        run: |
-          echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env.prod
-          echo DEBUG=0 >> .env.prod
-          echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env.prod
-          echo EMAIL_SENDING_DEFAULT_FROM_EMAIL=${{ secrets.EMAIL_SENDING_DEFAULT_FROM_EMAIL }} >> .env.prod
-          echo EMAIL_SENDING_EMAIL_HOST=${{ secrets.EMAIL_SENDING_EMAIL_HOST }} >> .env.prod
-          echo EMAIL_SENDING_EMAIL_PORT=${{ secrets.EMAIL_SENDING_EMAIL_PORT }} >> .env.prod
-          echo EMAIL_SENDING_EMAIL_HOST_USER=${{ secrets.EMAIL_SENDING_EMAIL_HOST_USER }} >> .env.prod
-          echo EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} >> .env.prod
-          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.prod
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.prod
-          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.prod
-          echo POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} >> .env.prod
-          echo POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} >> .env.prod
-          echo DATABASE=postgres >> .env.prod
-          echo CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }} >> .env.prod
-          echo CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }} >> .env.prod
-          echo NAMESPACE=${{ secrets.NAMESPACE }} >> .env.prod
-          echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> .env.prod
+  # build:
+  #   name: Build Docker Image
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout master
+  #       uses: actions/checkout@v1
+  #     - name: Add enviroment variables to .env.prod
+  #       run: |
+  #         echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env.prod
+  #         echo DEBUG=0 >> .env.prod
+  #         echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env.prod
+  #         echo EMAIL_SENDING_DEFAULT_FROM_EMAIL=${{ secrets.EMAIL_SENDING_DEFAULT_FROM_EMAIL }} >> .env.prod
+  #         echo EMAIL_SENDING_EMAIL_HOST=${{ secrets.EMAIL_SENDING_EMAIL_HOST }} >> .env.prod
+  #         echo EMAIL_SENDING_EMAIL_PORT=${{ secrets.EMAIL_SENDING_EMAIL_PORT }} >> .env.prod
+  #         echo EMAIL_SENDING_EMAIL_HOST_USER=${{ secrets.EMAIL_SENDING_EMAIL_HOST_USER }} >> .env.prod
+  #         echo EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} >> .env.prod
+  #         echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.prod
+  #         echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.prod
+  #         echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.prod
+  #         echo POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} >> .env.prod
+  #         echo POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} >> .env.prod
+  #         echo DATABASE=postgres >> .env.prod
+  #         echo CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }} >> .env.prod
+  #         echo CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }} >> .env.prod
+  #         echo NAMESPACE=${{ secrets.NAMESPACE }} >> .env.prod
+  #         echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> .env.prod
 
-      - name: Set environment variables
-        run: |
-          echo "WEB_IMAGE=$(echo ${{env.WEB_IMAGE}} )" >> $GITHUB_ENV
-          echo "NGINX_IMAGE=$(echo ${{env.NGINX_IMAGE}} )" >> $GITHUB_ENV
-      - name: Log in to Github Packages
-        run: echo ${PERSONAL_ACCESS_TOKEN} | docker login ghcr.io -u ${{ secrets.NAMESPACE }} --password-stdin
-        env:
-          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-      - name: Pull images
-        run: |
-          docker pull ${{ env.WEB_IMAGE }} || true
-          docker pull ${{ env.NGINX_IMAGE }} || true
-      - name: Build images
-        run: |
-          docker-compose -f docker-compose.prod.yml build
-      - name: Push images
-        run: |
-          docker push ${{ env.WEB_IMAGE }}
-          docker push ${{ env.NGINX_IMAGE }}
+  #     - name: Set environment variables
+  #       run: |
+  #         echo "WEB_IMAGE=$(echo ${{env.WEB_IMAGE}} )" >> $GITHUB_ENV
+  #         echo "NGINX_IMAGE=$(echo ${{env.NGINX_IMAGE}} )" >> $GITHUB_ENV
+  #     - name: Log in to Github Packages
+  #       run: echo ${PERSONAL_ACCESS_TOKEN} | docker login ghcr.io -u ${{ secrets.NAMESPACE }} --password-stdin
+  #       env:
+  #         PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+  #     - name: Pull images
+  #       run: |
+  #         docker pull ${{ env.WEB_IMAGE }} || true
+  #         docker pull ${{ env.NGINX_IMAGE }} || true
+  #     - name: Build images
+  #       run: |
+  #         docker-compose -f docker-compose.prod.yml build
+  #     - name: Push images
+  #       run: |
+  #         docker push ${{ env.WEB_IMAGE }}
+  #         docker push ${{ env.NGINX_IMAGE }}
 
   deploy:
     name: Deploy to DigitalOcean
@@ -62,30 +62,7 @@ jobs:
     steps:
       - name: Checkokut master
         uses: actions/checkout@v1
-      - name: Add environment variables to .env.prod
-        run: |
-          echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env.prod
-          echo DEBUG=0 >> .env.prod
-          echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env.prod
-          echo EMAIL_SENDING_DEFAULT_FROM_EMAIL=${{ secrets.EMAIL_SENDING_DEFAULT_FROM_EMAIL }} >> .env.prod
-          echo EMAIL_SENDING_EMAIL_HOST=${{ secrets.EMAIL_SENDING_EMAIL_HOST }} >> .env.prod
-          echo EMAIL_SENDING_EMAIL_PORT=${{ secrets.EMAIL_SENDING_EMAIL_PORT }} >> .env.prod
-          echo EMAIL_SENDING_EMAIL_HOST_USER=${{ secrets.EMAIL_SENDING_EMAIL_HOST_USER }} >> .env.prod
-          echo EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} >> .env.prod
-          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.prod
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.prod
-          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.prod
-          echo POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} >> .env.prod
-          echo POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} >> .env.prod
-          echo DATABASE=postgres >> .env.prod
-          echo CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }} >> .env.prod
-          echo CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }} >> .env.prod
-
-          echo WEB_IMAGE=${{ env.WEB_IMAGE }} >> .env.prod
-          echo NGINX_IMAGE=${{ env.NGINX_IMAGE }} >> .env.prod
-          echo NAMESPACE=${{ secrets.NAMESPACE }} >> .env.prod
-          echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> .env.prod
-
+        
       - name: Add the private SSH key to ssh-agent
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
@@ -99,19 +76,35 @@ jobs:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
           scp  -o StrictHostKeyChecking=no -r $(pwd) root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/app
-
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
             cd /app
-            source .env.prod
+            echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env.prod
+            echo DEBUG=0 >> .env.prod
+            echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env.prod
+            echo EMAIL_SENDING_DEFAULT_FROM_EMAIL=${{ secrets.EMAIL_SENDING_DEFAULT_FROM_EMAIL }} >> .env.prod
+            echo EMAIL_SENDING_EMAIL_HOST=${{ secrets.EMAIL_SENDING_EMAIL_HOST }} >> .env.prod
+            echo EMAIL_SENDING_EMAIL_PORT=${{ secrets.EMAIL_SENDING_EMAIL_PORT }} >> .env.prod
+            echo EMAIL_SENDING_EMAIL_HOST_USER=${{ secrets.EMAIL_SENDING_EMAIL_HOST_USER }} >> .env.prod
+            echo EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} >> .env.prod
+            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.prod
+            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.prod
+            echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.prod
+            echo POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} >> .env.prod
+            echo POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} >> .env.prod
+            echo DATABASE=postgres >> .env.prod
+            echo CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }} >> .env.prod
+            echo CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }} >> .env.prod
+
+            echo WEB_IMAGE=${{ env.WEB_IMAGE }} >> .env.prod
+            echo NGINX_IMAGE=${{ env.NGINX_IMAGE }} >> .env.prod
+            echo NAMESPACE=${{ secrets.NAMESPACE }} >> .env.prod
+            echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> .env.prod
+
+            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.prod.db
+            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.prod.db
+            echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.prod.db
 
             docker login ghcr.io -u $NAMESPACE -p $PERSONAL_ACCESS_TOKEN
-            docker pull $WEB_IMAGE
-            docker pull $NGINX_IMAGE
-            echo ================
-            cat .env.prod
-            echo $WEB_IMAGE
-            echo $NGINX_IMAGE
-            pwd
-            echo ================
+
             docker-compose -f myhouse24/docker-compose.prod.yml up --build -d
           ENDSSH

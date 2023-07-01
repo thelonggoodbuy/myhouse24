@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.prod
-    image: "${WEB_IMAGE}"
+    # image: "${WEB_IMAGE}"
     command: gunicorn MyHouse24_proj.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - static_volume:/home/app/web/staticfiles
@@ -52,7 +52,7 @@ services:
     # build:       
     #   context: ./nginx
     #   dockerfile: Dockerfile
-    image: "${NGINX_IMAGE}"
+    # image: "${NGINX_IMAGE}"
     volumes:
       - static_volume:/usr/src/app/staticfiles
       - media_volume:/usr/src/app/mediafiles
