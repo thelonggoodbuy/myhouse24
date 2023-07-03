@@ -27,25 +27,17 @@ jobs:
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          echo ====1====
+          
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
-            echo $(pwd)
             cd /app/myhouse24
-            echo $(pwd)
-            ls --all
-            #docker-compose -f docker-compose.prod.yml down
+            docker-compose -f docker-compose.prod.yml down
           ENDSSH
 
           rsync -ru $(pwd) root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/app --delete
-          echo =====2=====
-          echo $(pwd)
-          echo =====3=====
+
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
 
-            echo =====4=====
             cd /app/myhouse24
-            echo $(pwd)
-            echo =====5=====
             touch .env.prod
             echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env.prod
             echo DEBUG=0 >> .env.prod
