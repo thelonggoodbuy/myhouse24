@@ -33,7 +33,7 @@ jobs:
             cd /app/myhouse24
             echo $(pwd)
             ls --all
-            docker-compose -f docker-compose.prod.yml down
+            #docker-compose -f docker-compose.prod.yml down
           ENDSSH
 
           rsync -ru $(pwd) root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/app --delete
