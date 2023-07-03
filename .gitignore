@@ -132,6 +132,7 @@ GitHub.sublime-settings
 
 # Visual Studio Code # 
 .vscode/* 
+.vscode
 !.vscode/settings.json 
 !.vscode/tasks.json 
 !.vscode/launch.json 
@@ -142,3 +143,4 @@ pip_logs.py
 
 .env.prod
 .env.prod.db
+
