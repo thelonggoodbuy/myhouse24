@@ -32,7 +32,7 @@ jobs:
             echo $(pwd)
             cd /app/myhouse24
             echo $(pwd)
-            echo $(ls) --all
+            ls --all
             docker-compose -f docker-compose.prod.yml down
           ENDSSH
 
