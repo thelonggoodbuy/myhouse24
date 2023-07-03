@@ -40,7 +40,7 @@ jobs:
             cd /app/myhouse24
             touch .env.prod
             echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env.prod
-            echo DEBUG=0 >> .env.prod
+            echo DEBUG=False >> .env.prod
             echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env.prod
             echo EMAIL_SENDING_DEFAULT_FROM_EMAIL=${{ secrets.EMAIL_SENDING_DEFAULT_FROM_EMAIL }} >> .env.prod
             echo EMAIL_SENDING_EMAIL_HOST=${{ secrets.EMAIL_SENDING_EMAIL_HOST }} >> .env.prod
