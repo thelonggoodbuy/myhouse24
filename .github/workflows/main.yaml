@@ -35,7 +35,7 @@ jobs:
           rsync -ru $(pwd) root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/app --delete
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
 
-            cd /app/myhouse24
+            
             
             touch .env.prod
             echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env.prod
