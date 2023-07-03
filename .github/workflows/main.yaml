@@ -43,6 +43,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
 
             echo =====4=====
+            cd /app/myhouse24
             echo $(pwd)
             echo =====5=====
             touch .env.prod
