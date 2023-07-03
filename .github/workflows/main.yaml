@@ -32,7 +32,7 @@ jobs:
             docker-compose -f docker-compose.prod.yml down
           ENDSSH
 
-          rsync -ru  -o StrictHostKeyChecking=no $(pwd) root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/app
+          rsync -ru "ssh -o StrictHostKeyChecking=no" $(pwd) root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/app --delete
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
 
             cd /app/myhouse24
