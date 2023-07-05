@@ -18,7 +18,7 @@ urlpatterns = [
     path('contact_update_view/', ContactUpdateView.as_view(), name='contact_update_view'),
 
     # front end logic
-    path('main_page/', FrontMainPageView.as_view(), name='main_page'),
+    path('', FrontMainPageView.as_view(), name='main_page'),
     path('front_about_us/', FrontAboutUsView.as_view(), name='front_about_us'),
     path('front_utilities/', FrontUtilitiesView.as_view(), name='front_utilities'),
     path('front_contacts/', ContactsView.as_view(), name="front_contacts"),
