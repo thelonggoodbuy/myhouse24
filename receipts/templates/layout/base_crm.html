@@ -65,7 +65,7 @@
         <div class="wrapper">
         <header class="main-header">
             <!-- Logo -->
-            <a href="#" class="logo">
+            <a href="{% url 'website:main_page' %}" class="logo">
             <span class="logo-mini">
                 <img src="{% static 'users/img/logo-mini.svg' %}" class="img-responsive" alt="">
             </span>
@@ -109,7 +109,7 @@
                                     <li class="header">Нет новых пользовтелей</li>
                                 {% endif %}
                                 <li class="footer">
-                                    <a href="#">Перейти в раздел пользователей</a>
+                                    <a href="{% url 'users:admin_settings_users_list' %}">Перейти в раздел пользователей</a>
                                 </li>
                             </ul>
                         </li>
@@ -138,7 +138,7 @@
                                     </li>
                                     <li class="user-footer">
                                         <div class="pull-left">
-                                            <a class="btn btn-default btn-flat" href="#">Профиль</a>
+                                            <a class="btn btn-default btn-flat" href="{% url 'users:adm_settings_users_update' pk=user.id %}">Профиль</a>
                                         </div>
                                         <div class="pull-right">
                                             <a class="btn btn-default btn-flat" href="{% url 'users:logout' %}" data-method="post">Выход<a>
