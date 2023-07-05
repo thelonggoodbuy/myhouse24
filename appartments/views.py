@@ -1023,7 +1023,7 @@ class CreteNewUser(RolePassesTestMixin, CreateView):
     needfull_user_status = 'is_staff'
     template_name = 'appartments/owner_create.html'
     form_class = OwnerUpdateForm
-    success_url = reverse_lazy('appartments:owners_list')
+    success_url = reverse_lazy('appartments:owner_list')
 
 
     def form_invalid(self, form):
