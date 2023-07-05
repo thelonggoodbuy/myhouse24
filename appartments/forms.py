@@ -26,7 +26,7 @@ class HouseEditeForm(forms.ModelForm):
     
     address = forms.CharField(required=False, label="Адресс дома",
                             widget=forms.TextInput(attrs={'class': 'form-control',
-                                                            'placeholder': 'Адресс кинотеатра'}))
+                                                            'placeholder': 'Адресс дома'}))
     
     main_image = forms.ImageField(label='Изображение #1. Размер: (522x350)', 
                                   required=False, widget=forms.FileInput)

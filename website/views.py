@@ -72,6 +72,8 @@ class MainPageUpdateView(RolePassesTestMixin, FormView):
             context['main_form'] = MainPageUpdateForm(instance=MainPage.objects.first(), prefix="main_form")
         except:
             main_form_instance = MainPage.objects.create()
+            main_form_seo = SeoBlock.objects.create()
+            main_form_instance.seo_block = main_form_seo
             context['main_form'] = MainPageUpdateForm(instance=main_form_instance, prefix="main_form")
 
         context['main_slider_formset'] = MainSliderFormset(queryset=self.main_slider_images, prefix='main_slider_formset')
