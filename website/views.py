@@ -73,6 +73,7 @@ class MainPageUpdateView(RolePassesTestMixin, FormView):
         except:
             main_form_instance = MainPage.objects.create()
             main_form_seo = SeoBlock.objects.create()
+            main_form_seo.save()
             main_form_instance.seo_block = main_form_seo
             main_form_instance.save()
             context['main_form'] = MainPageUpdateForm(instance=main_form_instance, prefix="main_form")
