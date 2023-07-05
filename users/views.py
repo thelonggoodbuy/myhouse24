@@ -100,19 +100,12 @@ class LoginSimpleUser(SuccessMessageMixin, LoginView):
 
     def form_invalid(self, form):
         messages.error(self.request,'Ошибка в адресе электронной почты или в пароле')
-        # messages.error(self.request,f'messages')
-        # if form.errors:
-        #     for field, error in form.errors.items():
-        #         error_text = f"{''.join(error)}"
-        #         messages.error(self.request, error_text)
-
         return self.render_to_response(self.get_context_data(form=form))
 
     def get_success_message(self, cleaned_data):
         return f"Добро пожаловать, {self.request.user.email}"
 
     def form_valid(self, form):
-        # remember_me = form.cleaned_data['remember_me']
         return super(LoginSimpleUser, self).form_valid(form)
 
 

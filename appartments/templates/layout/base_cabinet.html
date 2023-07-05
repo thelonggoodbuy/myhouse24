@@ -185,12 +185,14 @@
                             </a>
                             <ul class="treeview-menu">
                                 {% for appartment in user_data.appartments %}
-                                    <li>
-                                        <a href="{% url 'users:profile_statistic_per_appartment' pk=appartment.owning__id %}">
-                                            <i class="fa fa-building-o"></i>  
-                                            <span>{{ appartment.address }}</span>
-                                        </a>
-                                    </li>
+                                    {% if appartment.owning %}
+                                        <li>
+                                            <a href="{% url 'users:profile_statistic_per_appartment' pk=appartment.owning__id %}">
+                                                <i class="fa fa-building-o"></i>  
+                                                <span>{{ appartment.address }}</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
                                 {% endfor %}
                             </ul>
                         </li>
@@ -210,25 +212,29 @@
                                     </a>
                                 </li>
                                 {% for appartment in user_data.appartments %}
-                                    <li>
-                                        <a href="{% url 'users:profile_receipt_list_per_appartment' appartment.owning__id %}">
-                                        {% comment %} <a href="{% url 'users:profile_receipt_list' %}"> {% endcomment %}
-                                            <i class="fa fa-building-o"></i>  
-                                            <span>{{ appartment.address }}</span>
-                                        </a>
-                                    </li>
+                                    {% if appartment.owning %}
+                                        <li>
+                                            <a href="{% url 'users:profile_receipt_list_per_appartment' appartment.owning__id %}">
+                                            {% comment %} <a href="{% url 'users:profile_receipt_list' %}"> {% endcomment %}
+                                                <i class="fa fa-building-o"></i>  
+                                                <span>{{ appartment.address }}</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
                                 {% endfor %}
                             </ul>
                         </li>
                         <li class="treeview"><a href="/cabinet/tariff/index"><i class="fa fa-money"></i>  <span>Тарифы</span> <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
                             <ul class="treeview-menu">
                             {% for appartment in user_data.appartments %}
-                                <li>
-                                    <a href="{% url 'users:profile_tariff_list' appartment.owning__id %}">
-                                        <i class="fa fa-building-o"></i>  
-                                        <span>{{ appartment.address }}</span>
-                                    </a>
-                                </li>
+                                {% if appartment.owning %}
+                                    <li>
+                                        <a href="{% url 'users:profile_tariff_list' appartment.owning__id %}">
+                                            <i class="fa fa-building-o"></i>  
+                                            <span>{{ appartment.address }}</span>
+                                        </a>
+                                    </li>
+                                {% endif %}
                             {% endfor %}
                             </ul>
                         </li>
