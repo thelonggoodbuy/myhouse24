@@ -997,14 +997,14 @@ class OwnerEditeView(RolePassesTestMixin, UpdateView):
     form_class = OwnerUpdateForm
     model = User
     template_name = 'appartments/owner_update.html'
-    success_url = reverse_lazy('appartments:owners_list')
+    success_url = reverse_lazy('appartments:owner_list')
 
 
 class OwnerDeleteView(RolePassesTestMixin, DeleteView):
     needfull_permission = 'owners_permission'
     needfull_user_status = 'is_staff'
     model = User
-    success_url = reverse_lazy('appartments:owners_list')
+    success_url = reverse_lazy('appartments:owner_list')
 
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
