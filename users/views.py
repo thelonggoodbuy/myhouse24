@@ -96,10 +96,11 @@ class LoginSimpleUser(SuccessMessageMixin, LoginView):
     form_class = LoginSimpleUserForm
 
     def get_success_url(self):
-        return reverse_lazy('appartments:report_view')
+        return reverse_lazy('users:profile_detail')
 
     def form_invalid(self, form):
         messages.error(self.request,'Ошибка в адресе электронной почты или в пароле')
+        # messages.error(self.request,f'messages')
         return self.render_to_response(self.get_context_data(form=form))
 
     def get_success_message(self, cleaned_data):
@@ -107,10 +108,6 @@ class LoginSimpleUser(SuccessMessageMixin, LoginView):
 
     def form_valid(self, form):
         remember_me = form.cleaned_data['remember_me']
-        # if not remember_me:
-        #     self.request.session.set_expiry(0) 
-        #     self.request.session.modified = True
-        #     print(self.request.session.get_expiry_age())
         return super(LoginSimpleUser, self).form_valid(form)
 
 
