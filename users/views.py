@@ -1011,9 +1011,7 @@ class ProfileMessageDeleteView(SuccessMessageMixin, DeleteView):
     
 
 
-class ProfileMastersRequestListView(RolePassesTestMixin, DetailView):
-    needfull_permission = 'masters_request_permission'
-    needfull_user_status = 'is_staff'
+class ProfileMastersRequestListView(DetailView):
     template_name = 'users/profile_masters_requests_list.html'
     model = User
 
@@ -1080,9 +1078,7 @@ class ProfileMastersRequestListView(RolePassesTestMixin, DetailView):
         
 
 
-class ProfileMasterRequestDeleteView(RolePassesTestMixin, SuccessMessageMixin, DeleteView):
-    needfull_permission = 'masters_request_permission'
-    needfull_user_status = 'is_staff'
+class ProfileMasterRequestDeleteView(SuccessMessageMixin, DeleteView):
     model = MastersRequest
     success_url = None
     success_message = "Запрос к мастеру удален!"
@@ -1103,9 +1099,7 @@ class ProfileMasterRequestDeleteView(RolePassesTestMixin, SuccessMessageMixin, D
 
 
 
-class ProfileMastersRequestsCreateView(RolePassesTestMixin, FormView):
-    needfull_permission = 'masters_request_permission'
-    needfull_user_status = 'is_staff'
+class ProfileMastersRequestsCreateView(FormView):
     template_name = "users/profile_masters_requests_create.html"
     form_class = ProfileMastersRequestsCreateForm
     success_url = None
