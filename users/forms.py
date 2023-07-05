@@ -48,19 +48,19 @@ class LoginSimpleUserForm(AuthenticationForm):
         else:
             return email
 
-    def clean(self):
-        username = self.cleaned_data.get('username')
-        password = self.cleaned_data.get('password')
-        remember_me = self.cleaned_data.get('remember_me')
-        if username is not None and password:
-            self.user_cache = authenticate(self.request, username=username, password=password)
-            if self.user_cache is None:
-                raise self.get_invalid_login_error()
-            else:
-                self.confirm_login_allowed(self.user_cache)
-        if not remember_me:
-            self.request.session.set_expiry(0)
-        return self.cleaned_data
+    # def clean(self):
+    #     username = self.cleaned_data.get('username')
+    #     password = self.cleaned_data.get('password')
+    #     remember_me = self.cleaned_data.get('remember_me')
+    #     if username is not None and password:
+    #         self.user_cache = authenticate(self.request, username=username, password=password)
+    #         if self.user_cache is None:
+    #             raise self.get_invalid_login_error()
+    #         else:
+    #             self.confirm_login_allowed(self.user_cache)
+    #     if not remember_me:
+    #         self.request.session.set_expiry(0)
+    #     return self.cleaned_data
 
 
 class LoginAdminUserForm(AuthenticationForm):
