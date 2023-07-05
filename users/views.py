@@ -96,7 +96,8 @@ class LoginSimpleUser(SuccessMessageMixin, LoginView):
     form_class = LoginSimpleUserForm
 
     def get_success_url(self):
-        return reverse_lazy('users:profile_detail')
+        # return reverse_lazy('users:profile_user_detail')
+        return reverse_lazy('users:profile_user_detail', kwargs={'pk': self.request.user.id})
 
     def form_invalid(self, form):
         messages.error(self.request,'Ошибка в адресе электронной почты или в пароле')
